@@ -20,6 +20,12 @@ Orottick4 (Oregon Lottery - Pick 4 Predictor) predicts Pick 4 (Oregon Lottery) d
 
 #----------#
 
+import json
+import time
+from datetime import datetime
+from datetime import timedelta
+import pandas as pd
+import numpy as np
 import os
 import warnings 
 warnings.filterwarnings('ignore')
