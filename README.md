@@ -11,7 +11,9 @@
              ABOUT
   -------------------------------
 
-Orottick4 (Oregon Lottery - Pick 4 Predictor) predicts Pick 4 (Oregon Lottery) draw by simulate random generating.
+Orottick4 (Oregon Lottery - Pick 4 Predictor) predicts
+Pick 4 (Oregon Lottery) draw by simulate random number
+generating.
 
 
 ====================================
@@ -162,6 +164,13 @@ if METHOD == 'observe_range':
         range_idx += 1
 
 #----------#
+
+
+====================================
+            EXAMPLES
+  -------------------------------
+
++ Predict: https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-p4a-2025-03-23
 
 
 ```
