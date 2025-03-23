@@ -12,8 +12,8 @@
   -------------------------------
 
 Orottick4 (Oregon Lottery - Pick 4 Predictor) predicts
-Pick 4 (Oregon Lottery) draw by simulate random number
-generating.
+Pick 4 (Oregon Lottery) draw by simulating computerized
+lottery drawing.
 
 
 ====================================
