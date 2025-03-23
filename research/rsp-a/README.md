@@ -35,6 +35,8 @@
 
 [ 2025.03.23 ]
 
++ Period No: 1
+
 + Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-rsp-a-2025-03-23
 
 + M4_CNT: 0
@@ -42,12 +44,16 @@
 
 [ 2025.03.16 ]
 
++ Period No: 2
+
 + Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-rsp-a-2025-03-16
 
 + M4_CNT: 0
 
 
 [ 2025.03.09 ]
+
++ Period No: 3
 
 + Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-rsp-a-2025-03-09
 
