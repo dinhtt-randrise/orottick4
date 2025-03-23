@@ -10,4 +10,31 @@
 ====================================
         RESEARCH PROJECT A
   -------------------------------
+
+
+  -------------------------------
+              PLAN
+  -------------------------------
+
++ LOTTE_KIND: p4a
++ LAST_BUY_DATE: 2025.03.23
++ PERIOD_SIZE: 7
++ PERIOD_CNT: 52
++ DATE_CNT: 280
++ TCK_CNT: 280
++ PRD_SORT_ORDER: B
++ TCK_KIND: All 4 exact order
+
+==> [GOAL] Simulate buying tickets and calculate ROI.
+
+
+  -------------------------------
+             PROCESS
+  -------------------------------
+
+[ 2025.03.23 ]
+
++ Notebook:
+
+
 ```
