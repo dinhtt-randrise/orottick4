@@ -36,6 +36,19 @@
              PROCESS
   -------------------------------
 
+[ 2025.03.24 ]
+
++ Period No: 1
+
++ Day No: 2
+
++ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-lip-a-2025-03-24
+
++ Win Number: -1
+
++ M4_CNT: -1
+
+
 [ 2025.03.23 ]
 
 + Period No: 1
@@ -44,8 +57,8 @@
 
 + Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-lip-a-2025-03-23
 
-+ Win Number: -1
++ Win Number: 8379
 
-+ M4_CNT: -1
++ M4_CNT: 0
 
 ```
