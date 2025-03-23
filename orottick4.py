@@ -577,7 +577,7 @@ class Orottick4Simulator:
                 for zp in l_pred:
                     if zp == zrsiw:
                         break
-                    zris += 1
+                    zrsi += 1
                 if zrsi < len(l_pred):
                     m4_rsi = zrsi
                 ls_pred = [str(x) for x in l_pred]
