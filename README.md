@@ -172,5 +172,7 @@ if METHOD == 'observe_range':
 
 + Predict: https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-p4a-2025-03-23
 
++ Observe: https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-p4a-2025-03-23
+
 
 ```
