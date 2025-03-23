@@ -8,7 +8,7 @@
 ------------------------------------
 
 ====================================
-        RESEARCH PROJECT A
+    Lottery Investment A Project
   -------------------------------
 
 
@@ -16,6 +16,8 @@
               PLAN
   -------------------------------
 
++ GitHub: https://github.com/dinhtt-randrise/orottick4/tree/main/invest/lip-a
++ Kaggle: https://www.kaggle.com/datasets/dinhttrandrise/orottick4/discussion/569535
 
 + LOTTE_KIND: p4a
 + FIRST_BUY_DATE: 2025.03.23
