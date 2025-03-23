@@ -17,6 +17,15 @@ lottery drawing.
 
 
 ====================================
+              LINKS
+  -------------------------------
+
++ Kaggle: https://orottick4.com/kaggle
+
++ GitHub: https://orottick4.com/github
+
+
+====================================
             HOW TO USE
   -------------------------------
 
