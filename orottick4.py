@@ -545,6 +545,7 @@ class Orottick4Simulator:
         xdf = zdf[zdf['buy_date'] == v_buy_date]
         pdf = zdf[zdf['buy_date'] < v_buy_date]
         json_pred = None
+        m4_rsi = -1
         if len(xdf) == 1 and len(pdf) >= v_date_cnt:
             s_sim_cnt = ''
             s_pred = ''
@@ -571,6 +572,14 @@ class Orottick4Simulator:
                 for x_sim_cnt in l_sim_cnt:
                     x = self.reproduce_one(x_sim_seed, x_sim_cnt)
                     l_pred.append(x)
+                zrsi = 0
+                zrsiw = int(xdf['w'].iloc[0])
+                for zp in l_pred:
+                    if zp == zrsiw:
+                        break
+                    zris += 1
+                if zrsi < len(l_pred):
+                    m4_rsi = zrsi
                 ls_pred = [str(x) for x in l_pred]
                 s_pred = ', '.join(ls_pred)
                 for pi in range(len(pdf)):
@@ -597,7 +606,7 @@ class Orottick4Simulator:
                         mb_m2 = 1
             else:
                 pdf = None
-            json_pred = {'date': xdf['date'].iloc[0], 'buy_date': xdf['buy_date'].iloc[0], 'next_date': xdf['next_date'].iloc[0], 'w': int(xdf['w'].iloc[0]), 'n': int(xdf['n'].iloc[0]), 'sim_seed': int(xdf['sim_seed'].iloc[0]), 'date_cnt': v_date_cnt, 'tck_cnt': tck_cnt, 'sim_cnt': s_sim_cnt, 'pred': s_pred, 'pcnt': 1, 'm4': int(xdf['a_m4'].iloc[0]), 'm3f': int(xdf['a_m3f'].iloc[0]), 'm3l': int(xdf['a_m3l'].iloc[0]), 'm3': int(xdf['a_m3'].iloc[0]), 'm2': int(xdf['a_m2'].iloc[0]), 'm4_cnt': int(xdf['m4_cnt'].iloc[0]), 'm3f_cnt': int(xdf['m3f_cnt'].iloc[0]), 'm3l_cnt': int(xdf['m3l_cnt'].iloc[0]), 'm3_cnt': int(xdf['m3_cnt'].iloc[0]), 'm2_cnt': int(xdf['m2_cnt'].iloc[0]), 'mb_m4': mb_m4, 'mb_m3f': mb_m3f, 'mb_m3l': mb_m3l, 'mb_m3': mb_m3, 'mb_m2': mb_m2}
+            json_pred = {'date': xdf['date'].iloc[0], 'buy_date': xdf['buy_date'].iloc[0], 'next_date': xdf['next_date'].iloc[0], 'w': int(xdf['w'].iloc[0]), 'n': int(xdf['n'].iloc[0]), 'sim_seed': int(xdf['sim_seed'].iloc[0]), 'date_cnt': v_date_cnt, 'tck_cnt': tck_cnt, 'sim_cnt': s_sim_cnt, 'pred': s_pred, 'm4_rsi': m4_rsi, 'pcnt': 1, 'm4': int(xdf['a_m4'].iloc[0]), 'm3f': int(xdf['a_m3f'].iloc[0]), 'm3l': int(xdf['a_m3l'].iloc[0]), 'm3': int(xdf['a_m3'].iloc[0]), 'm2': int(xdf['a_m2'].iloc[0]), 'm4_cnt': int(xdf['m4_cnt'].iloc[0]), 'm3f_cnt': int(xdf['m3f_cnt'].iloc[0]), 'm3l_cnt': int(xdf['m3l_cnt'].iloc[0]), 'm3_cnt': int(xdf['m3_cnt'].iloc[0]), 'm2_cnt': int(xdf['m2_cnt'].iloc[0]), 'mb_m4': mb_m4, 'mb_m3f': mb_m3f, 'mb_m3l': mb_m3l, 'mb_m3': mb_m3, 'mb_m2': mb_m2}
         else:
             pdf = None
             
