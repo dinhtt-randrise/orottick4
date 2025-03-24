@@ -52,17 +52,19 @@ import orottick4.orottick4 as vok4
 
 #----------#
 
-BUY_DATE = '2025.03.23'
+BUY_DATE = '2025.03.25'
 BUFFER_DIR = '/kaggle/buffers/orottick4'
 LOTTE_KIND = 'p4a'
 DATA_DF = None
-DATE_CNT = 56
-O_DATE_CNT = 28
-TCK_CNT = 56
+DATE_CNT = 56 * 5
+O_DATE_CNT = 7
+TCK_CNT = 56 * 5
 RUNTIME = 60 * 60 * 11.5
 PRD_SORT_ORDER = 'B'
-HAS_STEP_LOG = False
-RANGE_CNT = 2 * 11
+HAS_STEP_LOG = True
+RANGE_CNT = 52
+M4P_OBS = True
+M4P_CNT = 2
 
 METHOD = 'simulate'
 #METHOD = 'observe'
@@ -70,7 +72,7 @@ METHOD = 'simulate'
 
 #----------#
 
-ok4s = vok4.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG)
+ok4s = vok4.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT)
     
 if METHOD == 'simulate':
     zdf, json_pred, pdf = ok4s.simulate(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, TCK_CNT, RUNTIME)
@@ -89,12 +91,58 @@ if METHOD == 'simulate':
 
 + Predicted Numbers: __RS__
 
++ M4P Numbers: __M4__
+
 + Win Number:
 
 + Result: 
 
++ M4P Result:
+
++ Predict Notebook:
+
+
+  -------------------------------
+              MONEY
+  -------------------------------
+
++ Period No: 
+
++ Day No: 
+
++ Tickets: 280
+
++ Cost: $364
+
++ Total Cost: $364
+
++ Prize: $0
+
++ Total Prize: $0
+
++ Current ROI: 0.0  
+
+
+  -------------------------------
+            REAL BUY
+  -------------------------------
+
++ Buy Number: __M4__
+
++ Confirmation Number: 
+
++ Cost: $2.6
+
++ Total Cost: $2.6
+
++ Prize: $0
+
++ Total Prize: $0
+
++ Current ROI: 0.0
+
         '''
-        text = text.replace('__LK__', str(LOTTE_KIND)).replace('__BD__', str(BUY_DATE)).replace('__RS__', str(json_pred['pred']))
+        text = text.replace('__LK__', str(LOTTE_KIND)).replace('__BD__', str(BUY_DATE)).replace('__RS__', str(json_pred['pred'])).replace('__M4__', str(json_pred['m4_pred']))
         with open(f'/kaggle/working/{LOTTE_KIND}-pred-{BUY_DATE}.txt', 'w') as f:
             f.write(text)
         print(text)
