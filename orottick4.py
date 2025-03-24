@@ -20,6 +20,7 @@
 #  -------------------------------
 #
 # "Oregon Lottery - Pick 4 Predictor" is distributed under Apache-2.0 license
+# [ https://github.com/dinhtt-randrise/orottick4/blob/main/LICENSE ]
 #
 # ------------------------------------------------------------ #
 
@@ -36,7 +37,7 @@ import pickle
 # ------------------------------------------------------------ #
 
 class Orottick4Simulator:
-    def __init__(self, prd_sort_order = 'A', has_step_log = True, heading_printed = False):
+    def __init__(self, prd_sort_order = 'A', has_step_log = True, m4p_obs = False, m4p_cnt = -1, heading_printed = False):
         self.min_num = 0
         self.max_num = 9999
 
@@ -49,6 +50,8 @@ class Orottick4Simulator:
         self.prd_sort_order = prd_sort_order
 
         self.has_step_log = has_step_log
+        self.m4p_obs = m4p_obs
+        self.m4p_cnt = m4p_cnt
         
     def print_heading(self):
         if self.heading_printed:
@@ -544,8 +547,10 @@ class Orottick4Simulator:
         zdf = pd.DataFrame(rows)
         xdf = zdf[zdf['buy_date'] == v_buy_date]
         pdf = zdf[zdf['buy_date'] < v_buy_date]
+        kdf = pdf
         json_pred = None
         m4_rsi = -1
+        m4_pred = ''
         if len(xdf) == 1 and len(pdf) >= v_date_cnt:
             s_sim_cnt = ''
             s_pred = ''
@@ -606,7 +611,21 @@ class Orottick4Simulator:
                         mb_m2 = 1
             else:
                 pdf = None
-            json_pred = {'date': xdf['date'].iloc[0], 'buy_date': xdf['buy_date'].iloc[0], 'next_date': xdf['next_date'].iloc[0], 'w': int(xdf['w'].iloc[0]), 'n': int(xdf['n'].iloc[0]), 'sim_seed': int(xdf['sim_seed'].iloc[0]), 'date_cnt': v_date_cnt, 'tck_cnt': tck_cnt, 'sim_cnt': s_sim_cnt, 'pred': s_pred, 'm4_rsi': m4_rsi, 'pcnt': 1, 'm4': int(xdf['a_m4'].iloc[0]), 'm3f': int(xdf['a_m3f'].iloc[0]), 'm3l': int(xdf['a_m3l'].iloc[0]), 'm3': int(xdf['a_m3'].iloc[0]), 'm2': int(xdf['a_m2'].iloc[0]), 'm4_cnt': int(xdf['m4_cnt'].iloc[0]), 'm3f_cnt': int(xdf['m3f_cnt'].iloc[0]), 'm3l_cnt': int(xdf['m3l_cnt'].iloc[0]), 'm3_cnt': int(xdf['m3_cnt'].iloc[0]), 'm2_cnt': int(xdf['m2_cnt'].iloc[0]), 'mb_m4': mb_m4, 'mb_m3f': mb_m3f, 'mb_m3l': mb_m3l, 'mb_m3': mb_m3, 'mb_m2': mb_m2}
+            if len(kdf) > 0 and len(xdf) > 0:
+                kdf = kdf[kdf['m4'] > 0]
+                if len(kdf) > 0:
+                    kdf = kdf.sort_values(by=['buy_date'], ascending=[False])
+                    m4p_cnt = self.m4p_cnt
+                    if m4p_cnt > 0:
+                        if len(kdf) > m4p_cnt:
+                            kdf = kdf[:m4p_cnt]
+                    lx_pred = []
+                    x_sim_seed = xdf['sim_seed'].iloc[0]
+                    for xi in range(len(kdf)):
+                        x = self.reproduce_one(x_sim_seed, kdf['sim_cnt'].iloc[xi])
+                        lx_pred.append(str(x))
+                    m4_pred = ', '.join(lx_pred)
+            json_pred = {'date': xdf['date'].iloc[0], 'buy_date': xdf['buy_date'].iloc[0], 'next_date': xdf['next_date'].iloc[0], 'w': int(xdf['w'].iloc[0]), 'n': int(xdf['n'].iloc[0]), 'sim_seed': int(xdf['sim_seed'].iloc[0]), 'date_cnt': v_date_cnt, 'tck_cnt': tck_cnt, 'sim_cnt': s_sim_cnt, 'pred': s_pred, 'm4_rsi': m4_rsi, 'm4_pred': m4_pred, 'pcnt': 1, 'm4': int(xdf['a_m4'].iloc[0]), 'm3f': int(xdf['a_m3f'].iloc[0]), 'm3l': int(xdf['a_m3l'].iloc[0]), 'm3': int(xdf['a_m3'].iloc[0]), 'm2': int(xdf['a_m2'].iloc[0]), 'm4_cnt': int(xdf['m4_cnt'].iloc[0]), 'm3f_cnt': int(xdf['m3f_cnt'].iloc[0]), 'm3l_cnt': int(xdf['m3l_cnt'].iloc[0]), 'm3_cnt': int(xdf['m3_cnt'].iloc[0]), 'm2_cnt': int(xdf['m2_cnt'].iloc[0]), 'mb_m4': mb_m4, 'mb_m3f': mb_m3f, 'mb_m3l': mb_m3l, 'mb_m3': mb_m3, 'mb_m2': mb_m2}
         else:
             pdf = None
             
@@ -720,6 +739,8 @@ class Orottick4Simulator:
             more[f'pick_{t_buy_date}'] = pdf
             
             t_pred = json_prd['pred']
+            if self.m4p_obs:
+                t_pred = json_prd['m4_pred']
             t_prd_lst = t_pred.split(', ')
             if o_max_tck > 0:
                 if len(t_prd_lst) > o_max_tck:
