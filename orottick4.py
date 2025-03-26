@@ -1109,6 +1109,7 @@ class Orottick4Simulator:
                 ddf = ddf[:cache_cnt]
         ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
 
+        rows = []
         keycheck = {}
         sz = len(ddf)
         for ri in range(len(ddf)):
@@ -1120,16 +1121,47 @@ class Orottick4Simulator:
             n = ddf['n'].iloc[ri]
             date = ddf['date'].iloc[ri]
             sim_seed, sim_cnt = self.capture(w, n)
+            p = self.reproduce_one(sim_seed, sim_cnt)
 
-            print(f'=> [BC] {date} : {ri} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt}')
+            print(f'=> [BC1] {date} : {ri} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt} -> {p}')
 
+            rw = {'date': date, 'w': w, 'n': n, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt}
+            rows.append(rw)
+            
             if ri % 1000 == 0:
                 try:
                     self.save_cache()
                 except Exception as e:
                     msg = str(e)
                     print(f'=> [E] {msg}')
-                
+                    
+        cdf = pd.DataFrame(rows)
+        cdf = cdf.sort_values(by=['date'], ascending=[True])
+        sz = len(cdf) * len(cdf)
+        li = 0
+        for ria in range(len(cdf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+                    
+            sim_seed = cdf['sim_seed'].iloc[ria]
+            date_1 = cdf['date'].iloc[ria]
+            w = cdf['w'].iloc[ria]
+            n = cdf['n'].iloc[ria]
+            for rib in range(len(cdf)):
+                if runtime is not None:
+                    if time.time() - start_time > runtime:
+                        break
+                        
+                if rib >= ria:
+                    break
+                    
+                date_2 = cdf['date'].iloc[rib]
+                sim_cnt = cdf['sim_seed'].iloc[rib]
+                p = self.reproduce_one(sim_seed, sim_cnt)
+                li += 1
+                print(f'=> [BC2] {date_1}, {date_2} : {li} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt} -> {p}')
+                    
         try:
             self.save_cache()
         except Exception as e:
