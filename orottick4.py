@@ -1123,7 +1123,8 @@ class Orottick4Simulator:
             sim_seed, sim_cnt = self.capture(w, n)
             p = self.reproduce_one(sim_seed, sim_cnt)
 
-            print(f'=> [BC1] {date} : {ri} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt} -> {p}')
+            if ri % 50 == 0:
+                print(f'=> [BC1] {date} : {ri} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt} -> {p}')
 
             rw = {'date': date, 'w': w, 'n': n, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt}
             rows.append(rw)
@@ -1160,7 +1161,8 @@ class Orottick4Simulator:
                 sim_cnt = cdf['sim_seed'].iloc[rib]
                 p = self.reproduce_one(sim_seed, sim_cnt)
                 li += 1
-                print(f'=> [BC2] {date_1}, {date_2} : {li} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt} -> {p}')
+                if li % 1000 == 0:
+                    print(f'=> [BC2] {date_1}, {date_2} : {li} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt} -> {p}')
                     
         try:
             self.save_cache()
