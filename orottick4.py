@@ -46,7 +46,7 @@ import pickle
 # ------------------------------------------------------------ #
 
 class Orottick4Simulator:
-    def __init__(self, prd_sort_order = 'A', has_step_log = True, m4p_obs = False, m4p_cnt = -1, m4p_vry = True, heading_printed = False):
+    def __init__(self, prd_sort_order = 'A', has_step_log = True, m4p_obs = False, m4p_cnt = -1, m4p_vry = True, load_cache_dir = '/kaggle/working', save_cache_dir = '/kaggle/working', heading_printed = False):
         self.min_num = 0
         self.max_num = 9999
 
@@ -65,7 +65,56 @@ class Orottick4Simulator:
         if m4p_cnt < 2:
             m4p_vry = False
         self.m4p_vry = m4p_vry
+
+        self.cache_capture_seed = {}
+        self.cache_reproduce_one = {}
+        self.cache_capture = {}
+
+        self.debug_on = False
+        self.debug_gn_on = False
+        self.debug_cs_on = False
+
+        os.system(f'mkdir -p "{load_cache_dir}"')
+        self.load_cache_dir = load_cache_dir
+
+        os.system(f'mkdir -p "{save_cache_dir}"')
+        self.save_cache_dir = save_cache_dir
+
+        self.load_cache()
+
+    def save_cache(self):
+        cdir = self.save_cache_dir
+
+        fn = f'{cdir}/cache_capture_seed.pkl'
+        with open(fn, 'wb') as f:
+            pickle.dump(self.cache_capture_seed, f)
+
+        fn = f'{cdir}/cache_reproduce_one.pkl'
+        with open(fn, 'wb') as f:
+            pickle.dump(self.cache_reproduce_one, f)
+
+        fn = f'{cdir}/cache_capture.pkl'
+        with open(fn, 'wb') as f:
+            pickle.dump(self.cache_capture, f)
+
+    def load_cache(self):
+        cdir = self.load_cache_dir
         
+        fn = f'{cdir}/cache_capture_seed.pkl'
+        if os.path.exists(fn):
+            with open(fn, 'rb') as f:
+                self.cache_capture_seed = pickle.load(f)
+
+        fn = f'{cdir}/cache_reproduce_one.pkl'
+        if os.path.exists(fn):
+            with open(fn, 'rb') as f:
+                self.cache_reproduce_one = pickle.load(f)
+
+        fn = f'{cdir}/cache_capture.pkl'
+        if os.path.exists(fn):
+            with open(fn, 'rb') as f:
+                self.cache_capture = pickle.load(f)
+
     def print_heading(self):
         if self.heading_printed:
             return
@@ -87,37 +136,90 @@ class Orottick4Simulator:
         return random.randint(self.min_num, self.max_num)
 
     def capture_seed(self, sim_cnt, n):
+        key = f'{sim_cnt}_{n}'
+        if key in self.cache_capture_seed:
+            return self.cache_capture_seed[key]
+            
         sim_seed = 0
         p = self.reproduce_one(sim_seed, sim_cnt)
-        while p != n:
+
+        if self.debug_cs_on:
+            print(f'=> [CS1] {sim_seed}, {sim_cnt}, {n}, {p}')
+            
+        while not self.match(n, p):
             sim_seed += 1
             p = self.reproduce_one(sim_seed, sim_cnt)
+
+            if self.debug_cs_on:
+                if sim_seed % 100000 == 0:
+                    print(f'=> [CS2] {sim_seed}, {sim_cnt}, {n}, {p}')
+
+        if self.debug_cs_on:
+            print(f'=> [CS3] {sim_seed}, {sim_cnt}, {n}, {p}')
+
+        self.debug_cs_on = False
+
+        self.cache_capture_seed[key] = sim_seed
+        
         return sim_seed
 
     def capture(self, w, n):
+        key = f'{w}_{n}'
+        if key in self.cache_capture:
+            return self.cache_capture[key][0], self.cache_capture[key][1]
+            
+        if self.debug_on:
+            print(f'=> [C1] {w}, {n}')
+            
         sim_seed = self.capture_seed(1, n)
+
+        if self.debug_on:
+            print(f'=> [C2] {sim_seed}, {w}, {n}')
+
         random.seed(sim_seed)
         
         sim_cnt = 0
         p = self.gen_num()
         sim_cnt += 1
-        while p != w:
+
+        if self.debug_on:
+            print(f'=> [C3] {sim_seed}, {sim_cnt}, {w}, {n}')
+
+        while not self.match(w, p):
             p = self.gen_num()
             sim_cnt += 1
+
+            if self.debug_on:
+                if sim_cnt % 100000 == 0:
+                    print(f'=> [C4] {sim_seed}, {sim_cnt}, {w}, {n}')
 
         pn = self.reproduce_one(sim_seed, 1)
         pw = self.reproduce_one(sim_seed, sim_cnt)
 
+        if self.debug_on:
+            print(f'=> [C5] {sim_seed}, {sim_cnt}, {w}, {n}, {pw}, {pn}')
+
+        self.debug_on = False
+        
         if pn == n and pw == w:
+            self.cache_capture[key] = [sim_seed, sim_cnt]
             return sim_seed, sim_cnt
         else:
+            self.cache_capture[key] = [-1, -1]
             return -1, -1
             
     def reproduce_one(self, sim_seed, sim_cnt):
+        key = f'{sim_seed}_{sim_cnt}'
+        if key in self.cache_reproduce_one:
+            return self.cache_reproduce_one[key]
+            
         random.seed(sim_seed)
         n = -1
         for si in range(sim_cnt):
             n = self.gen_num()
+
+        self.cache_reproduce_one[key] = n
+        
         return n
 
     def match(self, w, p, match_kind = 'm4'):
@@ -463,7 +565,7 @@ class Orottick4Simulator:
                 
         rwcnt = v_date_cnt * 2 + 1
         start_time = time.time()
-        ddf = data_df[data_df['date'] <= v_buy_date]
+        ddf = data_df[data_df['buy_date'] <= v_buy_date]
         ddf = ddf.sort_values(by=['date'], ascending=[False])
         if v_date_cnt > 0:
             if len(ddf) > rwcnt:
@@ -777,6 +879,11 @@ class Orottick4Simulator:
             print(text)
             print(str(json_pred))
 
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
 
         text = '''
   -------------------------------
@@ -942,5 +1049,120 @@ class Orottick4Simulator:
         print(text)
 
         return odf, more
+
+    def build_cache(self, v_buy_date, cache_cnt = -1, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, runtime = None):
+        self.print_heading()
+            
+        text = '''
+====================================
+            BUILD CACHE
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        v_data_df_is_none = False
+        if data_df is None:
+            v_data_df_is_none = True
+            
+        print(f'[BUFFER_DIR] {buffer_dir}')
+        print(f'[LOTTE_KIND] {lotte_kind}')
+        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+        print(f'[BUY_DATE] {v_buy_date}')
+        print(f'[CACHE_CNT] {cache_cnt}')
+        print(f'[RUNTIME] {runtime}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        if data_df is None:
+            data_df = self.download_drawing(buffer_dir, v_buy_date)
+            if data_df is None:
+                return None
+                
+        if data_df is None:
+            d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
+            g = -1
+            d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
+            v_date = d2.strftime('%Y.%m.%d')
+    
+            data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
+            if data_df is None:
+                return None
+
+        start_time = time.time()
+        ddf = data_df[data_df['buy_date'] <= v_buy_date]
+        ddf = ddf.sort_values(by=['date'], ascending=[False])
+        if cache_cnt > 0:
+            if len(ddf) > cache_cnt:
+                ddf = ddf[:cache_cnt]
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+
+        keycheck = {}
+        sz = len(ddf)
+        for ri in range(len(ddf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+                    
+            w = ddf['w'].iloc[ri]
+            n = ddf['n'].iloc[ri]
+            date = ddf['date'].iloc[ri]
+            sim_seed, sim_cnt = self.capture(w, n)
+
+            print(f'=> [BC] {date} : {ri} / {sz} -> {w}, {n} -> {sim_seed}, {sim_cnt}')
+
+            if ri % 1000 == 0:
+                try:
+                    self.save_cache()
+                except Exception as e:
+                    msg = str(e)
+                    print(f'=> [E] {msg}')
+                
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
+        
+        rows = []
+        for key in self.cache_capture.keys():
+            fds = key.split('_')
+            w = int(fds[0])
+            n = int(fds[1])
+            fds = self.cache_capture[key]
+            sim_seed = fds[0]
+            sim_cnt = fds[1]
+            df = ddf[(ddf['w'] == w)&(ddf['n'] == n)]
+            if len(df) == 0:
+                continue
+            date = df['date'].iloc[0]
+            buy_date = df['buy_date'].iloc[0]
+            next_date = df['next_date'].iloc[0]
+            rw = {'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': w, 'n': n, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt}
+            rows.append(rw)
+
+        if len(rows) == 0:
+            return None
+            
+        cdf = pd.DataFrame(rows)
+        cdf = cdf.sort_value(by=['buy_date'], ascending=[False])
+
+        text = '''
+  -------------------------------
+            BUILD CACHE
+====================================
+        '''
+        print(text)
+
+        return cdf
 
 # ------------------------------------------------------------ #
