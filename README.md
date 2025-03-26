@@ -64,7 +64,8 @@ PRD_SORT_ORDER = 'B'
 HAS_STEP_LOG = True
 RANGE_CNT = 52
 M4P_OBS = True
-M4P_CNT = 2
+M4P_CNT = 3
+M4P_VRY = True
 
 METHOD = 'simulate'
 #METHOD = 'observe'
@@ -72,7 +73,7 @@ METHOD = 'simulate'
 
 #----------#
 
-ok4s = vok4.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT)
+ok4s = vok4.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY)
     
 if METHOD == 'simulate':
     zdf, json_pred, pdf = ok4s.simulate(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, TCK_CNT, RUNTIME)
