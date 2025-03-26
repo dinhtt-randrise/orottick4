@@ -46,7 +46,7 @@ import pickle
 # ------------------------------------------------------------ #
 
 class Orottick4Simulator:
-    def __init__(self, prd_sort_order = 'A', has_step_log = True, m4p_obs = False, m4p_cnt = -1, heading_printed = False):
+    def __init__(self, prd_sort_order = 'A', has_step_log = True, m4p_obs = False, m4p_cnt = -1, m4p_vry = True, heading_printed = False):
         self.min_num = 0
         self.max_num = 9999
 
@@ -61,6 +61,10 @@ class Orottick4Simulator:
         self.has_step_log = has_step_log
         self.m4p_obs = m4p_obs
         self.m4p_cnt = m4p_cnt
+
+        if m4p_cnt < 2:
+            m4p_vry = False
+        self.m4p_vry = m4p_vry
         
     def print_heading(self):
         if self.heading_printed:
@@ -189,6 +193,116 @@ class Orottick4Simulator:
             return a
         except Exception as e:
             return None
+
+    def capture_m4p_p_1(self, pdf):
+        xdf = pdf.sort_values(by=['buy_date'], ascending=[False])
+        xdf = xdf[(xdf['m4'] == 0)&(xdf['m3f'] == 0)&(xdf['m3l'] == 0)&(xdf['m3'] == 0)&(xdf['m2'] == 1)&(xdf['a_m4'] == 0)&(xdf['a_m3f'] == 0)&(xdf['a_m3l'] == 0)&(xdf['a_m3'] == 0)&(xdf['a_m2'] > 0)&(xdf['m4_cnt'] > 0)&(xdf['m4_cnt'] < 10)]
+        if len(xdf) == 0:
+            return None
+        else:
+            for ri in range(len(xdf)):
+                if xdf['a_m2'].iloc[ri] * 2 == xdf['m4_cnt'].iloc[ri]:
+                    buy_date = xdf['buy_date'].iloc[ri]
+                    zdf = pdf[pdf['buy_date'] > buy_date]
+                    if len(zdf) <= 60 and len(zdf) > 30:
+                        return buy_date
+                    else:
+                        return None
+            return None
+
+    def capture_m4p_p_2(self, pdf):
+        xdf = pdf.sort_values(by=['buy_date'], ascending=[False])
+        xdf1 = xdf[(xdf['m4'] == 0)&(xdf['m3f'] == 0)&(xdf['m3l'] == 0)&(xdf['m2'] == 0)&(xdf['a_m4'] == 0)&(xdf['a_m3f'] == 1)&(xdf['a_m3l'] == 0)]
+        if len(xdf1) == 0:
+            return None
+        else:
+            buy_date = xdf1['date'].iloc[0]
+            xdf2 = xdf[xdf['buy_date'] == buy_date]
+            if len(xdf2) == 0:
+                return None
+            else:
+                buy_date = xdf2['buy_date'].iloc[0]
+                zdf = pdf[pdf['buy_date'] > buy_date]
+                if len(zdf) <= 28 and len(zdf) > 14:
+                    return buy_date
+                else:
+                    return None
+
+    def capture_m4p_p_3(self, pdf):
+        xdf = pdf.sort_values(by=['buy_date'], ascending=[False])
+        xdf1 = xdf[(xdf['m4'] == 0)&(xdf['m3f'] == 0)&(xdf['m3l'] == 0)&(xdf['m3'] == 0)&(xdf['m2'] == 1)&(xdf['a_m2'] > 0)&(xdf['m4_cnt'] > 0)]
+        if len(xdf1) == 0:
+            return None
+        else:
+            xdf2 = xdf[xdf['m4'] == 1]
+            if len(xdf2) == 0:
+                return None
+            m4_buy_date = xdf2['buy_date'].iloc[0]
+            xdf1 = xdf1.sort_values(by=['buy_date'], ascending=[False])
+            for ri in range(len(xdf1)):
+                buy_date = xdf1['buy_date'].iloc[ri]
+                a = xdf1['a_m2'].iloc[ri]
+                b = 2 * (xdf1['m4_cnt'].iloc[ri] / 3)
+                if a == b and buy_date < m4_buy_date: 
+                    zdf = pdf[pdf['buy_date'] > buy_date]
+                    if len(zdf) <= 36 and len(zdf) > 18:
+                        return buy_date
+                    else:
+                        return None
+            return None
+            
+    def join_m4p(self, pdf, adf, l_buy_date, buy_date):
+        if buy_date is not None:
+            if buy_date not in l_buy_date:
+                l_buy_date.append(buy_date)
+                df = pdf[pdf['buy_date'] == buy_date]
+                df['m4p_no'] = len(l_buy_date)
+                if adf is None:
+                    adf = df
+                else:
+                    adf = pd.concat([adf, df])
+                adf = adf.sort_values(by=['m4p_no'], ascending=[True])
+        return l_buy_date, adf
+        
+    def capture_m4p(self, pdf, x_sim_seed):
+        l_pred = []
+        l_buy_date = []
+        adf = None
+
+        buy_date = self.capture_m4p_p_1(pdf)
+        l_buy_date, adf = self.join_m4p(pdf, adf, l_buy_date, buy_date)
+
+        sz = 0
+        if adf is not None:
+            sz = len(adf)
+        print(f'=> [M4PC-1] {l_buy_date} -> {sz}')
+
+        buy_date = self.capture_m4p_p_2(pdf)
+        l_buy_date, adf = self.join_m4p(pdf, adf, l_buy_date, buy_date)
+
+        sz = 0
+        if adf is not None:
+            sz = len(adf)
+        print(f'=> [M4PC-2] {l_buy_date} -> {sz}')
+
+        buy_date = self.capture_m4p_p_3(pdf)
+        l_buy_date, adf = self.join_m4p(pdf, adf, l_buy_date, buy_date)
+
+        sz = 0
+        if adf is not None:
+            sz = len(adf)
+        print(f'=> [M4PC-3] {l_buy_date} -> {sz}')
+        
+        if adf is None or len(l_buy_date) == 0 or len(adf) == 0:
+            return l_pred
+
+        adf = adf.sort_values(by=['m4p_no'], ascending=[True])
+        for ri in range(len(adf)):
+            x_sim_cnt = adf['sim_cnt'].iloc[ri]
+            p = self.reproduce_one(x_sim_seed, x_sim_cnt)
+            l_pred.append(p)
+
+        return l_pred
 
     def download_drawing(self, buffer_dir, lotte_kind, v_date):
         self.print_heading()
@@ -556,10 +670,11 @@ class Orottick4Simulator:
         zdf = pd.DataFrame(rows)
         xdf = zdf[zdf['buy_date'] == v_buy_date]
         pdf = zdf[zdf['buy_date'] < v_buy_date]
-        kdf = pdf
+        kdf = pdf.sort_values(by=['buy_date'], ascending=[False])
         json_pred = None
         m4_rsi = -1
         m4_pred = ''
+        m4pc = 0
         if len(xdf) == 1 and len(pdf) >= v_date_cnt:
             s_sim_cnt = ''
             s_pred = ''
@@ -620,7 +735,22 @@ class Orottick4Simulator:
                         mb_m2 = 1
             else:
                 pdf = None
-            if len(kdf) > 0 and len(xdf) > 0:
+            m4p_use = False
+            if pso == 'B' and pdf is not None:
+                if len(pdf) > 0:
+                    if len(xdf) > 0:
+                        lx_pred = self.capture_m4p(pdf, xdf['sim_seed'].iloc[0])
+                        if len(lx_pred) > 0:
+                            m4pc = 1
+                            m4p_cnt = self.m4p_cnt
+                            if m4p_cnt > 0:
+                                if len(lx_pred) > m4p_cnt:
+                                    lx_pred = lx_pred[:m4p_cnt]
+                            lx_pred = [str(x) for x in lx_pred]
+                            m4_pred = ', '.join(lx_pred)
+                            m4p_use = True
+                            
+            if not m4p_use and len(kdf) > 0 and len(xdf) > 0:
                 kdf = kdf[kdf['m4'] > 0]
                 if len(kdf) > 0:
                     kdf = kdf.sort_values(by=['buy_date'], ascending=[False])
@@ -634,7 +764,7 @@ class Orottick4Simulator:
                         x = self.reproduce_one(x_sim_seed, kdf['sim_cnt'].iloc[xi])
                         lx_pred.append(str(x))
                     m4_pred = ', '.join(lx_pred)
-            json_pred = {'date': xdf['date'].iloc[0], 'buy_date': xdf['buy_date'].iloc[0], 'next_date': xdf['next_date'].iloc[0], 'w': int(xdf['w'].iloc[0]), 'n': int(xdf['n'].iloc[0]), 'sim_seed': int(xdf['sim_seed'].iloc[0]), 'date_cnt': v_date_cnt, 'tck_cnt': tck_cnt, 'sim_cnt': s_sim_cnt, 'pred': s_pred, 'm4_rsi': m4_rsi, 'm4_pred': m4_pred, 'pcnt': 1, 'm4': int(xdf['a_m4'].iloc[0]), 'm3f': int(xdf['a_m3f'].iloc[0]), 'm3l': int(xdf['a_m3l'].iloc[0]), 'm3': int(xdf['a_m3'].iloc[0]), 'm2': int(xdf['a_m2'].iloc[0]), 'm4_cnt': int(xdf['m4_cnt'].iloc[0]), 'm3f_cnt': int(xdf['m3f_cnt'].iloc[0]), 'm3l_cnt': int(xdf['m3l_cnt'].iloc[0]), 'm3_cnt': int(xdf['m3_cnt'].iloc[0]), 'm2_cnt': int(xdf['m2_cnt'].iloc[0]), 'mb_m4': mb_m4, 'mb_m3f': mb_m3f, 'mb_m3l': mb_m3l, 'mb_m3': mb_m3, 'mb_m2': mb_m2}
+            json_pred = {'date': xdf['date'].iloc[0], 'buy_date': xdf['buy_date'].iloc[0], 'next_date': xdf['next_date'].iloc[0], 'w': int(xdf['w'].iloc[0]), 'n': int(xdf['n'].iloc[0]), 'sim_seed': int(xdf['sim_seed'].iloc[0]), 'date_cnt': v_date_cnt, 'tck_cnt': tck_cnt, 'sim_cnt': s_sim_cnt, 'pred': s_pred, 'm4_rsi': m4_rsi, 'm4_pred': m4_pred, 'm4pc': m4pc, 'pcnt': 1, 'm4': int(xdf['a_m4'].iloc[0]), 'm3f': int(xdf['a_m3f'].iloc[0]), 'm3l': int(xdf['a_m3l'].iloc[0]), 'm3': int(xdf['a_m3'].iloc[0]), 'm2': int(xdf['a_m2'].iloc[0]), 'm4_cnt': int(xdf['m4_cnt'].iloc[0]), 'm3f_cnt': int(xdf['m3f_cnt'].iloc[0]), 'm3l_cnt': int(xdf['m3l_cnt'].iloc[0]), 'm3_cnt': int(xdf['m3_cnt'].iloc[0]), 'm2_cnt': int(xdf['m2_cnt'].iloc[0]), 'mb_m4': mb_m4, 'mb_m3f': mb_m3f, 'mb_m3l': mb_m3l, 'mb_m3': mb_m3, 'mb_m2': mb_m2}
         else:
             pdf = None
             
@@ -748,8 +878,12 @@ class Orottick4Simulator:
             more[f'pick_{t_buy_date}'] = pdf
             
             t_pred = json_prd['pred']
+            vry = True
             if self.m4p_obs:
                 t_pred = json_prd['m4_pred']
+                if self.m4p_vry:
+                    if len(t_pred.split(', ')) != 1:
+                        vry = False
             t_prd_lst = t_pred.split(', ')
             if o_max_tck > 0:
                 if len(t_prd_lst) > o_max_tck:
@@ -764,15 +898,15 @@ class Orottick4Simulator:
             m3 = 0
             m2 = 0
             for t_p in nlst:
-                if self.match(t_w, t_p, 'm4'):
+                if vry and self.match(t_w, t_p, 'm4'):
                     m4 += 1
-                if self.match(t_w, t_p, 'm3f'):
+                if vry and self.match(t_w, t_p, 'm3f'):
                     m3f += 1
-                if self.match(t_w, t_p, 'm3l'):
+                if vry and self.match(t_w, t_p, 'm3l'):
                     m3l += 1
-                if self.match(t_w, t_p, 'm3'):
+                if vry and self.match(t_w, t_p, 'm3'):
                     m3 += 1
-                if self.match(t_w, t_p, 'm2'):
+                if vry and self.match(t_w, t_p, 'm2'):
                     m2 += 1
             m4_cnt += m4
             m3f_cnt += m3f
