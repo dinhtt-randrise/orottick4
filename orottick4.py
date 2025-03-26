@@ -104,16 +104,19 @@ class Orottick4Simulator:
         if os.path.exists(fn):
             with open(fn, 'rb') as f:
                 self.cache_capture_seed = pickle.load(f)
+                print('=> [cache_capture_seed] Loaded')
 
         fn = f'{cdir}/cache_reproduce_one.pkl'
         if os.path.exists(fn):
             with open(fn, 'rb') as f:
                 self.cache_reproduce_one = pickle.load(f)
+                print('=> [cache_reproduce_one] Loaded')
 
         fn = f'{cdir}/cache_capture.pkl'
         if os.path.exists(fn):
             with open(fn, 'rb') as f:
                 self.cache_capture = pickle.load(f)
+                print('=> [cache_capture] Loaded')
 
     def print_heading(self):
         if self.heading_printed:
