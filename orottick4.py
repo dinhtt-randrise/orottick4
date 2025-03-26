@@ -1084,7 +1084,7 @@ class Orottick4Simulator:
         print(text) 
 
         if data_df is None:
-            data_df = self.download_drawing(buffer_dir, v_buy_date)
+            data_df = self.download_drawing(buffer_dir, lotte_kind, v_buy_date)
             if data_df is None:
                 return None
                 
