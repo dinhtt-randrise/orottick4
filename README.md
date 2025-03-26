@@ -66,14 +66,28 @@ RANGE_CNT = 52
 M4P_OBS = True
 M4P_CNT = 3
 M4P_VRY = True
+LOAD_CACHE_DIR = '/kaggle/working'
+SAVE_CACHE_DIR = '/kaggle/working'
+CACHE_CNT = -1
 
 METHOD = 'simulate'
 #METHOD = 'observe'
 #METHOD = 'observe_range'
+#METHOD = 'download'
+#METHOD = 'build_cache'
 
 #----------#
 
-ok4s = vok4.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY)
+ok4s = vok4.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
+
+if METHOD == 'build_cache':
+    cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
+    if cdf is not None:
+        try:
+            cdf.to_csv(f'/kaggle/working/{LOTTE_KIND}-cache-{BUY_DATE}.csv', index=False)
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
     
 if METHOD == 'simulate':
     zdf, json_pred, pdf = ok4s.simulate(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, TCK_CNT, RUNTIME)
@@ -220,6 +234,18 @@ if METHOD == 'observe_range':
                             xdf.to_csv(f'/kaggle/working/{LOTTE_KIND}-pick-{t_buy_date}.csv', index=False)
 
         range_idx += 1
+
+
+if METHOD == 'download':  
+    d1 = datetime.strptime(BUY_DATE, "%Y.%m.%d")
+    g = -1
+    d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
+    v_date = d2.strftime('%Y.%m.%d')
+
+    data_df = ok4s.download_drawing(BUFFER_DIR, LOTTE_KIND, v_date)
+
+    if data_df is not None:
+        data_df.to_csv(f'/kaggle/working/{LOTTE_KIND}-{BUY_DATE}.csv', index=False)
 
 #----------#
 
