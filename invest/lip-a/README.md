@@ -21,7 +21,7 @@
 
   -------------------------------
 
-Follow "Research project A - Plan B" [ https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a ].
+Follow "Research project A - Plan B" and "Research project A - Plan C" [ https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a ].
 
 + Simulating Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-rsp-a-f-2025-03-23
 
@@ -41,7 +41,7 @@ Follow "Research project A - Plan B" [ https://github.com/dinhtt-randrise/orotti
 + TCK_KIND: All 4 exact order
 + BROKER_COST: $0.3 / ticket
 
-==> [GOAL] Simulate buying tickets, track results and calculate ROI.
+==> [GOAL] Simulate buying tickets, track results and calculate ROI. By the way, real buying based on "Research project A - Plan C".
 ```
 
 ![](https://github.com/dinhtt-randrise/orottick4/blob/773b9d431c576819ae37411bf1238f482d3d738f/research/rsp-a/orottick4-rsp-a-analyze-b.png)
