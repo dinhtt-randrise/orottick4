@@ -24,6 +24,8 @@ lottery drawing.
 
 + GitHub: https://orottick4.com/github
 
++ Lottery: https://orottick4.com/lotte
+
 
 ====================================
             HOW TO USE
