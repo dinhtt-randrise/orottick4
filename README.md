@@ -285,9 +285,18 @@ With Orottick4, we can invest in lottery (Pick 4) as following research:
 
 + Invest Cost: $32,396
 
++ Invest Cost (w/o broker): $24,920
+
 + Invest Return: $2,604
 
++ Invest Return (w/o broker): $10,080
+
 + Invest ROI: 8%
+
++ Invest ROI (w/o broker, w/ cost): 31.11%
+
++ Invest ROI (w/o broker, w/ no broker cost): 40.45%
+
 ```
 
 ![](https://github.com/dinhtt-randrise/orottick4/blob/773b9d431c576819ae37411bf1238f482d3d738f/research/rsp-a/orottick4-rsp-a-analyze-b.png)
