@@ -44,4 +44,5 @@ Follow "Research project A - Plan B" [ https://github.com/dinhtt-randrise/orotti
 ==> [GOAL] Simulate buying tickets, track results and calculate ROI.
 ```
 
-![](https://github.com/dinhtt-randrise/orottick4/blob/80eb83727709b8aff09766f17e107aa94c2152ae/research/rsp-a/orottick4-rsp-a-analyze-b.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/773b9d431c576819ae37411bf1238f482d3d738f/research/rsp-a/orottick4-rsp-a-analyze-b.png)
+
