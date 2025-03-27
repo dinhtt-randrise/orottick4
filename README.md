@@ -276,14 +276,25 @@ if METHOD == 'download':
 
 
 ====================================
-            EXAMPLES
+           HOW TO INVEST
   -------------------------------
 
-+ Predict: https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-p4a-2025-03-23
-
-+ Observe (One Period): https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-p4a-2025-03-23
-
-+ Observe (Multiple Periods): https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-range-p4a-2025-03-23
+With Orottick4, we can invest in lottery (Pick 4) as following research:
 
 
+  -------------------------------
+    RESEARCH PROJECT A - PLAN B
+  -------------------------------
+
++ Invest Period: 364 days
+
++ Invest Cost: $32,396
+
++ Invest Return: $2,604
+
++ Invest ROI: 8%
 ```
+
+![](https://github.com/dinhtt-randrise/orottick4/blob/80eb83727709b8aff09766f17e107aa94c2152ae/research/rsp-a/orottick4-rsp-a-analyze-b.png)
+
+
