@@ -297,6 +297,8 @@ With Orottick4, we can invest in lottery (Pick 4) as following research:
 
 + Invest ROI (w/o broker, w/ no broker cost): 40.45%
 
++ Research project A - Plan B: https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a
+
 + Lottery Investment A Project: https://github.com/dinhtt-randrise/orottick4/tree/main/invest/lip-a
 
 ```
