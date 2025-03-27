@@ -15,6 +15,8 @@
 #
 # + GitHub: https://orottick4.com/github
 #
+# + Lottery: https://orottick4.com/lotte
+#
 #
 #====================================
 #            Copyright
