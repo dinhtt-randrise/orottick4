@@ -1233,7 +1233,7 @@ class Orottick4Simulator:
         USE_GITHUB = Orottick4Simulator.get_option(options, 'USE_GITHUB', False)
         METHOD = Orottick4Simulator.get_option(options, 'METHOD', 'simulate')
 
-        if non_github_create is None:
+        if non_github_create_fn is None:
             USE_GITHUB = True
             
         if USE_GITHUB:
