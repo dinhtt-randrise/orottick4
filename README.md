@@ -110,6 +110,12 @@ vok4.Orottick4Simulator.run(options, vok4, None)
 
 + Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2-2025-03-23
 
+[ 2024.03.24 ]
+
++ Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2024-03-24
+
++ Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2-2024-03-24
+
 
 ====================================
            HOW TO INVEST
