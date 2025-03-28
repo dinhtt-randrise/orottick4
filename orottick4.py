@@ -1218,7 +1218,7 @@ class Orottick4Simulator:
         O_DATE_CNT = Orottick4Simulator.get_option(options, 'O_DATE_CNT', 7)
         TCK_CNT = Orottick4Simulator.get_option(options, 'TCK_CNT', 56 * 5)
         F_TCK_CNT = Orottick4Simulator.get_option(options, 'F_TCK_CNT', 250)
-        RUNTIME = Orottick4Simulator.get_option(options, 'BUY_DATE', 60 * 60 * 11.5)
+        RUNTIME = Orottick4Simulator.get_option(options, 'RUNTIME', 60 * 60 * 11.5)
         PRD_SORT_ORDER = Orottick4Simulator.get_option(options, 'PRD_SORT_ORDER', 'B')
         HAS_STEP_LOG = Orottick4Simulator.get_option(options, 'HAS_STEP_LOG', True)
         RANGE_CNT = Orottick4Simulator.get_option(options, 'RANGE_CNT', 52)
