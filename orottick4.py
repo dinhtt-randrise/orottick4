@@ -1116,9 +1116,10 @@ class Orottick4Simulator:
                     
             w = ddf['w'].iloc[ri]
             n = ddf['n'].iloc[ri]
-            date = ddf['date'].iloc[ri]
             if w < 0:
                 continue
+                
+            date = ddf['date'].iloc[ri]
 
             sim_seed, sim_cnt = self.capture(w, n)
             p = self.reproduce_one(sim_seed, sim_cnt)
@@ -1158,7 +1159,7 @@ class Orottick4Simulator:
                     break
                     
                 date_2 = cdf['date'].iloc[rib]
-                sim_cnt = cdf['sim_seed'].iloc[rib]
+                sim_cnt = cdf['sim_cnt'].iloc[rib]
                 p = self.reproduce_one(sim_seed, sim_cnt)
                 li += 1
                 if li % 1000 == 0:
