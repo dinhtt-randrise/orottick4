@@ -1117,6 +1117,9 @@ class Orottick4Simulator:
             w = ddf['w'].iloc[ri]
             n = ddf['n'].iloc[ri]
             date = ddf['date'].iloc[ri]
+            if w < 0:
+                continue
+
             sim_seed, sim_cnt = self.capture(w, n)
             p = self.reproduce_one(sim_seed, sim_cnt)
 
