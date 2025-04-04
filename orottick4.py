@@ -1336,8 +1336,8 @@ class Orottick4Simulator:
         CACHE_CNT = Orottick4Simulator.get_option(options, 'CACHE_CNT', -1)
         USE_GITHUB = Orottick4Simulator.get_option(options, 'USE_GITHUB', False)
         METHOD = Orottick4Simulator.get_option(options, 'METHOD', 'simulate')
-        M4P_COLLECT_DATA_DIRS = Orottick4RLSimulator.get_option(options, 'M4P_COLLECT_DATA_DIRS', [])
-        M4P_COLLECT_SAVE_DIR = Orottick4RLSimulator.get_option(options, 'M4P_COLLECT_SAVE_DIR', '/kaggle/working')
+        M4P_COLLECT_DATA_DIRS = Orottick4Simulator.get_option(options, 'M4P_COLLECT_DATA_DIRS', [])
+        M4P_COLLECT_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4P_COLLECT_SAVE_DIR', '/kaggle/working')
         
         if non_github_create_fn is None:
             USE_GITHUB = True
