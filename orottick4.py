@@ -408,6 +408,9 @@ class Orottick4Simulator:
                 if len(pdf2) >= self.m4p_cnt:
                     pdf2 = pdf2[:self.m4p_cnt]
 
+        l_rnkp = list(pdf2['rnkp'].values)
+        print(f'==> [RNKPL] {l_rnkp}')
+        
         adf = pdf2
         l_pred = []
         for ri in range(len(adf)):
