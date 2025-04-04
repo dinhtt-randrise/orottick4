@@ -856,7 +856,8 @@ class Orottick4Simulator:
                 df2 = df[(df['rnkn'] == 1)&(df['m4p_no'] == 1)]
                 vcnt += len(df2)
 
-            print(f'== [RNK1_CNT] {vcnt}')
+            sz = len(lx_buy_date)
+            print(f'== [RNK1_CNT] {vcnt} / {sz}')
             
             # maximize mean ndcg
             scores = []
@@ -867,7 +868,7 @@ class Orottick4Simulator:
         study = optuna.create_study(direction='maximize',
                                     sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
                                    )
-        study.optimize(objective, n_trials=10)
+        study.optimize(objective, n_trials=50)
 
         print('Number of finished trials:', len(study.trials))
         print('Best trial:', study.best_trial.params)        
