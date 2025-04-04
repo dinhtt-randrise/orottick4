@@ -381,7 +381,7 @@ class Orottick4Simulator:
     def capture_m4p(self, pdf, x_sim_seed):
         lp = self.capture_m4p_ranker(pdf, x_sim_seed)
         if len(lp) == 0:
-            return self.capture_m4p_ranker(pdf, x_sim_seed)
+            return self.capture_m4p_manual(pdf, x_sim_seed)
         return lp
         
     def capture_m4p_ranker(self, pdf, x_sim_seed):
