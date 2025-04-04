@@ -851,7 +851,7 @@ class Orottick4Simulator:
             for x_buy_date in lx_buy_date:
                 df = vadf[vadf['x_buy_date'] == x_buy_date]
                 df['rnkp'] = model.predict(df[features])
-                df = df.sort_values(by=['rnkp'], ascending=[False])
+                df = df.sort_values(by=['rnkp', 'buy_date'], ascending=[False, False])
                 df['rnkn'] = [x+1 for x in range(len(df))]
                 df2 = df[(df['rnkn'] == 1)&(df['m4p_no'] == 1)]
                 vcnt += len(df2)
