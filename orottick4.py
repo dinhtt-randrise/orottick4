@@ -845,11 +845,24 @@ class Orottick4Simulator:
                 #verbose=10
             )
             
+            vadf = all_df.sort_values(by=['x_buy_date', 'm4p_no'], ascending=[False, True])
+            vcnt = 0
+            lx_buy_date = list(vadf['x_buy_date'].unique())
+            for x_buy_date in lx_buy_date:
+                df = vadf[vadf['x_buy_date'] == x_buy_date]
+                df['rnkp'] = model.predict(df[features])
+                df = df.sort_values(by=['rnkp'], ascending=[False])
+                df['rnkn'] = [x+1 for x in range(len(df))]
+                df2 = df[(df['rnkn'] == 1)&(df['m4p_no'] == 1)]
+                vcnt += len(df2)
+
+            print(f'== [RNK1_CNT] {vcnt}')
+            
             # maximize mean ndcg
             scores = []
             for name, score in model.best_score_['valid_0'].items():
                 scores.append(score)
-            return np.mean(scores)
+            return vcnt + np.mean(scores)
 
         study = optuna.create_study(direction='maximize',
                                     sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
