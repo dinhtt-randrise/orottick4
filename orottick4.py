@@ -44,6 +44,7 @@ from datetime import timedelta
 import pandas as pd
 import numpy as np
 import pickle
+import glob
 
 # ------------------------------------------------------------ #
 
@@ -83,6 +84,8 @@ class Orottick4Simulator:
         self.save_cache_dir = save_cache_dir
 
         self.load_cache()
+
+        self.lotte_kind = 'p4a'
 
     def save_cache(self):
         cdir = self.save_cache_dir
@@ -518,7 +521,109 @@ class Orottick4Simulator:
         print(text) 
 
         return df
+
+    def is_observe_good(self, odf, o_cnt, o_ma_field = 'm4'):
+        if len(odf) == o_cnt:
+            df = odf[odf[o_ma_field] > 0]
+            if len(df) > 0:
+                return True
+            return False
+        else:
+            return False   
+
+    def is_pick_good(self, odf, p_cnt):
+        if len(odf) == p_cnt:
+            return True
+        else:
+            return False
+
+    def copy_file(self, src_fn, tag_fn):
+        os.system(f'cp -f "{src_fn}" "{tag_fn}"')
         
+    def m4p_collect_observe_glob(self):
+        lotte_kind = self.lotte_kind
+        return f'{lotte_kind}-observe-*.*.*.csv'
+
+    def m4p_collect_observe_file(self, obs_fn):
+        lotte_kind = self.lotte_kind
+        fn2 = obs_fn.split('/')[-1]
+        fn3 = fn2.replace(f'{lotte_kind}-observe-', '').replace(f'.csv', '')
+        return f'{lotte_kind}-observe-{fn3}.csv'
+
+    def m4p_collect_pick_file(self, odf, ri):
+        lotte_kind = self.lotte_kind
+        buy_date = odf['buy_date'].iloc[ri]
+        return f'{lotte_kind}-pick-{buy_date}.csv'
+
+    def m4p_collect_pred_file(self, odf, ri):
+        lotte_kind = self.lotte_kind
+        buy_date = odf['buy_date'].iloc[ri]
+        return f'{lotte_kind}-pred-{buy_date}.json'
+
+    def m4p_collect(self, lotte_kind, o_cnt, p_cnt, data_dirs, save_dir):
+        self.print_heading()
+
+        text = '''
+====================================
+           M4P COLLECT
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        print(f'LOTTE_KIND: {lotte_kind}')
+        print(f'O_CNT: {o_cnt}')
+        print(f'P_CNT: {p_cnt}')
+        print(f'DATA_DIRS: {data_dirs}')
+        print(f'SAVE_DIR: {save_dir}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+        
+        self.lotte_kind = lotte_kind
+        ma_field = 'm4'
+        fn_observe_glob = self.m4p_collect_observe_glob
+        fn_observe_file = self.m4p_collect_observe_file
+        fn_pick_file = self.m4p_collect_pick_file
+        fn_pred_file = self.m4p_collect_pred_file
+        
+        for data_dir in data_dirs:
+            obs_glob = fn_observe_glob()
+            lg_obs = glob.glob(f'{data_dir}/{obs_glob}')
+            for fn_obs in lg_obs:
+                odf = pd.read_csv(fn_obs)
+                if not self.is_observe_good(odf, o_cnt, ma_field):
+                    continue
+                observe_fn = fn_observe_file(fn_obs)
+                self.copy_file(fn_obs, f'{save_dir}/{observe_fn}')
+                print(f'== [Copy] ==> {observe_fn}')
+                for ri in range(len(odf)):
+                    if odf[ma_field].iloc[ri] > 0:
+                        pick_fn = fn_pick_file(odf, ri)
+                        pred_fn = fn_pred_file(odf, ri)
+                        pdf = pd.read_csv(f'{data_dir}/{pick_fn}')
+                        if not self.is_pick_good(pdf, p_cnt):
+                            continue
+                        self.copy_file(f'{data_dir}/{pick_fn}', f'{save_dir}/{pick_fn}')
+                        print(f'== [Copy] ==> {pick_fn}')
+                        self.copy_file(f'{data_dir}/{pred_fn}', f'{save_dir}/{pred_fn}')
+                        print(f'== [Copy] ==> {pred_fn}')
+        
+        text = '''
+  -------------------------------
+           M4P COLLECT
+====================================
+        '''
+        print(text) 
+
     def simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 56, tck_cnt = 2, runtime = None):
         self.print_heading()
 
@@ -1231,7 +1336,9 @@ class Orottick4Simulator:
         CACHE_CNT = Orottick4Simulator.get_option(options, 'CACHE_CNT', -1)
         USE_GITHUB = Orottick4Simulator.get_option(options, 'USE_GITHUB', False)
         METHOD = Orottick4Simulator.get_option(options, 'METHOD', 'simulate')
-
+        M4P_COLLECT_DATA_DIRS = Orottick4RLSimulator.get_option(options, 'M4P_COLLECT_DATA_DIRS', [])
+        M4P_COLLECT_SAVE_DIR = Orottick4RLSimulator.get_option(options, 'M4P_COLLECT_SAVE_DIR', '/kaggle/working')
+        
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -1432,5 +1539,7 @@ class Orottick4Simulator:
             if data_df is not None:
                 data_df.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-{BUY_DATE}.csv', index=False)
 
-        
+        if METHOD == 'm4p_collect':
+            ok4s.m4p_collect(LOTTE_KIND, O_DATE_CNT, DATE_CNT, M4P_COLLECT_DATA_DIRS, M4P_COLLECT_SAVE_DIR)
+            
 # ------------------------------------------------------------ #
