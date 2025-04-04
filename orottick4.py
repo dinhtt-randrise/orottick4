@@ -794,7 +794,7 @@ class Orottick4Simulator:
         m4p_max = 10
         
         all_df = pd.read_csv(f'{data_dir}/{lotte_kind}-all.csv')
-        all_df = all_df[all_df['m4p_no'] <= m4p_max]
+        #all_df = all_df[all_df['m4p_no'] <= m4p_max]
         sz = len(all_df)
         print(f'ALL_SZ: {sz}')
 
