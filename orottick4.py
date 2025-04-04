@@ -791,15 +791,20 @@ class Orottick4Simulator:
         print(f'DATA_DIR: {data_dir}')
         print(f'SAVE_DIR: {save_dir}')
 
+        m4p_max = 20
+        
         all_df = pd.read_csv(f'{data_dir}/{lotte_kind}-all.csv')
+        all_df = all_df[all_df['m4p_no'] <= m4p_max]
         sz = len(all_df)
         print(f'ALL_SZ: {sz}')
 
         train_df = pd.read_csv(f'{data_dir}/{lotte_kind}-train.csv')
+        train_df = train_df[train_df['m4p_no'] <= m4p_max]
         sz = len(train_df)
         print(f'TRAIN_SZ: {sz}')
 
         valid_df = pd.read_csv(f'{data_dir}/{lotte_kind}-valid.csv')
+        valid_df = valid_df[valid_df['m4p_no'] <= m4p_max]
         sz = len(valid_df)
         print(f'VALID_SZ: {sz}')
 
