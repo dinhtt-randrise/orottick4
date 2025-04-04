@@ -787,7 +787,7 @@ class Orottick4Simulator:
             }
              
             #train model
-            model = lgb.LGBMRanker(n_estimators=1000, **param, random_state=SEED,early_stopping_rounds=50)
+            model = lgb.LGBMRanker(n_estimators=1000, **param, random_state=SEED,early_stopping_rounds=50,verbose=10)
             model.fit(
                 train_df[features],
                 train_df[target],
@@ -796,7 +796,7 @@ class Orottick4Simulator:
                 eval_group=[list(valid_query)],
                 eval_at=[1, 3, 5, 10, 20], # calc validation ndcg@1,3,5,10,20
                 #early_stopping_rounds=50,
-                verbose=10
+                #verbose=10
             )
             
             # maximize mean ndcg
