@@ -669,6 +669,7 @@ class Orottick4Simulator:
                 pdf = pd.read_csv(f'{data_dir}/{lotte_kind}-pick-{x_buy_date}.csv')
                 m_keys = ['m4', 'm3f', 'm3l', 'm3', 'm2']
                 pdf['x_buy_date'] = x_buy_date
+                pdf['fw'] = x_w
                 pdf['fp'] = -1
                 pdf['m4p_no'] = 0
                 for key in m_keys:
@@ -686,6 +687,7 @@ class Orottick4Simulator:
                         if self.match(x_w, fp, key):
                             v = 1
                         l_dict[key].append(v)
+                pdf['fp'] = l_fp
                 for key in m_keys:
                     pdf[f'x_{key}'] = l_dict[key]
                 pdf = pdf.sort_values(by=['x_m4', 'x_m3f', 'x_m3l', 'x_m3', 'x_m2', 'buy_date'], ascending=[False, False, False, False, False, False])
