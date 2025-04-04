@@ -750,11 +750,11 @@ class Orottick4Simulator:
         print(f'ALL_SZ: {sz}')
 
         train_df = pd.read_csv(f'{data_dir}/{lotte_kind}-train.csv')
-        sz = len(all_df)
+        sz = len(train_df)
         print(f'TRAIN_SZ: {sz}')
 
         valid_df = pd.read_csv(f'{data_dir}/{lotte_kind}-valid.csv')
-        sz = len(all_df)
+        sz = len(valid_df)
         print(f'VALID_SZ: {sz}')
 
         text = '''
@@ -787,7 +787,7 @@ class Orottick4Simulator:
             }
              
             #train model
-            model = lgb.LGBMRanker(n_estimators=1000, **param, random_state=SEED,)
+            model = lgb.LGBMRanker(n_estimators=1000, **param, random_state=SEED,early_stopping_rounds=50)
             model.fit(
                 train_df[features],
                 train_df[target],
@@ -795,7 +795,7 @@ class Orottick4Simulator:
                 eval_set=[(valid_df[features], valid_df[target])],
                 eval_group=[list(valid_query)],
                 eval_at=[1, 3, 5, 10, 20], # calc validation ndcg@1,3,5,10,20
-                early_stopping_rounds=50,
+                #early_stopping_rounds=50,
                 verbose=10
             )
             
