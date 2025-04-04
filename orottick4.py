@@ -395,7 +395,8 @@ class Orottick4Simulator:
         pdf2['rnkp'] = self.m4pm['model'].predict(pdf2[features])
         pdf3 = pdf2.sort_values(by=['rnkp', 'buy_date'], ascending=[False, False])
         #pdf2 = pdf2[(pdf2['rnkp'] <= 1)&(pdf2['rnkp'] >= 0.95)]
-        pdf2 = pdf3[(pdf3['rnkp'] >= 0.95)]
+        #pdf2 = pdf3[(pdf3['rnkp'] >= 0.95)]
+        pdf2 = pdf2.sort_values(by=['rnkp', 'buy_date'], ascending=[False, False])
         if len(pdf2) == 0:
             print(f'== [M4PM] Ranking is not found!')
             return []
