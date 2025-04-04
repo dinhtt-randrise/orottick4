@@ -393,7 +393,8 @@ class Orottick4Simulator:
         features = ['m4', 'm3f', 'm3l', 'm3', 'm2', 'a_m4', 'a_m3f', 'a_m3l', 'a_m3', 'a_m2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
         pdf2['rnkp'] = self.m4pm['model'].predict(pdf2[features])
         pdf2 = pdf2.sort_values(by=['rnkp'], ascending=[False])
-        pdf2 = pdf2[(pdf2['rnkp'] <= 1)&(pdf2['rnkp'] >= 0.95)]
+        #pdf2 = pdf2[(pdf2['rnkp'] <= 1)&(pdf2['rnkp'] >= 0.95)]
+        pdf2 = pdf2[(pdf2['rnkp'] >= 0.95)]
         if len(pdf2) == 0:
             print(f'== [M4PM] Ranking is not found!')
             return []
