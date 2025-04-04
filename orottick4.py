@@ -89,6 +89,8 @@ class Orottick4Simulator:
 
         self.lotte_kind = 'p4a'
 
+        self.m4pm = None
+
     def save_cache(self):
         cdir = self.save_cache_dir
 
@@ -375,8 +377,42 @@ class Orottick4Simulator:
                     adf = pd.concat([adf, df])
                 adf = adf.sort_values(by=['m4p_no'], ascending=[True])
         return l_buy_date, adf
-        
+
     def capture_m4p(self, pdf, x_sim_seed):
+        lp = self.capture_m4p_ranker(pdf, x_sim_seed)
+        if len(lp) == 0:
+            return self.capture_m4p_ranker(pdf, x_sim_seed)
+        return lp
+        
+    def capture_m4p_ranker(self, pdf, x_sim_seed):
+        if self.m4pm is None:
+            print(f'== [M4PM] Model is not found!')
+            return []
+
+        pdf2 = pdf.sort_values(by=['buy_date'], ascending=[False])
+        features = ['m4', 'm3f', 'm3l', 'm3', 'm2', 'a_m4', 'a_m3f', 'a_m3l', 'a_m3', 'a_m2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
+        pdf2['rnkp'] = self.m4pm['model'].predict(pdf2[features])
+        pdf2 = pdf2.sort_values(by=['rnkp'], ascending=[False])
+        pdf2 = pdf2[(pdf2['rnkp'] <= 1)&(pdf2['rnkp'] >= 0.95)]
+        if len(pdf2) == 0:
+            print(f'== [M4PM] Ranking is not found!')
+            return []
+
+        if len(pdf2) > 5:
+            pdf2 = pdf2[:5]
+
+        adf = pdf2
+        l_pred = []
+        for ri in range(len(adf)):
+            x_sim_cnt = adf['sim_cnt'].iloc[ri]
+            p = self.reproduce_one(x_sim_seed, x_sim_cnt)
+            l_pred.append(p)
+
+        print(f'== [M4PM] Success: {l_pred}')
+
+        return l_pred
+        
+    def capture_m4p_manual(self, pdf, x_sim_seed):
         l_pred = []
         l_buy_date = []
         adf = None
@@ -1559,6 +1595,8 @@ class Orottick4Simulator:
         M4P_TRAIN_DATA_DIR = Orottick4Simulator.get_option(options, 'M4P_TRAIN_DATA_DIR', '/kaggle/working')
         M4P_TRAIN_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4P_TRAIN_SAVE_DIR', '/kaggle/working')
 
+        M4P_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4P_MODEL_DIR', '/kaggle/working')
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -1566,7 +1604,12 @@ class Orottick4Simulator:
             ok4s = github_pkg.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
         else:
             ok4s = non_github_create_fn(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
-        
+
+        m4pm_fn = f'{M4P_MODEL_DIR}/{LOTTE_KIND}-m4pm.pkl'
+        if os.path.exists(m4pm_fn):
+            with open(m4pm_fn, 'rb') as f:
+                ok4s.m4pm = pickle.load(f)
+                
         if METHOD == 'build_cache':
             cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
             if cdf is not None:
