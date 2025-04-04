@@ -741,7 +741,7 @@ class Orottick4Simulator:
                 pdf = pdf.sort_values(by=['x_m4', 'x_m3f', 'x_m3l', 'x_m3', 'x_m2', 'buy_date'], ascending=[False, False, False, False, False, False])
                 l_m4p_no = [x+1 for x in range(len(pdf))]
                 pdf['m4p_no'] = l_m4p_no
-                pdf = pdf[:5]
+                #pdf = pdf[:5]
                 if apdf is None:
                     apdf = pdf
                 else:
