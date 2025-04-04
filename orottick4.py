@@ -90,6 +90,7 @@ class Orottick4Simulator:
         self.lotte_kind = 'p4a'
 
         self.m4pm = None
+        self.m4p_cnt = -1
 
     def save_cache(self):
         cdir = self.save_cache_dir
@@ -399,8 +400,9 @@ class Orottick4Simulator:
             print(f'== [M4PM] Ranking is not found!')
             return []
 
-        if len(pdf2) > 5:
-            pdf2 = pdf2[:5]
+        if self.m4p_cnt > 0:
+            if len(pdf2) > self.m4p_cnt:
+                pdf2 = pdf2[:self.m4p_cnt]
 
         adf = pdf2
         l_pred = []
@@ -1610,6 +1612,7 @@ class Orottick4Simulator:
         if os.path.exists(m4pm_fn):
             with open(m4pm_fn, 'rb') as f:
                 ok4s.m4pm = pickle.load(f)
+                ok4s.m4p_cnt = M4P_CNT
                 
         if METHOD == 'build_cache':
             cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
