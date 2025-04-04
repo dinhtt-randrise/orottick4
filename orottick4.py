@@ -624,6 +624,102 @@ class Orottick4Simulator:
         '''
         print(text) 
 
+    def m4p_prepare(self, lotte_kind, data_dir, save_dir):
+        self.print_heading()
+
+        text = '''
+====================================
+           M4P PREPARE
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        print(f'LOTTE_KIND: {lotte_kind}')
+        print(f'DATA_DIR: {data_dir}')
+        print(f'SAVE_DIR: {save_dir}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        apdf = None
+        lg_obs = glob.glob(f'{data_dir}/{lotte_kind}-observe-*.*.*.csv')
+        sz_1 = len(lg_obs)
+        i_1 = 0
+        for fn_obs in lg_obs:
+            i_1 += 1
+            odf = pd.read_csv(fn_obs)
+            odf = odf[odf['m4'] > 0]
+            if len(odf) == 0:
+                continue
+            sz_2 = len(odf)
+            for xi in range(len(odf)):
+                i_2 = xi + 1
+                x_buy_date = odf['buy_date'].iloc[xi]
+                x_sim_seed = odf['sim_seed'].iloc[xi]
+                x_w = odf['w'].iloc[xi]
+                pdf = pd.read_csv(f'{data_dir}/{lotte_kind}-pick-{x_buy_date}.csv')
+                m_keys = ['m4', 'm3f', 'm3l', 'm3', 'm2']
+                pdf['x_buy_date'] = x_buy_date
+                pdf['fp'] = -1
+                pdf['m4p_no'] = 0
+                for key in m_keys:
+                    pdf[f'x_{key}'] = 0
+                l_fp = []
+                l_dict = {}
+                for key in m_keys:
+                    l_dict[f'{key}'] = []
+                for yi in range(len(pdf)):
+                    y_sim_cnt = pdf['sim_cnt'].iloc[yi]
+                    fp = self.reproduce_one(x_sim_seed, y_sim_cnt)  
+                    l_fp.append(fp)
+                    for key in m_keys:
+                        v = 0
+                        if self.match(x_w, fp, key):
+                            v = 1
+                        l_dict[key].append(v)
+                for key in m_keys:
+                    pdf[f'x_{key}'] = l_dict[key]
+                pdf = pdf.sort_values(by=['x_m4', 'x_m3f', 'x_m3l', 'x_m3', 'x_m2', 'buy_date'], ascending=[False, False, False, False, False, False])
+                l_m4p_no = [x+1 for x in range(len(pdf))]
+                pdf['m4p_no'] = l_m4p_no
+                pdf = pdf[:5]
+                if apdf is None:
+                    apdf = pdf
+                else:
+                    apdf = pd.concat([apdf, pdf])
+                apdf = apdf.sort_values(by=['x_buy_date', 'm4p_no'], ascending=[False, True])
+                
+                print(f'== [P] {i_1} / {sz_1} -> {i_2} / {sz_2}')
+
+        apdf.to_csv(f'{save_dir}/{lotte_kind}-all.csv', index=False)
+        lx_buy_date = list(apdf['x_buy_date'].unique())
+        sz = len(lx_buy_date)
+        sz_valid = int(round(sz * 0.2))
+        lx_valid = lx_buy_date[:sz_valid]
+        lx_train = lx_buy_date[sz_valid:]
+        
+        valid_df = apdf[apdf['x_buy_date'].isin(lx_valid)]
+        valid_df.to_csv(f'{save_dir}/{lotte_kind}-valid.csv', index=False)       
+
+        train_df = apdf[apdf['x_buy_date'].isin(lx_train)]
+        train_df.to_csv(f'{save_dir}/{lotte_kind}-train.csv', index=False)       
+        
+        text = '''
+  -------------------------------
+           M4P PREPARE
+====================================
+        '''
+        print(text) 
+
     def simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 56, tck_cnt = 2, runtime = None):
         self.print_heading()
 
@@ -1338,7 +1434,10 @@ class Orottick4Simulator:
         METHOD = Orottick4Simulator.get_option(options, 'METHOD', 'simulate')
         M4P_COLLECT_DATA_DIRS = Orottick4Simulator.get_option(options, 'M4P_COLLECT_DATA_DIRS', [])
         M4P_COLLECT_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4P_COLLECT_SAVE_DIR', '/kaggle/working')
-        
+
+        M4P_PREPARE_DATA_DIR = Orottick4Simulator.get_option(options, 'M4P_PREPARE_DATA_DIR', '/kaggle/working')
+        M4P_PREPARE_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4P_PREPARE_SAVE_DIR', '/kaggle/working')
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -1541,5 +1640,8 @@ class Orottick4Simulator:
 
         if METHOD == 'm4p_collect':
             ok4s.m4p_collect(LOTTE_KIND, O_DATE_CNT, DATE_CNT, M4P_COLLECT_DATA_DIRS, M4P_COLLECT_SAVE_DIR)
-            
+
+        if METHOD == 'm4p_prepare':
+            ok4s.m4p_prepare(LOTTE_KIND, M4P_PREPARE_DATA_DIR, M4P_PREPARE_SAVE_DIR)
+
 # ------------------------------------------------------------ #
