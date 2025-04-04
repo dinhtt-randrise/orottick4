@@ -815,7 +815,7 @@ class Orottick4Simulator:
 
         # train with best params
         best_params = study.best_trial.params
-        model = lgb.LGBMRanker(n_estimators=1000, **best_params, random_state=SEED,)
+        model = lgb.LGBMRanker(n_estimators=1000, **best_params, random_state=SEED,early_stopping_rounds=50,verbose=10)
         model.fit(
             train_df[features],
             train_df[target],
@@ -823,8 +823,8 @@ class Orottick4Simulator:
             eval_set=[(valid_df[features], valid_df[target])],
             eval_group=[list(valid_query)],
             eval_at=[1, 3, 5, 10, 20],
-            early_stopping_rounds=50,
-            verbose=10
+            #early_stopping_rounds=50,
+            #verbose=10
         )
 
         m4pm = {'params': best_params, 'model': model}
