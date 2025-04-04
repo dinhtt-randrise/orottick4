@@ -45,6 +45,8 @@ import pandas as pd
 import numpy as np
 import pickle
 import glob
+import lightgbm as lgb
+import optuna
 
 # ------------------------------------------------------------ #
 
@@ -718,6 +720,120 @@ class Orottick4Simulator:
         text = '''
   -------------------------------
            M4P PREPARE
+====================================
+        '''
+        print(text) 
+
+    def m4p_train(self, lotte_kind, data_dir, save_dir):
+        self.print_heading()
+
+        text = '''
+====================================
+            M4P TRAIN
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        print(f'LOTTE_KIND: {lotte_kind}')
+        print(f'DATA_DIR: {data_dir}')
+        print(f'SAVE_DIR: {save_dir}')
+
+        all_df = pd.read_csv(f'{data_dir}/{lotte_kind}-all.csv')
+        sz = len(all_df)
+        print(f'ALL_SZ: {sz}')
+
+        train_df = pd.read_csv(f'{data_dir}/{lotte_kind}-train.csv')
+        sz = len(all_df)
+        print(f'TRAIN_SZ: {sz}')
+
+        valid_df = pd.read_csv(f'{data_dir}/{lotte_kind}-valid.csv')
+        sz = len(all_df)
+        print(f'VALID_SZ: {sz}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        SEED = 311
+        random.seed(SEED)
+        os.environ["PYTHONHASHSEED"] = str(SEED)
+        np.random.seed(SEED)
+
+        features = ['m4', 'm3f', 'm3l', 'm3', 'm2', 'a_m4', 'a_m3f', 'a_m3l', 'a_m3', 'a_m2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
+        target = 'm4p_no'
+
+        # model query data
+        train_query = train_df['x_buy_date'].value_counts().sort_index()
+        valid_query = valid_df['x_buy_date'].value_counts().sort_index()
+
+        def objective(trial):
+            # search param
+            param = {
+                'reg_alpha': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
+                'reg_lambda': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
+                'num_leaves': trial.suggest_int('num_leaves', 2, 256),
+                'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.1, 1), 
+                #'subsample': trial.suggest_uniform('subsample', 1e-8, 1), 
+                'min_child_samples': trial.suggest_int('min_child_samples', 5, 100), 
+            }
+             
+            #train model
+            model = lgb.LGBMRanker(n_estimators=1000, **param, random_state=SEED,)
+            model.fit(
+                train_df[features],
+                train_df[target],
+                group=train_query,
+                eval_set=[(valid_df[features], valid_df[target])],
+                eval_group=[list(valid_query)],
+                eval_at=[1, 3, 5, 10, 20], # calc validation ndcg@1,3,5,10,20
+                early_stopping_rounds=50,
+                verbose=10
+            )
+            
+            # maximize mean ndcg
+            scores = []
+            for name, score in model.best_score_['valid_0'].items():
+                scores.append(score)
+            return np.mean(scores)
+
+        study = optuna.create_study(direction='maximize',
+                                    sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
+                                   )
+        study.optimize(objective, n_trials=10)
+
+        print('Number of finished trials:', len(study.trials))
+        print('Best trial:', study.best_trial.params)        
+
+        # train with best params
+        best_params = study.best_trial.params
+        model = lgb.LGBMRanker(n_estimators=1000, **best_params, random_state=SEED,)
+        model.fit(
+            train_df[features],
+            train_df[target],
+            group=train_query,
+            eval_set=[(valid_df[features], valid_df[target])],
+            eval_group=[list(valid_query)],
+            eval_at=[1, 3, 5, 10, 20],
+            early_stopping_rounds=50,
+            verbose=10
+        )
+
+        m4pm = {'params': best_params, 'model': model}
+        with open(f'{save_dir}/{lotte_kind}-m4pm.pkl', 'wb') as f:
+            pickle.dump(m4pm, f)
+
+        text = '''
+  -------------------------------
+            M4P TRAIN
 ====================================
         '''
         print(text) 
@@ -1440,6 +1556,9 @@ class Orottick4Simulator:
         M4P_PREPARE_DATA_DIR = Orottick4Simulator.get_option(options, 'M4P_PREPARE_DATA_DIR', '/kaggle/working')
         M4P_PREPARE_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4P_PREPARE_SAVE_DIR', '/kaggle/working')
 
+        M4P_TRAIN_DATA_DIR = Orottick4Simulator.get_option(options, 'M4P_TRAIN_DATA_DIR', '/kaggle/working')
+        M4P_TRAIN_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4P_TRAIN_SAVE_DIR', '/kaggle/working')
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -1645,5 +1764,8 @@ class Orottick4Simulator:
 
         if METHOD == 'm4p_prepare':
             ok4s.m4p_prepare(LOTTE_KIND, M4P_PREPARE_DATA_DIR, M4P_PREPARE_SAVE_DIR)
+
+        if METHOD == 'm4p_train':
+            ok4s.m4p_train(LOTTE_KIND, M4P_TRAIN_DATA_DIR, M4P_TRAIN_SAVE_DIR)
 
 # ------------------------------------------------------------ #
