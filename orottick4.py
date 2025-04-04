@@ -853,7 +853,7 @@ class Orottick4Simulator:
                 df['rnkp'] = model.predict(df[features])
                 df = df.sort_values(by=['rnkp', 'buy_date'], ascending=[False, False])
                 df['rnkn'] = [x+1 for x in range(len(df))]
-                df2 = df[(df['rnkn'] == 1)&(df['m4p_no'] == 1)]
+                df2 = df[((df['rnkn'] >= 1)&(df['rnkn'] <= 5))&(df['m4p_no'] == 1)]
                 vcnt += len(df2)
 
             sz = len(lx_buy_date)
@@ -868,7 +868,7 @@ class Orottick4Simulator:
         study = optuna.create_study(direction='maximize',
                                     sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
                                    )
-        study.optimize(objective, n_trials=50)
+        study.optimize(objective, n_trials=100)
 
         print('Number of finished trials:', len(study.trials))
         print('Best trial:', study.best_trial.params)        
