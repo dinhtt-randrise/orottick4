@@ -1107,7 +1107,7 @@ class Orottick4Simulator:
                         p_q = self.reproduce_one(sim_seed, p_sim_cnt)
                         g_sim_cnt = p_sim_cnt
                         if self.use_tripple:
-                            g_sim_seed, g_sim_cnt = self.capture(t_w, t_w)
+                            g_sim_seed, g_sim_cnt = self.capture(t_w, p_w)
                         i_m4 = pdf['m4'].iloc[pi]
                         i_m3f = pdf['m3f'].iloc[pi]
                         i_m3l = pdf['m3l'].iloc[pi]
