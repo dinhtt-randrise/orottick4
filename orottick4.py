@@ -407,15 +407,18 @@ class Orottick4Simulator:
 
         pdf2a = pdf4.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
         pdf2b = pdf4.sort_values(by=['rnkp', 'buy_date'], ascending=[False, False])
+        pdf2c = pdf4.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
 
         if self.m4p_cnt > 0:
-            h_cnt = int(round(self.m4p_cnt / 2.0))
-            if self.m4p_cnt % 2 == 1:
+            h_cnt = int(round(self.m4p_cnt / 3.0))
+            if self.m4p_cnt % 2 != 0:
                 h_cnt += 1
-            if len(pdf2) >= 2 * h_cnt:
+            if len(pdf2) >= 3 * h_cnt:
                 pdf2a = pdf2a[:h_cnt]
                 pdf2b = pdf2b[:h_cnt]
-                pdf2 = pd.concat([pdf2a, pdf2b])
+                lcnt = int(round((len(pdf2c) - h_cnt) / 2.0))
+                pdf2c = pdf2c[lcnt:lcnt+h_cnt]
+                pdf2 = pd.concat([pdf2a, pdf2c, pdf2b])
                 pdf2 = pdf2.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
             else:
                 pdf2 = pdf2a
