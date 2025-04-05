@@ -1056,6 +1056,8 @@ class Orottick4Simulator:
         m3l_cnt = 0
         m3_cnt = 0
         m2_cnt = 0
+        g_sim_seed = -1
+        g_sim_cnt = -1
         for ri in range(len(ddf)):
             if runtime is not None:
                 if time.time() - start_time > runtime:
@@ -1063,7 +1065,9 @@ class Orottick4Simulator:
             if self.has_step_log:
                 if ri % db_cnt == 0:
                     print(f'== [S1] ==> {ri} / {sz}')
-                
+
+            g_sim_seed = -1
+            g_sim_cnt = -1
             t_date = ddf['date'].iloc[ri]
             t_buy_date = ddf['buy_date'].iloc[ri]
             t_next_date = ddf['next_date'].iloc[ri]
