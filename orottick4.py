@@ -91,6 +91,8 @@ class Orottick4Simulator:
 
         self.m4pm = None
         self.m4p_cnt = -1
+        self.m4p_ranker_only = False
+        self.m4p_ranker_max = 30
 
     def save_cache(self):
         cdir = self.save_cache_dir
@@ -381,8 +383,9 @@ class Orottick4Simulator:
 
     def capture_m4p(self, pdf, x_sim_seed):
         lp = self.capture_m4p_ranker(pdf, x_sim_seed)
-        if len(lp) == 0:
-            return self.capture_m4p_manual(pdf, x_sim_seed)
+        if not self.m4p_ranker_only:
+            if len(lp) == 0:
+                return self.capture_m4p_manual(pdf, x_sim_seed)
         return lp
         
     def capture_m4p_ranker(self, pdf, x_sim_seed):
@@ -1272,7 +1275,11 @@ class Orottick4Simulator:
                     if len(xdf) > 0:
                         lx_pred = self.capture_m4p(pdf, xdf['sim_seed'].iloc[0])
                         if len(lx_pred) > 0:
-                            m4pc = 1
+                            if self.m4p_ranker_only:
+                                if len(lx_pred) >= self.m4p_ranker_max:
+                                    m4pc = 1
+                            else:
+                                m4pc = 1
                             m4p_cnt = self.m4p_cnt
                             if m4p_cnt > 0:
                                 if len(lx_pred) > m4p_cnt:
@@ -1666,6 +1673,8 @@ class Orottick4Simulator:
 
         M4P_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4P_MODEL_DIR', '/kaggle/working')
 
+        M4P_RANKER_ONLY = Orottick4Simulator.get_option(options, 'M4P_RANKER_ONLY', True)
+        
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -1678,7 +1687,11 @@ class Orottick4Simulator:
         if os.path.exists(m4pm_fn):
             with open(m4pm_fn, 'rb') as f:
                 ok4s.m4pm = pickle.load(f)
-                ok4s.m4p_cnt = M4P_CNT
+                if M4P_CNT >= self.m4p_ranker_max:
+                    ok4s.m4p_cnt = M4P_CNT
+                else:
+                    ok4s.m4p_cnt = self.m4p_ranker_max
+                ok4s.m4p_ranker_only = M4P_RANKER_ONLY
                 
         if METHOD == 'build_cache':
             cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
