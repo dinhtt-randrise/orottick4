@@ -960,7 +960,7 @@ class Orottick4Simulator:
             pmn += p_step
 
         mdf = pd.DataFrame(rows)
-        mdf = mdf.sort_values(by=['cnt', 'pmn'], ascending=[False, True])
+        mdf = mdf.sort_values(by=['cnt', 'pmn'], ascending=[False, False])
         rnkp_max = mdf['pmn'].iloc[0]
         rnkp_max_cnt = mdf['cnt'].iloc[0]
         mdf.to_csv(f'{save_dir}/{lotte_kind}-rnkp-max.csv', index=False)
