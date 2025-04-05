@@ -1690,7 +1690,7 @@ class Orottick4Simulator:
                 if M4P_CNT >= self.m4p_ranker_max:
                     ok4s.m4p_cnt = M4P_CNT
                 else:
-                    ok4s.m4p_cnt = self.m4p_ranker_max
+                    ok4s.m4p_cnt = ok4s.m4p_ranker_max
                 ok4s.m4p_ranker_only = M4P_RANKER_ONLY
                 
         if METHOD == 'build_cache':
