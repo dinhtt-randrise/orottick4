@@ -794,7 +794,6 @@ class Orottick4Simulator:
         print(f'SAVE_DIR: {save_dir}')
 
         m4p_max = 30
-        m4p_pmin = 0
         
         all_df = pd.read_csv(f'{data_dir}/{lotte_kind}-all.csv')
         #all_df = all_df[all_df['m4p_no'] <= m4p_max]
@@ -860,9 +859,6 @@ class Orottick4Simulator:
                 df = vadf[vadf['x_buy_date'] == x_buy_date]
                 df['rnkp'] = model.predict(df[features])
                 df = df.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
-                #df = df[df['rnkp'] >= m4p_pmin]
-                #if len(df) == 0:
-                #    continue
                 df['rnkn'] = [x+1 for x in range(len(df))]
                 df2 = df[((df['rnkn'] >= 1)&(df['rnkn'] <= m4p_max))&(df['m4p_no'] == 1)]
                 vcnt += len(df2)
@@ -876,6 +872,21 @@ class Orottick4Simulator:
                 scores.append(score)
             return vcnt + np.mean(scores)
 
+        def count_match(model, min_p):
+            vadf = all_df.sort_values(by=['x_buy_date', 'm4p_no'], ascending=[False, True])
+            vcnt = 0
+            lx_buy_date = list(vadf['x_buy_date'].unique())
+            for x_buy_date in lx_buy_date:
+                df = vadf[vadf['x_buy_date'] == x_buy_date]
+                df['rnkp'] = model.predict(df[features])
+                df = df.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
+                df = df[df['rnkp'] >= min_p]
+                if len(df) == 0:
+                    continue
+                df['rnkn'] = [x+1 for x in range(len(df))]
+                df2 = df[((df['rnkn'] >= 1)&(df['rnkn'] <= m4p_max))&(df['m4p_no'] == 1)]
+                vcnt += len(df2)
+            
         study = optuna.create_study(direction='maximize',
                                     sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
                                    )
@@ -898,7 +909,23 @@ class Orottick4Simulator:
             #verbose=10
         )
 
-        m4pm = {'params': best_params, 'model': model}
+        p_min = -2.0
+        p_max = 1
+        p_step = 0.025
+        pmn = p_min
+        rows = []
+        while pmn <= p_max:
+            cnt = count_match(model, pmn)
+            rw = {'pmn': pmn, 'cnt': cnt}
+            rows.append(rw)
+            pmn += p_step
+
+        mdf = pd.DataFrame(rows)
+        mdf = mdf.sort_values(by=['cnt', 'pmn'], ascending=[False, False])
+        rnkp_min = mdf['pmn'].iloc[0]
+        mdf.to_csv(f'{save_dir}/{lotte_kind}-rnkp-count.csv', index=False)
+
+        m4pm = {'params': best_params, 'features': features, 'rnkp_min': rnkp_min, 'model': model}
         with open(f'{save_dir}/{lotte_kind}-m4pm.pkl', 'wb') as f:
             pickle.dump(m4pm, f)
 
