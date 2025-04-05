@@ -886,6 +886,8 @@ class Orottick4Simulator:
                 df['rnkn'] = [x+1 for x in range(len(df))]
                 df2 = df[((df['rnkn'] >= 1)&(df['rnkn'] <= m4p_max))&(df['m4p_no'] == 1)]
                 vcnt += len(df2)
+
+            return vcnt
             
         study = optuna.create_study(direction='maximize',
                                     sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
