@@ -1687,7 +1687,7 @@ class Orottick4Simulator:
         if os.path.exists(m4pm_fn):
             with open(m4pm_fn, 'rb') as f:
                 ok4s.m4pm = pickle.load(f)
-                if M4P_CNT >= self.m4p_ranker_max:
+                if M4P_CNT >= ok4s.m4p_ranker_max:
                     ok4s.m4p_cnt = M4P_CNT
                 else:
                     ok4s.m4p_cnt = ok4s.m4p_ranker_max
