@@ -864,7 +864,7 @@ class Orottick4Simulator:
                 vcnt += len(df2)
 
             sz = len(lx_buy_date)
-            print(f'== [RNK1_CNT] {vcnt} / {sz}')
+            print(f'== [RNK1_CNT] ==> {vcnt} / {sz}')
             
             # maximize mean ndcg
             scores = []
@@ -923,9 +923,14 @@ class Orottick4Simulator:
         mdf = pd.DataFrame(rows)
         mdf = mdf.sort_values(by=['cnt', 'pmn'], ascending=[False, False])
         rnkp_min = mdf['pmn'].iloc[0]
+        rnkp_cnt = mdf['cnt'].iloc[0]
+        lx_buy_date = list(all_df['x_buy_date'].unique())
+        rnkp_sz = len(lx_buy_date)
         mdf.to_csv(f'{save_dir}/{lotte_kind}-rnkp-count.csv', index=False)
 
-        m4pm = {'params': best_params, 'features': features, 'rnkp_min': rnkp_min, 'model': model}
+        print(f'== [RNKP_MIN] ==> {rnkp_min} -> {rnkp_cnt} / {rnkp_sz}')
+        
+        m4pm = {'params': best_params, 'features': features, 'rnkp_min': rnkp_min, 'rnkp_cnt': rnkp_cnt, 'rnkp_sz': rnkp_sz, 'model': model}
         with open(f'{save_dir}/{lotte_kind}-m4pm.pkl', 'wb') as f:
             pickle.dump(m4pm, f)
 
