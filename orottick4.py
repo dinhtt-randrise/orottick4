@@ -92,7 +92,7 @@ class Orottick4Simulator:
         self.m4pm = None
         self.m4p_cnt = -1
         self.m4p_ranker_only = False
-        self.m4p_ranker_max = 30
+        self.m4p_ranker_max = 15
 
     def save_cache(self):
         cdir = self.save_cache_dir
