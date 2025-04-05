@@ -93,6 +93,7 @@ class Orottick4Simulator:
         self.m4p_cnt = -1
         self.m4p_ranker_only = False
         self.m4p_ranker_max = 15
+        self.use_tripple = False
 
     def save_cache(self):
         cdir = self.save_cache_dir
@@ -1102,7 +1103,11 @@ class Orottick4Simulator:
                     for pi in range(len(pdf)):
                         p_sim_cnt = pdf['sim_cnt'].iloc[pi]
                         p_date = pdf['date'].iloc[pi]
+                        p_w = pdf['w'].iloc[pi]
                         p_q = self.reproduce_one(sim_seed, p_sim_cnt)
+                        g_sim_cnt = p_sim_cnt
+                        if self.use_tripple:
+                            g_sim_seed, g_sim_cnt = self.capture(t_w, t_w)
                         i_m4 = pdf['m4'].iloc[pi]
                         i_m3f = pdf['m3f'].iloc[pi]
                         i_m3l = pdf['m3l'].iloc[pi]
@@ -1192,6 +1197,8 @@ class Orottick4Simulator:
                             pi_prd_num_m2 += str(p_q)
                         for xi in range(len(rows)):
                             if rows[xi]['date'] == p_date:
+                                rows[xi]['g_sim_cnt'] = g_sim_cnt
+                                
                                 rows[xi]['m4'] = i_m4
                                 rows[xi]['m3f'] = i_m3f
                                 rows[xi]['m3l'] = i_m3l
@@ -1231,7 +1238,7 @@ class Orottick4Simulator:
                     
             else:
                 sim_seed = self.capture_seed(1, t_n)
-            rw = {'date': t_date, 'buy_date': t_buy_date, 'next_date': t_next_date, 'w': t_w, 'n': t_n, 'p': t_p, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt, 'm4': m4, 'm3f': m3f, 'm3l': m3l, 'm3': m3, 'm2': m2, 'a_m4': a_m4, 'a_m3f': a_m3f, 'a_m3l': a_m3l, 'a_m3': a_m3, 'a_m2': a_m2, 'm4_cnt': m4_cnt, 'm3f_cnt': m3f_cnt, 'm3l_cnt': m3l_cnt, 'm3_cnt': m3_cnt, 'm2_cnt': m2_cnt, 'p_buy_date_m4': p_buy_date_m4, 'p_sim_seed_m4': p_sim_seed_m4, 'p_win_num_m4': p_win_num_m4, 'p_prd_num_m4': p_prd_num_m4      , 'p_buy_date_m3f': p_buy_date_m3f, 'p_sim_seed_m3f': p_sim_seed_m3f, 'p_win_num_m3f': p_win_num_m3f, 'p_prd_num_m3f': p_prd_num_m3f        , 'p_buy_date_m3l': p_buy_date_m3l, 'p_sim_seed_m3l': p_sim_seed_m3l, 'p_win_num_m3l': p_win_num_m3l, 'p_prd_num_m3l': p_prd_num_m3l        , 'p_buy_date_m3': p_buy_date_m3, 'p_sim_seed_m3': p_sim_seed_m3, 'p_win_num_m3': p_win_num_m3, 'p_prd_num_m3': p_prd_num_m3, 'p_buy_date_m2': p_buy_date_m2, 'p_sim_seed_m2': p_sim_seed_m2, 'p_win_num_m2': p_win_num_m2, 'p_prd_num_m2': p_prd_num_m2}
+            rw = {'date': t_date, 'buy_date': t_buy_date, 'next_date': t_next_date, 'w': t_w, 'n': t_n, 'p': t_p, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt, 'g_sim_cnt': sim_cnt, 'm4': m4, 'm3f': m3f, 'm3l': m3l, 'm3': m3, 'm2': m2, 'a_m4': a_m4, 'a_m3f': a_m3f, 'a_m3l': a_m3l, 'a_m3': a_m3, 'a_m2': a_m2, 'm4_cnt': m4_cnt, 'm3f_cnt': m3f_cnt, 'm3l_cnt': m3l_cnt, 'm3_cnt': m3_cnt, 'm2_cnt': m2_cnt, 'p_buy_date_m4': p_buy_date_m4, 'p_sim_seed_m4': p_sim_seed_m4, 'p_win_num_m4': p_win_num_m4, 'p_prd_num_m4': p_prd_num_m4      , 'p_buy_date_m3f': p_buy_date_m3f, 'p_sim_seed_m3f': p_sim_seed_m3f, 'p_win_num_m3f': p_win_num_m3f, 'p_prd_num_m3f': p_prd_num_m3f        , 'p_buy_date_m3l': p_buy_date_m3l, 'p_sim_seed_m3l': p_sim_seed_m3l, 'p_win_num_m3l': p_win_num_m3l, 'p_prd_num_m3l': p_prd_num_m3l        , 'p_buy_date_m3': p_buy_date_m3, 'p_sim_seed_m3': p_sim_seed_m3, 'p_win_num_m3': p_win_num_m3, 'p_prd_num_m3': p_prd_num_m3, 'p_buy_date_m2': p_buy_date_m2, 'p_sim_seed_m2': p_sim_seed_m2, 'p_win_num_m2': p_win_num_m2, 'p_prd_num_m2': p_prd_num_m2}
             rows.append(rw)
         zdf = pd.DataFrame(rows)
         xdf = zdf[zdf['buy_date'] == v_buy_date]
@@ -1259,7 +1266,10 @@ class Orottick4Simulator:
 
                 if tck_cnt > 0 and len(pdf) > tck_cnt:
                     pdf = pdf[:tck_cnt]
-                l_sim_cnt = list(pdf['sim_cnt'].values)
+                if self.use_tripple:
+                    l_sim_cnt = list(pdf['sim_cnt'].values)
+                else:
+                    l_sim_cnt = list(pdf['sim_cnt'].values)
                 ls_sim_cnt = [str(x) for x in l_sim_cnt]
                 s_sim_cnt = ', '.join(ls_sim_cnt)
                 l_pred = []
@@ -1706,6 +1716,8 @@ class Orottick4Simulator:
         M4P_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4P_MODEL_DIR', '/kaggle/working')
 
         M4P_RANKER_ONLY = Orottick4Simulator.get_option(options, 'M4P_RANKER_ONLY', True)
+
+        USE_TRIPPLE = Orottick4Simulator.get_option(options, 'USE_TRIPPLE', False)       
         
         if non_github_create_fn is None:
             USE_GITHUB = True
@@ -1715,6 +1727,8 @@ class Orottick4Simulator:
         else:
             ok4s = non_github_create_fn(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
 
+        ok4s.use_tripple = USE_TRIPPLE
+        
         m4pm_fn = f'{M4P_MODEL_DIR}/{LOTTE_KIND}-m4pm.pkl'
         if os.path.exists(m4pm_fn):
             with open(m4pm_fn, 'rb') as f:
