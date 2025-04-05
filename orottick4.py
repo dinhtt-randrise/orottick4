@@ -951,7 +951,7 @@ class Orottick4Simulator:
         p_step = -0.0225
         pmn = p_min
         rows = []
-        while pmn <= p_max:
+        while pmn >= p_max:
             cnt = count_match(model, pmn, True)
             rw = {'pmn': pmn, 'cnt': cnt}
             rows.append(rw)
