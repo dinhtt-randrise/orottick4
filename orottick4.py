@@ -924,6 +924,10 @@ class Orottick4Simulator:
         rnkp_cnt = mdf['cnt'].iloc[0]
         lx_buy_date = list(all_df['x_buy_date'].unique())
         rnkp_sz = len(lx_buy_date)
+        mdf2 = mdf[mdf['cnt'] < rnkp_cnt]
+        if len(mdf2) > 0:
+            rnkp_min = mdf2['pmn'].iloc[0]
+            rnkp_cnt = mdf2['cnt'].iloc[0]            
         mdf.to_csv(f'{save_dir}/{lotte_kind}-rnkp-count.csv', index=False)
 
         print(f'== [RNKP_MIN] ==> {rnkp_min} -> {rnkp_cnt} / {rnkp_sz}')
