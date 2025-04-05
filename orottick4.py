@@ -411,7 +411,7 @@ class Orottick4Simulator:
 
         if self.m4p_cnt > 0:
             h_cnt = int(round(self.m4p_cnt / 3.0))
-            if self.m4p_cnt % 2 != 0:
+            if self.m4p_cnt % 3 != 0:
                 h_cnt += 1
             if len(pdf2) >= 3 * h_cnt:
                 pdf2a = pdf2a[:h_cnt]
