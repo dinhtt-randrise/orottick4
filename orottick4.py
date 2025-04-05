@@ -1267,7 +1267,7 @@ class Orottick4Simulator:
                 if tck_cnt > 0 and len(pdf) > tck_cnt:
                     pdf = pdf[:tck_cnt]
                 if self.use_tripple:
-                    l_sim_cnt = list(pdf['sim_cnt'].values)
+                    l_sim_cnt = list(pdf['g_sim_cnt'].values)
                 else:
                     l_sim_cnt = list(pdf['sim_cnt'].values)
                 ls_sim_cnt = [str(x) for x in l_sim_cnt]
