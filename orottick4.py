@@ -910,9 +910,9 @@ class Orottick4Simulator:
             #verbose=10
         )
 
-        p_min = -2.0
+        p_min = -1.5
         p_max = 1
-        p_step = 0.025
+        p_step = 0.0225
         pmn = p_min
         rows = []
         while pmn <= p_max:
