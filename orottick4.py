@@ -399,16 +399,27 @@ class Orottick4Simulator:
         features = self.m4pm['features']
         rnkp_min = self.m4pm['rnkp_min']
         pdf2['rnkp'] = self.m4pm['model'].predict(pdf2[features])
-        pdf3 = pdf2.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
-        pdf2 = pdf3[(pdf3['rnkp'] >= rnkp_min)]
-        if len(pdf2) == 0:
+        pdf4 = pdf2[(pdf2['rnkp'] >= rnkp_min)]
+        pdf2a = pdf4.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
+        pdf2b = pdf4.sort_values(by=['rnkp', 'buy_date'], ascending=[False, False])
+        if len(pdf4) == 0:
             print(f'== [M4PM] Ranking is not found!')
             return []
 
         if self.m4p_cnt > 0:
-            if len(pdf2) >= self.m4p_cnt:
-                pdf2 = pdf2[:self.m4p_cnt]
-
+            h_cnt = int(round(self.m4p_cnt / 2.0))
+            if self.m4p_cnt % 2 == 1:
+                h_cnt += 1
+            if len(pdf2) >= 2 * h_cnt:
+                pdf2a = pdf2a[:h_cnt]
+                pdf2b = pdf2b[:h_cnt]
+                pdf2 = pd.concat([pdf2a, pdf2b])
+                pdf2 = pdf2.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
+            else:
+                pdf2 = pdf2a
+        else:
+            pdf2 = pdf2a
+            
         l_rnkp = list(pdf2['rnkp'].values)
         print(f'==> [RNKPL] {l_rnkp}')
         
