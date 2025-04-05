@@ -151,6 +151,16 @@ class Orottick4Simulator:
     def gen_num(self):
         return random.randint(self.min_num, self.max_num)
 
+    def guess(self, x_sim_seed, y_sim_seed, max_sim_cnt):
+        sim_cnt = 1
+        while sim_cnt <= max_sim_cnt:
+            x = self.reproduce_one(x_sim_seed, sim_cnt)
+            y = self.reproduce_one(y_sim_seed, sim_cnt)
+            if x == y:
+                return x
+            sim_cnt += 1
+        return -1
+        
     def capture_seed(self, sim_cnt, n):
         key = f'{sim_cnt}_{n}'
         if key in self.cache_capture_seed:
@@ -1106,6 +1116,7 @@ class Orottick4Simulator:
                         p_w = pdf['w'].iloc[pi]
                         p_q = self.reproduce_one(sim_seed, p_sim_cnt)
                         g_sim_cnt = p_sim_cnt
+                        g_sim_seed = pdf['sim_seed'].iloc[pi]
                         if self.use_tripple:
                             g_sim_seed, g_sim_cnt = self.capture(t_w, p_w)
                         i_m4 = pdf['m4'].iloc[pi]
@@ -1198,6 +1209,7 @@ class Orottick4Simulator:
                         for xi in range(len(rows)):
                             if rows[xi]['date'] == p_date:
                                 rows[xi]['g_sim_cnt'] = g_sim_cnt
+                                rows[xi]['g_sim_seed'] = g_sim_seed
                                 
                                 rows[xi]['m4'] = i_m4
                                 rows[xi]['m3f'] = i_m3f
@@ -1238,7 +1250,7 @@ class Orottick4Simulator:
                     
             else:
                 sim_seed = self.capture_seed(1, t_n)
-            rw = {'date': t_date, 'buy_date': t_buy_date, 'next_date': t_next_date, 'w': t_w, 'n': t_n, 'p': t_p, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt, 'g_sim_cnt': sim_cnt, 'm4': m4, 'm3f': m3f, 'm3l': m3l, 'm3': m3, 'm2': m2, 'a_m4': a_m4, 'a_m3f': a_m3f, 'a_m3l': a_m3l, 'a_m3': a_m3, 'a_m2': a_m2, 'm4_cnt': m4_cnt, 'm3f_cnt': m3f_cnt, 'm3l_cnt': m3l_cnt, 'm3_cnt': m3_cnt, 'm2_cnt': m2_cnt, 'p_buy_date_m4': p_buy_date_m4, 'p_sim_seed_m4': p_sim_seed_m4, 'p_win_num_m4': p_win_num_m4, 'p_prd_num_m4': p_prd_num_m4      , 'p_buy_date_m3f': p_buy_date_m3f, 'p_sim_seed_m3f': p_sim_seed_m3f, 'p_win_num_m3f': p_win_num_m3f, 'p_prd_num_m3f': p_prd_num_m3f        , 'p_buy_date_m3l': p_buy_date_m3l, 'p_sim_seed_m3l': p_sim_seed_m3l, 'p_win_num_m3l': p_win_num_m3l, 'p_prd_num_m3l': p_prd_num_m3l        , 'p_buy_date_m3': p_buy_date_m3, 'p_sim_seed_m3': p_sim_seed_m3, 'p_win_num_m3': p_win_num_m3, 'p_prd_num_m3': p_prd_num_m3, 'p_buy_date_m2': p_buy_date_m2, 'p_sim_seed_m2': p_sim_seed_m2, 'p_win_num_m2': p_win_num_m2, 'p_prd_num_m2': p_prd_num_m2}
+            rw = {'date': t_date, 'buy_date': t_buy_date, 'next_date': t_next_date, 'w': t_w, 'n': t_n, 'p': t_p, 'sim_seed': sim_seed, 'sim_cnt': sim_cnt, 'g_sim_seed': g_sim_seed, 'g_sim_cnt': sim_cnt, 'm4': m4, 'm3f': m3f, 'm3l': m3l, 'm3': m3, 'm2': m2, 'a_m4': a_m4, 'a_m3f': a_m3f, 'a_m3l': a_m3l, 'a_m3': a_m3, 'a_m2': a_m2, 'm4_cnt': m4_cnt, 'm3f_cnt': m3f_cnt, 'm3l_cnt': m3l_cnt, 'm3_cnt': m3_cnt, 'm2_cnt': m2_cnt, 'p_buy_date_m4': p_buy_date_m4, 'p_sim_seed_m4': p_sim_seed_m4, 'p_win_num_m4': p_win_num_m4, 'p_prd_num_m4': p_prd_num_m4      , 'p_buy_date_m3f': p_buy_date_m3f, 'p_sim_seed_m3f': p_sim_seed_m3f, 'p_win_num_m3f': p_win_num_m3f, 'p_prd_num_m3f': p_prd_num_m3f        , 'p_buy_date_m3l': p_buy_date_m3l, 'p_sim_seed_m3l': p_sim_seed_m3l, 'p_win_num_m3l': p_win_num_m3l, 'p_prd_num_m3l': p_prd_num_m3l        , 'p_buy_date_m3': p_buy_date_m3, 'p_sim_seed_m3': p_sim_seed_m3, 'p_win_num_m3': p_win_num_m3, 'p_prd_num_m3': p_prd_num_m3, 'p_buy_date_m2': p_buy_date_m2, 'p_sim_seed_m2': p_sim_seed_m2, 'p_win_num_m2': p_win_num_m2, 'p_prd_num_m2': p_prd_num_m2}
             rows.append(rw)
         zdf = pd.DataFrame(rows)
         xdf = zdf[zdf['buy_date'] == v_buy_date]
@@ -1268,14 +1280,23 @@ class Orottick4Simulator:
                     pdf = pdf[:tck_cnt]
                 if self.use_tripple:
                     l_sim_cnt = list(pdf['g_sim_cnt'].values)
+                    l_sim_seed = list(pdf['g_sim_seed'].values)
                 else:
                     l_sim_cnt = list(pdf['sim_cnt'].values)
+                    l_sim_seed = list(pdf['sim_seed'].values)
                 ls_sim_cnt = [str(x) for x in l_sim_cnt]
                 s_sim_cnt = ', '.join(ls_sim_cnt)
                 l_pred = []
                 x_sim_seed = xdf['sim_seed'].iloc[0]
-                for x_sim_cnt in l_sim_cnt:
-                    x = self.reproduce_one(x_sim_seed, x_sim_cnt)
+                for xli in range(len(l_sim_cnt)):
+                    x_sim_cnt = l_sim_cnt[xli]
+                    y_sim_seed = l_sim_seed[xli]
+                    if self.use_tripple:
+                        x = self.guess(x_sim_seed, y_sim_seed, x_sim_cnt)
+                        if x < 0:
+                            x = self.reproduce_one(x_sim_seed, x_sim_cnt)                            
+                    else:
+                        x = self.reproduce_one(x_sim_seed, x_sim_cnt)
                     l_pred.append(x)
                 zrsi = 0
                 zrsiw = int(xdf['w'].iloc[0])
