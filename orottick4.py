@@ -95,6 +95,10 @@ class Orottick4Simulator:
         self.m4p_max = 30
         self.m4p_ranker_max = 2 * self.m4p_max
 
+        self.m4pl_max = 2
+        self.m4pl_min = -2
+        self.m4pl_step = 0.0225
+
     def save_cache(self):
         cdir = self.save_cache_dir
 
@@ -928,9 +932,9 @@ class Orottick4Simulator:
         lx_buy_date = list(all_df['x_buy_date'].unique())
         rnkp_sz = len(lx_buy_date)
 
-        p_min = -1.5
-        p_max = 1
-        p_step = 0.0225
+        p_min = self.m4pl_min
+        p_max = self.m4pl_max
+        p_step = self.m4pl_step
         pmn = p_min
         rows = []
         while pmn <= p_max:
@@ -947,16 +951,16 @@ class Orottick4Simulator:
 
         print(f'== [RNKP_MIN] ==> {rnkp_min} -> {rnkp_min_cnt} / {rnkp_sz}')
 
-        p_min = 1
-        p_max = -1.5
-        p_step = -0.0225
+        p_min = self.m4pl_max
+        p_max = self.m4pl_min
+        p_step = self.m4pl_step
         pmn = p_min
         rows = []
         while pmn >= p_max:
             cnt = count_match(model, pmn, True)
             rw = {'pmn': pmn, 'cnt': cnt}
             rows.append(rw)
-            pmn += p_step
+            pmn -= p_step
 
         mdf = pd.DataFrame(rows)
         mdf = mdf.sort_values(by=['cnt', 'pmn'], ascending=[False, False])
@@ -1712,6 +1716,10 @@ class Orottick4Simulator:
 
         M4P_MAX = Orottick4Simulator.get_option(options, 'M4P_MAX', 30)
 
+        M4PL_MAX = Orottick4Simulator.get_option(options, 'M4PL_MAX', 2)
+        M4PL_MIN = Orottick4Simulator.get_option(options, 'M4PL_MIN', -2)
+        M4PL_STEP = Orottick4Simulator.get_option(options, 'M4PL_STEP', 0.0225)
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -1722,6 +1730,10 @@ class Orottick4Simulator:
 
         ok4s.m4p_max = M4P_MAX
         ok4s.m4p_ranker_max = M4P_MAX * 2
+
+        ok4s.m4pl_max = M4PL_MAX
+        ok4s.m4pl_min = M4PL_MIN
+        ok4s.m4pl_step = M4PL_STEP
 
         m4pm_fn = f'{M4P_MODEL_DIR}/{LOTTE_KIND}-m4pm.pkl'
         if os.path.exists(m4pm_fn):
