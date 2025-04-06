@@ -997,6 +997,66 @@ class Orottick4Simulator:
         '''
         print(text) 
 
+    def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, runtime = None):
+        self.print_heading()
+
+        text = '''
+====================================
+          RESEARCH A
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        v_data_df_is_none = False
+        if data_df is None:
+            v_data_df_is_none = True
+            
+        print(f'[BUFFER_DIR] {buffer_dir}')
+        print(f'[LOTTE_KIND] {lotte_kind}')
+        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+        print(f'[BUY_DATE] {v_buy_date}')
+        print(f'[DATE_CNT] {v_date_cnt}')
+        print(f'[RUNTIME] {runtime}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        rdf = None
+        
+        if data_df is None:
+            d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
+            g = -1
+            d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
+            v_date = d2.strftime('%Y.%m.%d')
+    
+            data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
+            if data_df is None:
+                return rdf
+
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
+
+        text = '''
+  -------------------------------
+          RESEARCH A
+====================================
+        '''
+        print(text)
+        
+        return rdf
+
     def simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 56, tck_cnt = 2, runtime = None):
         self.print_heading()
 
@@ -1967,4 +2027,10 @@ class Orottick4Simulator:
         if METHOD == 'm4p_train':
             ok4s.m4p_train(LOTTE_KIND, M4P_TRAIN_DATA_DIR, M4P_TRAIN_SAVE_DIR)
 
+        if METHOD == 'research_a':
+            rdf = ok4s.research_a(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, RUNTIME)
+
+            if rdf is not None:
+                rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-{BUY_DATE}.csv', index=False)
+                
 # ------------------------------------------------------------ #
