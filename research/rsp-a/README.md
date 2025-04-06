@@ -216,3 +216,48 @@
 
 ![](orottick4-rsp-a-analyze-g.png)
 
+
+```
+  -------------------------------
+              PLAN K
+  -------------------------------
+
++ LOTTE_KIND: p4a
++ LAST_BUY_DATE: 2025.03.23
++ PERIOD_SIZE: 7
++ PERIOD_CNT: 52
++ DATE_CNT: 280
++ TCK_CNT: 280
++ F_TCK_CNT: 280
++ PRD_SORT_ORDER: B
++ M4P_OBS: True
++ M4P_CNT: 10
++ M4P_VRY: False
++ M4PC_CHK: True
++ M4P_ONE: False
++ M4P_OBS: True
++ M4P_MODEL: True
++ M4P_RANKER_ONLY: True
++ TCK_KIND: All 4 exact order
++ BROKER_COST: $0.3 / ticket
+
+==> [GOAL] Simulate buying tickets and calculate ROI.
+
+
+  -------------------------------
+             PROCESS K
+  -------------------------------
+
++ Simulating Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-rsp-a-k-2025-03-23
+
++ Analyzing Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-analyze-rsp-a-k-2025-03-23
+
+
+  -------------------------------
+             ANALYZE K
+  -------------------------------
+```
+
+![](orottick4-rsp-a-analyze-k.png)
+
+
