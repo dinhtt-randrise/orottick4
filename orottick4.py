@@ -970,7 +970,7 @@ class Orottick4Simulator:
 
         print(f'== [RNKP_MAX] ==> {rnkp_max} -> {rnkp_max_cnt} / {rnkp_sz}')
 
-        m4pm = {'params': best_params, 'features': features, 'rnkp_min': rnkp_min, 'rnkp_min_cnt': rnkp_min_cnt, 'rnkp_max': rnkp_max, 'rnkp_max_cnt': rnkp_max_cnt, 'rnkp_sz': rnkp_sz, 'model': model}
+        m4pm = {'m4p_max': self.m4p_max, 'm4pl_max': self.m4pl_max, 'm4pl_min': self.m4pl_min, 'm4pl_step': self.m4pl_step, 'params': best_params, 'features': features, 'rnkp_min': rnkp_min, 'rnkp_min_cnt': rnkp_min_cnt, 'rnkp_max': rnkp_max, 'rnkp_max_cnt': rnkp_max_cnt, 'rnkp_sz': rnkp_sz, 'model': model}
         with open(f'{save_dir}/{lotte_kind}-m4pm.pkl', 'wb') as f:
             pickle.dump(m4pm, f)
 
@@ -1744,7 +1744,16 @@ class Orottick4Simulator:
                 else:
                     ok4s.m4p_cnt = ok4s.m4p_ranker_max
                 ok4s.m4p_ranker_only = M4P_RANKER_ONLY
-                
+                if 'm4p_max' in ok4s.m4pm:
+                    ok4s.m4p_max = ok4s.m4pm['m4p_max']
+                    ok4s.m4p_ranker_max = ok4s.m4p_max * 2
+                if 'm4pl_max' in ok4s.m4pm:
+                    ok4s.m4pl_max = ok4s.m4pm['m4pl_max']
+                if 'm4pl_min' in ok4s.m4pm:
+                    ok4s.m4pl_min = ok4s.m4pm['m4pl_min']
+                if 'm4pl_step' in ok4s.m4pm:
+                    ok4s.m4pl_step = ok4s.m4pm['m4pl_step']
+                    
         if METHOD == 'build_cache':
             cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
             if cdf is not None:
