@@ -46,7 +46,7 @@ Follow "Research project A - Plan G" [ https://github.com/dinhtt-randrise/orotti
 + TCK_KIND: All 4 exact order
 + BROKER_COST: $0.3 / ticket
 
-==> [GOAL] Simulate buying tickets, track results and calculate ROI. By the way, real buying based on "Research project A - Plan G" with 3 times tickets.
+==> [GOAL] Simulate buying tickets, track results and calculate ROI. By the way, real buying based on "Research project A - Plan G" with 1 times tickets.
 ```
 
 ```
