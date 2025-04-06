@@ -21,49 +21,37 @@
 
   -------------------------------
 
-Follow "Research project A - Plan B", "Research project A - Plan D" and "Research project A - Plan C" [ https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a ].
+Follow "Research project A - Plan G" [ https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a ].
 
-+ Simulating Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-observe-rsp-a-f-2025-03-23
++ Predict Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-rsp-a-g-2025-04-06
 
   -------------------------------
 
 + LOTTE_KIND: p4a
-+ FIRST_BUY_DATE: 2025.03.27
++ FIRST_BUY_DATE: 2025.04.06
 + PERIOD_SIZE: 7
 + PERIOD_CNT: 52
 + DATE_CNT: 280
 + TCK_CNT: 280
-+ F_TCK_CNT: 250
++ F_TCK_CNT: 280
 + PRD_SORT_ORDER: B
-+ M4P_OBS: False
-+ M4P_CNT: 3
++ M4P_OBS: True
++ M4P_CNT: 20
 + M4P_VRY: False
 + M4PC_CHK: True
-+ M4P_ONE: True
++ M4P_ONE: False
++ M4P_OBS: True
++ M4P_MODEL: True
++ M4P_RANKER_ONLY: True
 + TCK_KIND: All 4 exact order
 + BROKER_COST: $0.3 / ticket
 
-==> [GOAL] Simulate buying tickets, track results and calculate ROI. By the way, real buying based on "Research project A - Plan C".
+==> [GOAL] Simulate buying tickets, track results and calculate ROI. By the way, real buying based on "Research project A - Plan G" with 3 times tickets.
 ```
 
 ```
-  ----------- Plan B ------------
+  ----------- Plan G ------------
 ```
 
-![](https://github.com/dinhtt-randrise/orottick4/blob/ad930f2d91e56434d272099e722f575296f3f2f3/research/rsp-a/orottick4-rsp-a-analyze-b.png)
-
-```
-  ----------- Plan C ------------
-```
-
-![](https://github.com/dinhtt-randrise/orottick4/blob/ad930f2d91e56434d272099e722f575296f3f2f3/research/rsp-a/orottick4-rsp-a-analyze-c.png)
-
-```
-  ----------- Plan D ------------
-```
-
-![](https://github.com/dinhtt-randrise/orottick4/blob/ad930f2d91e56434d272099e722f575296f3f2f3/research/rsp-a/orottick4-rsp-a-analyze-d.png)
-
-
-
+![](https://github.com/dinhtt-randrise/orottick4/blob/4127a0f21d60e0a4eed277e30a2c34d382e40db0/research/rsp-a/orottick4-rsp-a-analyze-g.png)
 
