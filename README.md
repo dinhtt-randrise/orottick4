@@ -135,24 +135,24 @@ With Orottick4, we can invest in lottery (Pick 4) as following research:
 
 
   -------------------------------
-    RESEARCH PROJECT A - PLAN B
+    RESEARCH PROJECT A - PLAN G
   -------------------------------
 
 + Invest Period: 364 days
 
-+ Invest Cost: $24,375
++ Invest Cost: $2,314
 
-+ Invest Cost (w/o broker): $18,750
++ Invest Cost (w/o broker): $1,780
 
-+ Invest Return: $5,625
++ Invest Return: $7,686
 
-+ Invest Return (w/o broker): $11,250
++ Invest Return (w/o broker): $8,220
 
-+ Invest ROI: 23.1%
++ Invest ROI: 332.2%
 
-+ Invest ROI (w/o broker, w/ cost): 46.2%
++ Invest ROI (w/o broker, w/ cost): 355.2%
 
-+ Invest ROI (w/o broker, w/ no broker cost): 60%
++ Invest ROI (w/o broker, w/ no broker cost): 461.8%
 
 + Research project A: https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a
 
@@ -160,6 +160,11 @@ With Orottick4, we can invest in lottery (Pick 4) as following research:
 
 ```
 
-![](https://github.com/dinhtt-randrise/orottick4/blob/ad930f2d91e56434d272099e722f575296f3f2f3/research/rsp-a/orottick4-rsp-a-analyze-b.png)
+```
+  ----------- Plan G ------------
+```
+
+![](https://github.com/dinhtt-randrise/orottick4/blob/4127a0f21d60e0a4eed277e30a2c34d382e40db0/research/rsp-a/orottick4-rsp-a-analyze-g.png)
+
 
 
