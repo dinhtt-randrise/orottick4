@@ -387,16 +387,21 @@ class Orottick4Simulator:
         return l_buy_date, adf
 
     def capture_m4p(self, pdf, x_sim_seed):
-        lp = self.capture_m4p_ranker(pdf, x_sim_seed)
+        m4pc = 0
+        lp2, vm4pc2 = self.capture_m4p_manual(pdf, x_sim_seed)
+        lp, vm4pc = self.capture_m4p_ranker(pdf, x_sim_seed)
+        if vm4pc2 > 0:
+            m4pc = 1
         if not self.m4p_ranker_only:
             if len(lp) == 0:
-                return self.capture_m4p_manual(pdf, x_sim_seed)
-        return lp
+                lp2, m4pc
+        return lp, m4pc
         
     def capture_m4p_ranker(self, pdf, x_sim_seed):
+        m4pc = 0
         if self.m4pm is None:
             print(f'== [M4PM] Model is not found!')
-            return []
+            return [], m4pc
         
         pdf2 = pdf.sort_values(by=['buy_date'], ascending=[False])
         features = self.m4pm['features']
@@ -406,7 +411,7 @@ class Orottick4Simulator:
         pdf4 = pdf2[(pdf2['rnkp'] >= rnkp_min)&(pdf2['rnkp'] <= rnkp_max)]
         if len(pdf4) == 0:
             print(f'== [M4PM] Ranking is not found!')
-            return []
+            return [], m4pc
 
         pdf2a = pdf4.sort_values(by=['rnkp', 'buy_date'], ascending=[True, False])
         pdf2b = pdf4.sort_values(by=['rnkp', 'buy_date'], ascending=[False, False])
@@ -437,9 +442,17 @@ class Orottick4Simulator:
 
         print(f'== [M4PM] Success: {l_pred}')
 
-        return l_pred
+        if len(l_pred) > 0:
+            if self.m4p_ranker_only:
+                if len(l_pred) >= self.m4p_ranker_max:
+                    m4pc = 1
+            else:
+                m4pc = 1
+
+        return l_pred, m4pc
         
     def capture_m4p_manual(self, pdf, x_sim_seed):
+        m4pc = 0
         l_pred = []
         l_buy_date = []
         adf = None
@@ -469,7 +482,7 @@ class Orottick4Simulator:
         print(f'=> [M4PC-3] {l_buy_date} -> {sz}')
         
         if adf is None or len(l_buy_date) == 0 or len(adf) == 0:
-            return l_pred
+            return l_pred, m4pc
 
         adf = adf.sort_values(by=['m4p_no'], ascending=[True])
         for ri in range(len(adf)):
@@ -477,7 +490,10 @@ class Orottick4Simulator:
             p = self.reproduce_one(x_sim_seed, x_sim_cnt)
             l_pred.append(p)
 
-        return l_pred
+        if len(l_pred) > 0:
+            m4pc = 1
+            
+        return l_pred, m4pc
 
     def download_drawing(self, buffer_dir, lotte_kind, v_date):
         self.print_heading()
@@ -1312,13 +1328,9 @@ class Orottick4Simulator:
             if pso == 'B' and pdf is not None:
                 if len(pdf) > 0:
                     if len(xdf) > 0:
-                        lx_pred = self.capture_m4p(pdf, xdf['sim_seed'].iloc[0])
+                        lx_pred, vm4pc = self.capture_m4p(pdf, xdf['sim_seed'].iloc[0])
                         if len(lx_pred) > 0:
-                            if self.m4p_ranker_only:
-                                if len(lx_pred) >= self.m4p_ranker_max:
-                                    m4pc = 1
-                            else:
-                                m4pc = 1
+                            m4pc = vm4pc
                             m4p_cnt = self.m4p_cnt
                             if m4p_cnt > 0:
                                 if len(lx_pred) > m4p_cnt:
