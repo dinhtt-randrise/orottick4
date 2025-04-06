@@ -54,7 +54,7 @@ import orottick4.orottick4 as vok4
 
 #----------#
 
-BUY_DATE = '2025.03.27'
+BUY_DATE = '2025.04.06'
 BUFFER_DIR = '/kaggle/buffers/orottick4'
 LOTTE_KIND = 'p4a'
 DATA_DF = None
