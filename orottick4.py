@@ -92,7 +92,8 @@ class Orottick4Simulator:
         self.m4pm = None
         self.m4p_cnt = -1
         self.m4p_ranker_only = False
-        self.m4p_ranker_max = 15
+        self.m4p_max = 30
+        self.m4p_ranker_max = 2 * self.m4p_max
 
     def save_cache(self):
         cdir = self.save_cache_dir
@@ -392,8 +393,6 @@ class Orottick4Simulator:
         if self.m4pm is None:
             print(f'== [M4PM] Model is not found!')
             return []
-
-        m4p_pmin = 0
         
         pdf2 = pdf.sort_values(by=['buy_date'], ascending=[False])
         features = self.m4pm['features']
@@ -805,7 +804,7 @@ class Orottick4Simulator:
         print(f'DATA_DIR: {data_dir}')
         print(f'SAVE_DIR: {save_dir}')
 
-        m4p_max = 30
+        m4p_max = self.m4p_max
         
         all_df = pd.read_csv(f'{data_dir}/{lotte_kind}-all.csv')
         #all_df = all_df[all_df['m4p_no'] <= m4p_max]
@@ -1710,7 +1709,9 @@ class Orottick4Simulator:
         M4P_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4P_MODEL_DIR', '/kaggle/working')
 
         M4P_RANKER_ONLY = Orottick4Simulator.get_option(options, 'M4P_RANKER_ONLY', True)
-        
+
+        M4P_MAX = Orottick4Simulator.get_option(options, 'M4P_MAX', 30)
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -1718,7 +1719,10 @@ class Orottick4Simulator:
             ok4s = github_pkg.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
         else:
             ok4s = non_github_create_fn(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
-        
+
+        ok4s.m4p_max = M4P_MAX
+        ok4s.m4p_ranker_max = M4P_MAX * 2
+
         m4pm_fn = f'{M4P_MODEL_DIR}/{LOTTE_KIND}-m4pm.pkl'
         if os.path.exists(m4pm_fn):
             with open(m4pm_fn, 'rb') as f:
