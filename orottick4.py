@@ -1813,7 +1813,7 @@ class Orottick4Simulator:
 
 + Day No: 
 
-+ Tickets: 20
++ Tickets: 10
 
 + Cost: $13
 
