@@ -394,7 +394,7 @@ class Orottick4Simulator:
             m4pc = 1
         if not self.m4p_ranker_only:
             if len(lp) == 0:
-                lp2, m4pc
+                return lp2, m4pc
         return lp, m4pc
         
     def capture_m4p_ranker(self, pdf, x_sim_seed):
