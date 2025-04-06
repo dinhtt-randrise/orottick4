@@ -61,15 +61,15 @@ DATA_DF = None
 DATE_CNT = 56 * 5
 O_DATE_CNT = 7
 TCK_CNT = 56 * 5
-F_TCK_CNT = 250
+F_TCK_CNT = 56 * 5
 RUNTIME = 60 * 60 * 11.5
 PRD_SORT_ORDER = 'B'
 HAS_STEP_LOG = True
 RANGE_CNT = 52
-M4P_OBS = False
-M4P_CNT = 3
+M4P_OBS = True
+M4P_CNT = 20
 M4P_VRY = False
-M4P_ONE = True
+M4P_ONE = False
 RESULT_DIR = '/kaggle/working'
 LOAD_CACHE_DIR = '/kaggle/working'
 SAVE_CACHE_DIR = '/kaggle/working'
@@ -80,8 +80,12 @@ M4P_COLLECT_DATA_DIRS = [
 M4P_COLLECT_SAVE_DIR = '/kaggle/working'
 M4P_TRAIN_DATA_DIR = '/kaggle/working'
 M4P_TRAIN_SAVE_DIR = '/kaggle/working'
-M4P_MODEL_DIR = '/kaggle/input/orottick4-m4pm-rsp-a-b-2025-03-23'
+M4P_MODEL_DIR = '/kaggle/input/orottick4-m4pm-rsp-a-g-2025-03-23'
 M4P_RANKER_ONLY = True
+M4P_MAX = 10
+M4PL_MAX = 2
+M4PL_MIN = -2
+M4PL_STEP = 0.0225
 
 METHOD = 'simulate'
 #METHOD = 'observe'
@@ -94,7 +98,7 @@ METHOD = 'simulate'
 
 #----------#
 
-options = {'BUY_DATE': BUY_DATE, 'BUFFER_DIR': BUFFER_DIR, 'LOTTE_KIND': LOTTE_KIND, 'DATA_DF': DATA_DF, 'DATE_CNT': DATE_CNT, 'O_DATE_CNT': O_DATE_CNT, 'TCK_CNT': TCK_CNT, 'F_TCK_CNT': F_TCK_CNT, 'RUNTIME': RUNTIME, 'PRD_SORT_ORDER': PRD_SORT_ORDER, 'HAS_STEP_LOG': HAS_STEP_LOG, 'RANGE_CNT': RANGE_CNT, 'M4P_OBS': M4P_OBS, 'M4P_CNT': M4P_CNT, 'M4P_VRY': M4P_VRY, 'M4P_ONE': M4P_ONE, 'RESULT_DIR': RESULT_DIR, 'LOAD_CACHE_DIR': LOAD_CACHE_DIR, 'SAVE_CACHE_DIR': SAVE_CACHE_DIR, 'CACHE_CNT': CACHE_CNT, 'USE_GITHUB': USE_GITHUB, 'METHOD': METHOD, 'M4P_COLLECT_DATA_DIRS': M4P_COLLECT_DATA_DIRS, 'M4P_COLLECT_SAVE_DIR': M4P_COLLECT_SAVE_DIR, 'M4P_PREPARE_DATA_DIR': M4P_PREPARE_DATA_DIR, 'M4P_PREPARE_SAVE_DIR': M4P_PREPARE_SAVE_DIR, 'M4P_TRAIN_DATA_DIR': M4P_TRAIN_DATA_DIR, 'M4P_TRAIN_SAVE_DIR': M4P_TRAIN_SAVE_DIR, 'M4P_MODEL_DIR': M4P_MODEL_DIR, 'M4P_RANKER_ONLY': M4P_RANKER_ONLY}
+options = {'BUY_DATE': BUY_DATE, 'BUFFER_DIR': BUFFER_DIR, 'LOTTE_KIND': LOTTE_KIND, 'DATA_DF': DATA_DF, 'DATE_CNT': DATE_CNT, 'O_DATE_CNT': O_DATE_CNT, 'TCK_CNT': TCK_CNT, 'F_TCK_CNT': F_TCK_CNT, 'RUNTIME': RUNTIME, 'PRD_SORT_ORDER': PRD_SORT_ORDER, 'HAS_STEP_LOG': HAS_STEP_LOG, 'RANGE_CNT': RANGE_CNT, 'M4P_OBS': M4P_OBS, 'M4P_CNT': M4P_CNT, 'M4P_VRY': M4P_VRY, 'M4P_ONE': M4P_ONE, 'RESULT_DIR': RESULT_DIR, 'LOAD_CACHE_DIR': LOAD_CACHE_DIR, 'SAVE_CACHE_DIR': SAVE_CACHE_DIR, 'CACHE_CNT': CACHE_CNT, 'USE_GITHUB': USE_GITHUB, 'METHOD': METHOD, 'M4P_COLLECT_DATA_DIRS': M4P_COLLECT_DATA_DIRS, 'M4P_COLLECT_SAVE_DIR': M4P_COLLECT_SAVE_DIR, 'M4P_PREPARE_DATA_DIR': M4P_PREPARE_DATA_DIR, 'M4P_PREPARE_SAVE_DIR': M4P_PREPARE_SAVE_DIR, 'M4P_TRAIN_DATA_DIR': M4P_TRAIN_DATA_DIR, 'M4P_TRAIN_SAVE_DIR': M4P_TRAIN_SAVE_DIR, 'M4P_MODEL_DIR': M4P_MODEL_DIR, 'M4P_RANKER_ONLY': M4P_RANKER_ONLY, 'M4P_MAX': M4P_MAX, 'M4PL_MAX': M4PL_MAX, 'M4PL_MIN': M4PL_MIN, 'M4PL_STEP': M4PL_STEP}
 
 vok4.Orottick4Simulator.run(options, vok4, None)
 
@@ -125,6 +129,25 @@ vok4.Orottick4Simulator.run(options, vok4, None)
 + Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2024-03-24
 
 + Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2-2024-03-24
+
+[ 2023.03.26 ]
+
++ Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2023-03-26
+
++ Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2-2023-03-26
+
+
+====================================
+           M4P MODELS
+  -------------------------------
+
+[ RSP A, Plan G]
+
++ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-m4pm-rsp-a-g-2025-03-23
+
+[ RSP A, Plan K]
+
++ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-m4pm-rsp-a-k-2025-03-23
 
 
 ====================================
