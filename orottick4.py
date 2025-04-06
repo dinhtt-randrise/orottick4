@@ -1815,13 +1815,13 @@ class Orottick4Simulator:
 
 + Tickets: 20
 
-+ Cost: $26
++ Cost: $13
 
-+ Total Cost: $26
++ Total Cost: $13
 
-+ Broker Cost: $6
++ Broker Cost: $3
 
-+ Total Broker Cost: $6
++ Total Broker Cost: $3
 
 + Prize: $0
 
@@ -1840,13 +1840,13 @@ class Orottick4Simulator:
 
 + Confirmation Number: 
 
-+ Cost: $78
++ Cost: $26
 
-+ Total Cost: $78
++ Total Cost: $26
 
-+ Broker Cost: $18
++ Broker Cost: $6
 
-+ Total Broker Cost: $18
++ Total Broker Cost: $6
 
 + Prize: $0
 
