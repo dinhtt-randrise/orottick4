@@ -1256,7 +1256,7 @@ class Orottick4Simulator:
                         nrdf = pd.concat([nrdf, df])
                 rdf = nrdf
 
-                l_date_cnt = list(rdf['a_date_cnt'])
+                l_date_cnt = list(rdf['a_date_cnt'].unique())
                 nrdf = None
                 for t_date_cnt in l_date_cnt:
                     df = rdf[rdf['a_date_cnt'] == t_date_cnt]
