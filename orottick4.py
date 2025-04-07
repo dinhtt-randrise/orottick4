@@ -1339,8 +1339,12 @@ class Orottick4Simulator:
             if runtime is not None:
                 if time.time() - start_time > runtime:
                     break
-            df = cdf[cdf['a_date_cnt'] == a_date_cnt]
-            b_sim_cnt = df['b_sim_cnt'].iloc[0]
+            df = ddf[ddf['x_date_cnt'] == a_date_cnt]
+            if len(df) == 0:
+                continue
+            b_w = df['w'].iloc[0]
+            b_n = df['n'].iloc[0]
+            b_sim_seed, b_sim_cnt = self.capture(b_w, b_n)
             xp = self.reproduce_one(x_sim_seed, b_sim_cnt)
             xl_date_cnt.append(a_date_cnt)
             xl_pred.append(xp)
