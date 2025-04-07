@@ -1061,6 +1061,11 @@ class Orottick4Simulator:
 
         start_time = time.time()
 
+        bdfd = v_buy_date.split('.')
+        x_txt_year = bdfd[0]
+        x_txt_month = bdfd[1]
+        x_txt_day = bdfd[2]
+        
         dict_year = {}
         dict_month = {}
         dict_year_month = {}
@@ -1266,7 +1271,16 @@ class Orottick4Simulator:
                     else:
                         nrdf = pd.concat([nrdf, df])
                 rdf = nrdf
-                
+
+                rdf = rdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[False, True, False, False])
+
+                cdf = rdf[rdf['a_date_cnt_same'] > 1]
+                if len(cdf) == 0:
+                    cdf = None
+                else:
+                    cdf = cdf[(cdf['a_txt_day'] == x_txt_day)&(cdf['a_txt_month'] == x_txt_month)]
+                    if len(cdf) == 0:
+                        cdf = None
             except Exception as e:
                 msg = str(e)
                 print(f'=> [E] {msg}')
@@ -2263,7 +2277,7 @@ class Orottick4Simulator:
             if rdf is not None:
                 rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-{BUY_DATE}.csv', index=False)
 
-                rdf = rdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[False, True, False, False])
-                rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-date_cnt-{BUY_DATE}.csv', index=False)
+            if cdf is not None:
+                cdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-date_cnt-{BUY_DATE}.csv', index=False)
 
 # ------------------------------------------------------------ #
