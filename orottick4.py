@@ -1374,7 +1374,7 @@ class Orottick4Simulator:
 
         min_date_cnt = 1
         max_date_cnt = 56 * 5
-        df1 = ardf[(ardf['a_date_cnt'] >= min_date_cnt)&(ardf['a_date_cnt'] <= max_cnt)]
+        df1 = ardf[(ardf['a_date_cnt'] >= min_date_cnt)&(ardf['a_date_cnt'] <= max_date_cnt)]
         rw['date_cnt_ir'] = len(df1)
         rw['date_cnt_or'] = len(ardf) - len(df1)
 
