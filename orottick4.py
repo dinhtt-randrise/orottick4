@@ -1354,23 +1354,27 @@ class Orottick4Simulator:
         return xl_pred, xl_date_cnt    
 
     def research_b_mpc(self, v_buy_date, data_df, runtime):
+        rdf = None
+        cdf = None
         catch_kind = 'same_date'
         start_time = time.time()
         xdf = data_df[data_df['buy_date'] == v_buy_date]
         if len(xdf) == 0:
-            return 0
+            return 0, rdf, cdf
         ddf = data_df[data_df['buy_date'] < v_buy_date]
         if len(ddf) == 0:
-            return 0
+            return 0, rdf, cdf
         ddf = data_df[data_df['buy_date'] < v_buy_date]
         rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind, True)
         if cdf is None:
-            return 0
-        return 1
+            return 0, rdf, cdf
+        return 1, rdf, cdf
 
     def research_b(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
         self.print_heading()
 
+        more = {}
+        
         text = '''
 ====================================
           RESEARCH B
@@ -1414,15 +1418,15 @@ class Orottick4Simulator:
     
             data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
             if data_df is None:
-                return rdf, cdf
+                return rdf, cdf, more
 
         ddf = data_df[data_df['buy_date'] <= v_buy_date]
         if len(ddf) == 0:
-            return rdf, cdf
+            return rdf, cdf, more
             
         ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
         if len(ddf) == 0:
-            return rdf, cdf
+            return rdf, cdf, more
 
         xrdf, xcdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, 'same_date', True)
 
@@ -1431,7 +1435,7 @@ class Orottick4Simulator:
         if len(ddf) > v_date_cnt:
             ddf = ddf[:v_date_cnt]
         if len(ddf) == 0:
-            return rdf, cdf
+            return rdf, cdf, more
 
         ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
 
@@ -1463,8 +1467,12 @@ class Orottick4Simulator:
             df = xrdf[xrdf['a_buy_date'] == a_buy_date]
             if len(df) > 0:
                 a_m4 = len(df)
-            a_m4pc = self.research_b_mpc(a_buy_date, oddf, a_runtime)
-
+            a_m4pc, rdf, cdf = self.research_b_mpc(a_buy_date, oddf, a_runtime)
+            if rdf is not None:
+                more[f'rdf_{a_buy_date}'] = rdf
+            if cdf is not None:
+                more[f'cdf_{a_buy_date}'] = cdf
+                
             dix += 1
             if a_m4 > 0:
                 dix_m4 += 1
@@ -1509,7 +1517,7 @@ class Orottick4Simulator:
         '''
         print(text)
         
-        return rdf, cdf
+        return rdf, cdf, more
 
     def research_b_old(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
         self.print_heading()
@@ -2631,12 +2639,17 @@ class Orottick4Simulator:
                 cdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-date_cnt-{BUY_DATE}.csv', index=False)
 
         if METHOD == 'research_b':
-            rdf, cdf = ok4s.research_b(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
+            ardf, acdf, more = ok4s.research_b(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
 
-            if rdf is not None:
-                rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-{BUY_DATE}.csv', index=False)
+            if ardf is not None:
+                ardf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-{BUY_DATE}.csv', index=False)
 
-            if cdf is not None:
-                cdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-m4-{BUY_DATE}.csv', index=False)
+            if acdf is not None:
+                acdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-m4-{BUY_DATE}.csv', index=False)
 
+            for key in more.keys():
+                adf = more[key]
+                if adf is not None:
+                    adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-{key}-{BUY_DATE}.csv', index=False)
+                    
 # ------------------------------------------------------------ #
