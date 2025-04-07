@@ -1429,7 +1429,8 @@ class Orottick4Simulator:
             return rdf, cdf, more
 
         xrdf, xcdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, 'same_date', True)
-
+        xrdf = xrdf[xrdf['a_date_cnt'] <= 56*5]
+        
         oddf = ddf.sort_values(by=['buy_date'], ascending=[False])
         ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
         if len(ddf) > v_date_cnt:
@@ -1446,6 +1447,8 @@ class Orottick4Simulator:
         dcnt = 10
         dix_m4 = 0
         dix_m4pc = 0
+        dix_m4pc_2 = 0
+        dix_m4pc_3 = 0
         dcnt_m4 = 10
         dsz = len(ddf)
         if dsz < 365:
@@ -1480,10 +1483,15 @@ class Orottick4Simulator:
                 dix_m4 += 1
                 if a_m4pc > 0:
                     dix_m4pc += 1
+                else:
+                    dix_m4pc_3 += 1
+            else:
+                if a_m4pc > 0:
+                    dix_m4pc_2 += 1
 
             if dix > 0 and dix % dcnt == 0:
                 if has_log_step:
-                    print(f'== [R] ==> {dix}, {dix_m4}, {dix_m4pc} / {dsz}')
+                    print(f'== [R] ==> {dix}, {dix_m4}, {dix_m4pc} --- {dix_m4pc_2}, {dix_m4pc_3} / {dsz}')
 
             rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4pc': a_m4pc, 'm4': a_m4}
             rows.append(rw)
