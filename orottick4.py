@@ -1103,7 +1103,7 @@ class Orottick4Simulator:
         dix = 0
         dix_m4 = 0
         dcnt = 1000
-        dcnt_m4 = 10
+        dcnt_m4 = 100
         for ria in range(len(ddf)):
             if runtime is not None:
                 if time.time() - start_time > runtime:
