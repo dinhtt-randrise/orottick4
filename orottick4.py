@@ -1031,6 +1031,7 @@ class Orottick4Simulator:
         print(text) 
 
         rdf = None
+        cdf = None
         
         if data_df is None:
             d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
@@ -1040,21 +1041,21 @@ class Orottick4Simulator:
     
             data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
             if data_df is None:
-                return rdf
+                return rdf, cdf
 
         ddf = data_df[data_df['buy_date'] <= v_buy_date]
         if len(ddf) == 0:
-            return rdf
+            return rdf, cdf
             
         ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
         if len(ddf) == 0:
-            return rdf
+            return rdf, cdf
 
         ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
         if len(ddf) > v_date_cnt:
             ddf = ddf[:v_date_cnt]
         if len(ddf) == 0:
-            return rdf
+            return rdf, cdf
 
         ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
 
@@ -1166,7 +1167,7 @@ class Orottick4Simulator:
                 a_date_cnt = ria - rib
                 b_date_no = rib + 1
 
-                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_txt_year': a_txt_year, 'a_year': a_year, 'a_year_cnt': a_year_cnt, 'a_year_cnt_m4': 0, 'a_txt_month': a_txt_month, 'a_month': a_month, 'a_month_cnt': a_month_cnt, 'a_month_cnt_m4': 0, 'a_txt_year_month': a_txt_year_month, 'a_year_month_cnt': a_year_month_cnt, 'a_year_month_cnt_m4': 0, 'a_txt_day': a_txt_day, 'a_day': a_day, 'a_day_cnt': a_day_cnt, 'a_day_cnt_m4': 0, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_m4': a_m4, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
+                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_txt_year': a_txt_year, 'a_year': a_year, 'a_year_cnt': a_year_cnt, 'a_year_cnt_m4': 0, 'a_txt_month': a_txt_month, 'a_month': a_month, 'a_month_cnt': a_month_cnt, 'a_month_cnt_m4': 0, 'a_txt_year_month': a_txt_year_month, 'a_year_month_cnt': a_year_month_cnt, 'a_year_month_cnt_m4': 0, 'a_txt_day': a_txt_day, 'a_day': a_day, 'a_day_cnt': a_day_cnt, 'a_day_cnt_m4': 0, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_m4': a_m4, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'a_date_cnt_same': 0, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
                 rows.append(rw)
                 
                 if dix_m4 % dcnt_m4 == 0:
@@ -1254,6 +1255,18 @@ class Orottick4Simulator:
                     else:
                         nrdf = pd.concat([nrdf, df])
                 rdf = nrdf
+
+                l_date_cnt = list(rdf['a_date_cnt'])
+                nrdf = None
+                for t_date_cnt in l_date_cnt:
+                    df = rdf[rdf['a_date_cnt'] == t_date_cnt]
+                    df['a_date_cnt_same'] = len(df)
+                    if nrdf is None:
+                        nrdf = df
+                    else:
+                        nrdf = pd.concat([nrdf, df])
+                rdf = nrdf
+                
             except Exception as e:
                 msg = str(e)
                 print(f'=> [E] {msg}')
@@ -1272,7 +1285,7 @@ class Orottick4Simulator:
         '''
         print(text)
         
-        return rdf
+        return rdf, cdf
 
     def simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 56, tck_cnt = 2, runtime = None):
         self.print_heading()
@@ -2245,12 +2258,12 @@ class Orottick4Simulator:
             ok4s.m4p_train(LOTTE_KIND, M4P_TRAIN_DATA_DIR, M4P_TRAIN_SAVE_DIR)
 
         if METHOD == 'research_a':
-            rdf = ok4s.research_a(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
+            rdf, cdf = ok4s.research_a(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
 
             if rdf is not None:
                 rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-{BUY_DATE}.csv', index=False)
 
-                rdf = rdf.sort_values(by=['a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[True, False, False])
+                rdf = rdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[False, True, False, False])
                 rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-date_cnt-{BUY_DATE}.csv', index=False)
 
 # ------------------------------------------------------------ #
