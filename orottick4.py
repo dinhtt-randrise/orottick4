@@ -1278,7 +1278,8 @@ class Orottick4Simulator:
                 if len(cdf) == 0:
                     cdf = None
                 else:
-                    cdf = cdf[(cdf['a_txt_day'] == x_txt_day)&(cdf['a_txt_month'] == x_txt_month)]
+                    #cdf = cdf[(cdf['a_txt_day'] == x_txt_day)&(cdf['a_txt_month'] == x_txt_month)]
+                    cdf = cdf[(cdf['a_txt_month'] == x_txt_month)]
                     if len(cdf) == 0:
                         cdf = None
             except Exception as e:
