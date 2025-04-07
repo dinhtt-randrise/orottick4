@@ -1477,7 +1477,7 @@ class Orottick4Simulator:
             rows.append(rw)
 
             if dix_m4 == 0:
-                if dix > 0 and dix <= 5:
+                if dix > 0 and dix <= 50:
                     if has_log_step:
                         print(str(rw))                    
                 elif dix % dcnt == 0:
