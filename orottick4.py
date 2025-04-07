@@ -997,7 +997,7 @@ class Orottick4Simulator:
         '''
         print(text) 
 
-    def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None, catch_kind = 'same_month'):
+    def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None, catch_kind = 'same_month', silent = False):
         self.print_heading()
 
         text = '''
@@ -1005,30 +1005,34 @@ class Orottick4Simulator:
           RESEARCH A
   -------------------------------
         '''
-        print(text) 
+        if not silent:
+            print(text) 
 
         text = '''
   -------------------------------
            PARAMETERS
   -------------------------------
         '''
-        print(text) 
+        if not silent:
+            print(text) 
 
         v_data_df_is_none = False
         if data_df is None:
             v_data_df_is_none = True
-            
-        print(f'[BUFFER_DIR] {buffer_dir}')
-        print(f'[LOTTE_KIND] {lotte_kind}')
-        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
-        print(f'[BUY_DATE] {v_buy_date}')
-        print(f'[DATE_CNT] {v_date_cnt}')
-        print(f'[RUNTIME] {runtime}')
+
+        if not silent:
+            print(f'[BUFFER_DIR] {buffer_dir}')
+            print(f'[LOTTE_KIND] {lotte_kind}')
+            print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+            print(f'[BUY_DATE] {v_buy_date}')
+            print(f'[DATE_CNT] {v_date_cnt}')
+            print(f'[RUNTIME] {runtime}')
 
         text = '''
   -------------------------------
         '''
-        print(text) 
+        if not silent:
+            print(text) 
 
         rdf = None
         cdf = None
@@ -1301,7 +1305,8 @@ class Orottick4Simulator:
           RESEARCH A
 ====================================
         '''
-        print(text)
+        if not silent:
+            print(text) 
         
         return rdf, cdf
 
@@ -1314,7 +1319,7 @@ class Orottick4Simulator:
         if len(ddf) == 0:
             return None, None
         ddf = data_df[data_df['buy_date'] < v_buy_date]
-        rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind)
+        rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind, True)
         if cdf is None:
             return None, None
         ddf = data_df[data_df['buy_date'] < v_buy_date]
@@ -1411,8 +1416,9 @@ class Orottick4Simulator:
 
         rows = []
         dix = 0
-        dcnt = 100
+        dcnt = 10
         dix_m4 = 0
+        dix_m4pc = 0
         dcnt_m4 = 10
         dsz = len(ddf)
         for ri in range(len(ddf)):
@@ -1434,7 +1440,9 @@ class Orottick4Simulator:
             a_pred = ''
             a_date_cnt = ''
             al_pred, al_date_cnt = self.research_b_predict(a_buy_date, oddf, a_runtime, catch_kind)
+            a_m4pc = 0
             if al_pred is not None and al_date_cnt is not None:
+                a_m4pc = 1
                 a_pred = ', '.join([str(x) for x in al_pred])
                 a_date_cnt = ', '.join([str(x) for x in al_date_cnt])
                 for a_p in a_pred:
@@ -1444,12 +1452,14 @@ class Orottick4Simulator:
             dix += 1
             if a_m4 > 0:
                 dix_m4 += 1
+                if a_m4pc > 0:
+                    dix_m4pc += 1
 
             if dix % dcnt == 0:
                 if has_log_step:
-                    print(f'== [R] ==> {dix}, {dix_m4} / {dsz}')
+                    print(f'== [R] ==> {dix}, {dix_m4}, {dix_m4pc} / {dsz}')
 
-            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4': a_m4, 'pred': a_pred, 'date_cnt': a_date_cnt}
+            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4pc': a_m4pc, 'm4': a_m4, 'pred': a_pred, 'date_cnt': a_date_cnt}
             rows.append(rw)
 
             if dix_m4 % dcnt_m4 == 0:
@@ -1458,7 +1468,7 @@ class Orottick4Simulator:
 
         if len(rows) > 0:
             rdf = pd.DataFrame(rows)
-            cdf = rdf[rdf['m4'] > 0]
+            cdf = rdf[(rdf['m4'] > 0)&(rdf['m4pc'] > 0)]
             if len(cdf) == 0:
                 cdf = None
                 
