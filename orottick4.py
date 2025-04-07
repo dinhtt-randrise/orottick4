@@ -1414,7 +1414,7 @@ class Orottick4Simulator:
         if len(ddf) == 0:
             return rdf, cdf
 
-        ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
 
         start_time = time.time()
 
