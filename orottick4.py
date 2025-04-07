@@ -1476,6 +1476,11 @@ class Orottick4Simulator:
             rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4pc': a_m4pc, 'm4': a_m4, 'pred': a_pred, 'date_cnt': a_date_cnt}
             rows.append(rw)
 
+            if dix_m4 == 0:
+                if dix > 0 and dix % dcnt == 0:
+                    if has_log_step:
+                        print(str(rw))
+
             if dix_m4 > 0 and dix_m4 % dcnt_m4 == 0:
                 if has_log_step:
                     print(str(rw))
