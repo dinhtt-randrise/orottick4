@@ -1473,7 +1473,7 @@ class Orottick4Simulator:
                 if has_log_step:
                     print(f'== [R] ==> {dix}, {dix_m4}, {dix_m4pc} / {dsz}')
 
-            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4pc': a_m4pc, 'm4': a_m4, 'pred': a_pred, 'date_cnt': a_date_cnt}
+            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4pc': a_m4pc, 'm4': a_m4}
             rows.append(rw)
 
             if dix_m4 == 0:
