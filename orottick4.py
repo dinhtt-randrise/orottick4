@@ -1389,6 +1389,15 @@ class Orottick4Simulator:
         rw['month_day_ir'] = 0
         rw['month_day_or'] = 0
 
+        dcnt_step = 5
+        dcnt_min = min_date_cnt
+        dcnt_max = dcnt_min + dcnt_step - 1
+        while dcnt_max <= max_date_cnt:
+            rw[f'date_cnt_{dcnt_max}_ir'] = 0
+            rw[f'date_cnt_{dcnt_max}_or'] = 0
+            dcnt_min += dcnt_step
+            dcnt_max = dcnt_min + dcnt_step - 1
+
         bdfd = v_buy_date.split('.')
         a_year = int(bdfd[0])
         a_p_year = a_year - 1
@@ -1416,6 +1425,15 @@ class Orottick4Simulator:
             rw['month_day_ir'] = len(df)
             rw['month_day_or'] = len(df1) - len(df)
             
+            dcnt_step = 5
+            dcnt_min = min_date_cnt
+            dcnt_max = dcnt_min + dcnt_step - 1
+            while dcnt_max <= max_date_cnt:
+                df = df1[(df1['a_date_cnt'] >= dcnt_min)&(df1['a_date_cnt'] <= dcnt_max)]
+                rw[f'date_cnt_{dcnt_max}_ir'] = len(df)
+                rw[f'date_cnt_{dcnt_max}_or'] = len(df1) - len(df)
+                dcnt_min += dcnt_step
+                dcnt_max = dcnt_min + dcnt_step - 1
         
         rdf = pd.DataFrame([rw])
         cdf = ardf
