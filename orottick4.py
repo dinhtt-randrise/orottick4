@@ -1302,6 +1302,176 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
+    def research_b_predict(self, v_buy_date, data_df, runtime):
+        start_time = time.time()
+        xdf = data_df[data_df['buy_date'] == v_buy_date]
+        if len(xdf) == 0:
+            return None, None
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        if len(ddf) == 0:
+            return None, None
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime)
+        if cdf is None:
+            return None, None
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        if runtime is not None:
+            if time.time() - start_time > runtime:
+                return None, None
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        x_n = xdf['n'].iloc[0]
+        x_sim_seed = self.capture_seed(x_n, 1)
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        ddf['x_date_cnt'] = [x+1 for x in range(len(ddf))]
+        cdf = cdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date'], ascending=[False, True, False])
+        al_date_cnt = list(cdf['a_date_cnt'].unique())
+        xl_date_cnt = []
+        xl_pred = []
+        for a_date_cnt in al_date_cnt: 
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+            df = cdf[cdf['a_date_cnt'] == a_date_cnt]
+            b_sim_cnt = df['b_sim_cnt'].iloc[0]
+            xp = self.reproduce_one(x_sim_seed, b_sim_cnt)
+            xl_date_cnt.append(a_date_cnt)
+            xl_pred.append(xp)
+
+        return xl_pred, xl_date_cnt    
+        
+    def research_b(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
+        self.print_heading()
+
+        text = '''
+====================================
+          RESEARCH B
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        v_data_df_is_none = False
+        if data_df is None:
+            v_data_df_is_none = True
+            
+        print(f'[BUFFER_DIR] {buffer_dir}')
+        print(f'[LOTTE_KIND] {lotte_kind}')
+        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+        print(f'[BUY_DATE] {v_buy_date}')
+        print(f'[DATE_CNT] {v_date_cnt}')
+        print(f'[RUNTIME] {runtime}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        rdf = None
+        cdf = None
+        
+        if data_df is None:
+            d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
+            g = -1
+            d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
+            v_date = d2.strftime('%Y.%m.%d')
+    
+            data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
+            if data_df is None:
+                return rdf, cdf
+
+        ddf = data_df[data_df['buy_date'] <= v_buy_date]
+        if len(ddf) == 0:
+            return rdf, cdf
+            
+        ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
+        if len(ddf) == 0:
+            return rdf, cdf
+
+        oddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        if len(ddf) > v_date_cnt:
+            ddf = ddf[:v_date_cnt]
+        if len(ddf) == 0:
+            return rdf, cdf
+
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
+
+        start_time = time.time()
+
+        rows = []
+        dix = 0
+        dcnt = 100
+        dix_m4 = 0
+        dcnt_m4 = 10
+        dsz = len(ddf)
+        for ri in range(len(ddf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+
+            a_date = ddf['date'].iloc[ri]
+            a_buy_date = ddf['buy_date'].iloc[ri]
+            a_next_date = ddf['next_date'].iloc[ri]
+            a_w = ddf['w'].iloc[ri]
+            a_n = ddf['n'].iloc[ri]
+            a_runtime = None
+            if runtime is not None:
+                o_runtime = time.time() - start_time
+                a_runtime = runtime - o_runtime
+
+            a_m4 = 0
+            a_pred = ''
+            a_date_cnt = ''
+            al_pred, al_date_cnt = self.research_b_predict(a_buy_date, oddf, a_runtime)
+            if al_pred is not None and al_date_cnt is not None:
+                a_pred = ', '.join([str(x) for x in al_pred])
+                a_date_cnt = ', '.join([str(x) for x in al_date_cnt])
+                for a_p in a_pred:
+                    if self.match(a_w, a_p, 'm4'):
+                        a_m4 += 1
+
+            dix += 1
+            if a_m4 > 0:
+                dix_m4 += 1
+
+            if dix % dcnt == 0:
+                if has_log_step:
+                    print(f'== [R] ==> {dix}, {dix_m4} / {dsz}')
+
+            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4': a_m4, 'pred': a_pred, 'date_cnt': a_date_cnt}
+            rows.append(rw)
+
+            if dix_m4 % dcnt_m4 == 0:
+                if has_log_step:
+                    print(str(rw))
+
+        if len(rows) > 0:
+            rdf = pd.DataFrame(rows)
+            cdf = rdf[rdf['m4'] > 0]
+            if len(cdf) == 0:
+                cdf = None
+                
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
+
+        text = '''
+  -------------------------------
+          RESEARCH B
+====================================
+        '''
+        print(text)
+        
+        return rdf, cdf
+
     def simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 56, tck_cnt = 2, runtime = None):
         self.print_heading()
 
@@ -2280,5 +2450,14 @@ class Orottick4Simulator:
 
             if cdf is not None:
                 cdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-date_cnt-{BUY_DATE}.csv', index=False)
+
+        if METHOD == 'research_b':
+            rdf, cdf = ok4s.research_b(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
+
+            if rdf is not None:
+                rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-{BUY_DATE}.csv', index=False)
+
+            if cdf is not None:
+                cdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-m4-{BUY_DATE}.csv', index=False)
 
 # ------------------------------------------------------------ #
