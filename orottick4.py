@@ -1042,6 +1042,84 @@ class Orottick4Simulator:
             if data_df is None:
                 return rdf
 
+        ddf = data_df[data_df['buy_date'] <= v_buy_date]
+        if len(ddf) == 0:
+            return rdf
+            
+        ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
+        if len(ddf) == 0:
+            return rdf
+
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        if len(ddf) > v_date_cnt:
+            ddf = ddf[:v_date_cnt]
+        if len(ddf) == 0:
+            return rdf
+
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
+
+        start_time = time.time()
+        rows = []
+        dsz = len(ddf) * len(ddf)
+        dix = 0
+        dix_m4 = 0
+        dcnt = 1000
+        dcnt_m4 = 100
+        for ria in range(len(ddf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+
+            a_date = ddf['date'].iloc[ria]
+            a_buy_date = ddf['buy_date'].iloc[ria]
+            a_next_date = ddf['next_date'].iloc[ria]
+            a_w = ddf['w'].iloc[ria]
+            a_n = ddf['n'].iloc[ria]
+            a_sim_seed, a_sim_cnt = self.capture(a_w, a_n)
+            
+            for rib in range(len(ddf)):
+                if runtime is not None:
+                    if time.time() - start_time > runtime:
+                        break
+
+                if rib >= ria:
+                    break
+
+                b_date = ddf['date'].iloc[rib]
+                b_buy_date = ddf['buy_date'].iloc[rib]
+                b_next_date = ddf['next_date'].iloc[rib]
+                b_w = ddf['w'].iloc[rib]
+                b_n = ddf['n'].iloc[rib]
+                b_sim_seed, b_sim_cnt = self.capture(b_w, b_n)
+
+                a_p = self.reproduce_one(a_sim_seed, b_sim_cnt)
+
+                a_m4 = 0
+                if self.match(a_w, a_p, 'm4'):
+                    a_m4 = 1
+                    dix_m4 += 1
+
+                dix += 1
+                if dix % dcnt == 0:
+                    print(f'== [R] {dix}, {dix_m4} / {dsz}')
+                    
+                if a_m4 <= 0:
+                    continue
+
+                a_date_no = ria + 1
+                a_date_cnt = ria - rib
+                b_date_no = rib + 1
+
+                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_m4': a_m4, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
+                rows.append(rw)
+                
+                if dix_m4 % dcnt_m4 == 0:
+                    print(str(rw))
+
+        if len(rows) > 0:
+            rdf = pd.DataFrame(rows)
+            rdf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+
         try:
             self.save_cache()
         except Exception as e:
