@@ -1448,6 +1448,8 @@ class Orottick4Simulator:
         dix_m4pc = 0
         dcnt_m4 = 10
         dsz = len(ddf)
+        if dsz < 365:
+            dcnt_m4 = 1
         for ri in range(len(ddf)):
             if runtime is not None:
                 if time.time() - start_time > runtime:
