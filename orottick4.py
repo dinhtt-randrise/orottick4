@@ -2247,5 +2247,8 @@ class Orottick4Simulator:
 
             if rdf is not None:
                 rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-{BUY_DATE}.csv', index=False)
-                
+
+                rdf = rdf.sort_values(by=['a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[True, False, False])
+                rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-date_cnt-{BUY_DATE}.csv', index=False)
+
 # ------------------------------------------------------------ #
