@@ -997,7 +997,7 @@ class Orottick4Simulator:
         '''
         print(text) 
 
-    def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, runtime = None):
+    def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
         self.print_heading()
 
         text = '''
@@ -1156,7 +1156,8 @@ class Orottick4Simulator:
 
                 dix += 1
                 if dix % dcnt == 0:
-                    print(f'== [R] {dix}, {dix_m4} / {dsz}')
+                    if has_log_step:
+                        print(f'== [R] {dix}, {dix_m4} / {dsz}')
                     
                 if a_m4 <= 0:
                     continue
@@ -1169,7 +1170,8 @@ class Orottick4Simulator:
                 rows.append(rw)
                 
                 if dix_m4 % dcnt_m4 == 0:
-                    print(str(rw))
+                    if has_log_step:
+                        print(str(rw))
 
                 if a_txt_year in dict_year_m4:
                     dict_year_m4[a_txt_year] = dict_year_m4[a_txt_year] + 1
@@ -2243,7 +2245,7 @@ class Orottick4Simulator:
             ok4s.m4p_train(LOTTE_KIND, M4P_TRAIN_DATA_DIR, M4P_TRAIN_SAVE_DIR)
 
         if METHOD == 'research_a':
-            rdf = ok4s.research_a(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, RUNTIME)
+            rdf = ok4s.research_a(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
 
             if rdf is not None:
                 rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-{BUY_DATE}.csv', index=False)
