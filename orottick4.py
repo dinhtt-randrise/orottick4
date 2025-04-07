@@ -997,7 +997,7 @@ class Orottick4Simulator:
         '''
         print(text) 
 
-    def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
+    def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None, catch_kind = 'same_month'):
         self.print_heading()
 
         text = '''
@@ -1278,8 +1278,11 @@ class Orottick4Simulator:
                 if len(cdf) == 0:
                     cdf = None
                 else:
-                    #cdf = cdf[(cdf['a_txt_day'] == x_txt_day)&(cdf['a_txt_month'] == x_txt_month)]
-                    cdf = cdf[(cdf['a_txt_month'] == x_txt_month)]
+                    if catch_kind == 'previous_year':
+                        xt_year = int(x_txt_year)
+                        cdf = cdf[(cdf['a_year'] == xt_year)]
+                    else:
+                        cdf = cdf[(cdf['a_txt_month'] == x_txt_month)]
                     if len(cdf) == 0:
                         cdf = None
             except Exception as e:
@@ -1302,7 +1305,7 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
-    def research_b_predict(self, v_buy_date, data_df, runtime):
+    def research_b_predict(self, v_buy_date, data_df, runtime, catch_kind = 'previous_year'):
         start_time = time.time()
         xdf = data_df[data_df['buy_date'] == v_buy_date]
         if len(xdf) == 0:
@@ -1311,7 +1314,7 @@ class Orottick4Simulator:
         if len(ddf) == 0:
             return None, None
         ddf = data_df[data_df['buy_date'] < v_buy_date]
-        rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime)
+        rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind)
         if cdf is None:
             return None, None
         ddf = data_df[data_df['buy_date'] < v_buy_date]
@@ -1356,6 +1359,7 @@ class Orottick4Simulator:
         '''
         print(text) 
 
+        catch_kind = 'previous_year'
         v_data_df_is_none = False
         if data_df is None:
             v_data_df_is_none = True
@@ -1366,6 +1370,7 @@ class Orottick4Simulator:
         print(f'[BUY_DATE] {v_buy_date}')
         print(f'[DATE_CNT] {v_date_cnt}')
         print(f'[RUNTIME] {runtime}')
+        print(f'[CATCH_KIND] {catch_kind}')
 
         text = '''
   -------------------------------
@@ -1428,7 +1433,7 @@ class Orottick4Simulator:
             a_m4 = 0
             a_pred = ''
             a_date_cnt = ''
-            al_pred, al_date_cnt = self.research_b_predict(a_buy_date, oddf, a_runtime)
+            al_pred, al_date_cnt = self.research_b_predict(a_buy_date, oddf, a_runtime, catch_kind)
             if al_pred is not None and al_date_cnt is not None:
                 a_pred = ', '.join([str(x) for x in al_pred])
                 a_date_cnt = ', '.join([str(x) for x in al_date_cnt])
