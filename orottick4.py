@@ -1285,6 +1285,8 @@ class Orottick4Simulator:
                     if catch_kind == 'previous_year':
                         xt_year = int(x_txt_year) - 1
                         cdf = cdf[(cdf['a_year'] == xt_year)]
+                    elif catch_kind == 'same_date':
+                        cdf = cdf[(cdf['a_txt_day'] == x_txt_day)&(cdf['a_txt_month'] == x_txt_month)]                        
                     else:
                         cdf = cdf[(cdf['a_txt_month'] == x_txt_month)]
                     if len(cdf) == 0:
