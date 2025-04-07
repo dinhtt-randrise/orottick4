@@ -1059,6 +1059,45 @@ class Orottick4Simulator:
         ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
 
         start_time = time.time()
+
+        dict_year = {}
+        dict_month = {}
+        dict_year_month = {}
+        dict_day = {}
+
+        dict_year_m4 = {}
+        dict_month_m4 = {}
+        dict_year_month_m4 = {}
+        dict_day_m4 = {}
+
+        for ri in range(len(ddf)):
+            t_buy_date = ddf['buy_date'].iloc[ri]
+            bdfd = t_buy_date.split('.')
+
+            year = bdfd[0]
+            if year in dict_year:
+                dict_year[year] = dict_year[year] + 1
+            else:
+                dict_year[year] = 1
+
+            month = bdfd[1]
+            if month in dict_month:
+                dict_month[month] = dict_month[month] + 1
+            else:
+                dict_month[month] = 1
+            
+            year_month = bdfd[0] + '.' + bdfd[1]
+            if year_month in dict_year_month:
+                dict_year_month[year_month] = dict_year_month[year_month] + 1
+            else:
+                dict_year_month[year_month] = 1
+
+            day = bdfd[2]
+            if day in dict_day:
+                dict_day[day] = dict_day[day] + 1
+            else:
+                dict_day[day] = 1
+            
         rows = []
         dsz = len(ddf) * len(ddf)
         dix = 0
@@ -1076,7 +1115,23 @@ class Orottick4Simulator:
             a_w = ddf['w'].iloc[ria]
             a_n = ddf['n'].iloc[ria]
             a_sim_seed, a_sim_cnt = self.capture(a_w, a_n)
+
+            bdfd = a_buy_date.split('.')
+            a_txt_year = bdfd[0]
+            a_year = int(a_txt_year)
+            a_year_cnt = dict_year[a_txt_year]
+
+            a_txt_month = bdfd[1]
+            a_month = int(a_txt_month)
+            a_month_cnt = dict_month[a_txt_month]
             
+            a_txt_year_month = bdfd[0] + '.' + bdfd[1]
+            a_year_month_cnt = dict_year_month[a_txt_year_month]
+
+            a_txt_day = bdfd[2]
+            a_day = int(a_txt_day)
+            a_day_cnt = dict_day[a_txt_day]
+
             for rib in range(len(ddf)):
                 if runtime is not None:
                     if time.time() - start_time > runtime:
@@ -1110,16 +1165,98 @@ class Orottick4Simulator:
                 a_date_cnt = ria - rib
                 b_date_no = rib + 1
 
-                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_m4': a_m4, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
+                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_txt_year': a_txt_year, 'a_year': a_year, 'a_year_cnt': a_year_cnt, 'a_year_cnt_m4': 0, 'a_txt_month': a_txt_month, 'a_month': a_month, 'a_month_cnt': a_month_cnt, 'a_month_cnt_m4': 0, 'a_txt_year_month': a_txt_year_month, 'a_year_month_cnt': a_year_month_cnt, 'a_year_month_cnt_m4': 0, 'a_txt_day': a_txt_day, 'a_day': a_day, 'a_day_cnt': a_day_cnt, 'a_day_cnt_m4': 0, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_m4': a_m4, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
                 rows.append(rw)
                 
                 if dix_m4 % dcnt_m4 == 0:
                     print(str(rw))
 
+                if a_txt_year in dict_year_m4:
+                    dict_year_m4[a_txt_year] = dict_year_m4[a_txt_year] + 1
+                else:
+                    dict_year_m4[a_txt_year] = 1
+
+                if a_txt_month in dict_month_m4:
+                    dict_month_m4[a_txt_month] = dict_month_m4[a_txt_month] + 1
+                else:
+                    dict_month_m4[a_txt_month] = 1
+            
+                if a_txt_year_month in dict_year_month_m4:
+                    dict_year_month_m4[a_txt_year_month] = dict_year_month_m4[a_txt_year_month] + 1
+                else:
+                    dict_year_month_m4[a_txt_year_month] = 1
+
+                if a_txt_day in dict_day_m4:
+                    dict_day_m4[a_txt_day] = dict_day_m4[a_txt_day] + 1
+                else:
+                    dict_day_m4[a_txt_day] = 1
+
         if len(rows) > 0:
             rdf = pd.DataFrame(rows)
+            ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
             rdf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
 
+            try:
+                l_txt_year = list(rdf['a_txt_year'].unique())
+                nrdf = None
+                for t_txt_year in l_txt_year:
+                    df = rdf[rdf['a_txt_year'] == t_txt_year]
+                    v = 0
+                    if t_txt_year in dict_year_m4:
+                        v = dict_year_m4[t_txt_year]
+                    df['a_year_cnt_m4'] = v
+                    if nrdf is None:
+                        nrdf = df
+                    else:
+                        nrdf = pd.concat([nrdf, df])
+                rdf = nrdf
+    
+                l_txt_month = list(rdf['a_txt_month'].unique())
+                nrdf = None
+                for t_txt_month in l_txt_month:
+                    df = rdf[rdf['a_txt_month'] == t_txt_month]
+                    v = 0
+                    if t_txt_month in dict_month_m4:
+                        v = dict_month_m4[t_txt_month]
+                    df['a_month_cnt_m4'] = v
+                    if nrdf is None:
+                        nrdf = df
+                    else:
+                        nrdf = pd.concat([nrdf, df])
+                rdf = nrdf
+    
+                l_txt_year_month = list(rdf['a_txt_year_month'].unique())
+                nrdf = None
+                for t_txt_year_month in l_txt_year_month:
+                    df = rdf[rdf['a_txt_year_month'] == t_txt_year_month]
+                    v = 0
+                    if t_txt_year_month in dict_year_month_m4:
+                        v = dict_year_month_m4[t_txt_year_month]
+                    df['a_year_month_cnt_m4'] = v
+                    if nrdf is None:
+                        nrdf = df
+                    else:
+                        nrdf = pd.concat([nrdf, df])
+                rdf = nrdf
+    
+                l_txt_day = list(rdf['a_txt_day'].unique())
+                nrdf = None
+                for t_txt_day in l_txt_day:
+                    df = rdf[rdf['a_txt_day'] == t_txt_day]
+                    v = 0
+                    if t_txt_day in dict_day_m4:
+                        v = dict_day_m4[t_txt_day]
+                    df['a_day_cnt_m4'] = v
+                    if nrdf is None:
+                        nrdf = df
+                    else:
+                        nrdf = pd.concat([nrdf, df])
+                rdf = nrdf
+            except Exception as e:
+                msg = str(e)
+                print(f'=> [E] {msg}')
+                rdf = ordf
+                
         try:
             self.save_cache()
         except Exception as e:
