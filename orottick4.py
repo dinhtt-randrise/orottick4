@@ -1353,9 +1353,10 @@ class Orottick4Simulator:
 
         return xl_pred, xl_date_cnt    
 
-    def research_b_mpc(self, v_buy_date, data_df, runtime):
+    def m4pc_data(self, v_buy_date, data_df, runtime):
         rdf = None
         cdf = None
+        rw = None
         catch_kind = 'same_date'
         start_time = time.time()
         xdf = data_df[data_df['buy_date'] == v_buy_date]
@@ -1365,19 +1366,70 @@ class Orottick4Simulator:
         if len(ddf) == 0:
             return 0, rdf, cdf
         ddf = data_df[data_df['buy_date'] < v_buy_date]
-        rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind, True)
-        if cdf is None:
-            return 0, rdf, cdf
-        return 1, rdf, cdf
+        ardf, acdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind, True)
+        if ardf is None:
+            return rw, rdf, cdf
 
-    def research_b(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
+        rw = {}
+
+        min_date_cnt = 1
+        max_date_cnt = 56 * 5
+        df1 = ardf[(ardf['a_date_cnt'] >= min_date_cnt)&(ardf['a_date_cnt'] <= max_cnt)]
+        rw['date_cnt_ir'] = len(df1)
+        rw['date_cnt_or'] = len(ardf) - len(df1)
+
+        rw['year_ir'] = 0
+        rw['year_or'] = 0
+        rw['p_year_ir'] = 0
+        rw['p_year_or'] = 0
+        rw['month_ir'] = 0
+        rw['month_or'] = 0
+        rw['day_ir'] = 0
+        rw['day_or'] = 0
+        rw['month_day_ir'] = 0
+        rw['month_day_or'] = 0
+
+        bdfd = v_buy_date.split('.')
+        a_year = int(bdfd[0])
+        a_p_year = a_year - 1
+        a_month = int(bdfd[1])
+        a_day = int(bdfd[2])
+
+        if len(df1) > 0:
+            df = df1[df1['a_year'] == a_year]
+            rw['year_ir'] = len(df)
+            rw['year_or'] = len(df1) - len(df)
+
+            df = df1[df1['a_year'] == a_p_year]
+            rw['p_year_ir'] = len(df)
+            rw['p_year_or'] = len(df1) - len(df)
+
+            df = df1[df1['a_month'] == a_month]
+            rw['month_ir'] = len(df)
+            rw['month_or'] = len(df1) - len(df)
+
+            df = df1[df1['a_day'] == a_day]
+            rw['day_ir'] = len(df)
+            rw['day_or'] = len(df1) - len(df)
+
+            df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_day)]
+            rw['month_day_ir'] = len(df)
+            rw['month_day_or'] = len(df1) - len(df)
+            
+        
+        rdf = pd.DataFrame([rw])
+        cdf = ardf
+        
+        return rw, rdf, cdf
+
+    def m4pc_prepare(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
         self.print_heading()
 
         more = {}
         
         text = '''
 ====================================
-          RESEARCH B
+           M4PC PREPARE
   -------------------------------
         '''
         print(text) 
@@ -1446,9 +1498,6 @@ class Orottick4Simulator:
         dix = 0
         dcnt = 10
         dix_m4 = 0
-        dix_m4pc = 0
-        dix_m4pc_2 = 0
-        dix_m4pc_3 = 0
         dcnt_m4 = 10
         dsz = len(ddf)
         if dsz < 365:
@@ -1469,32 +1518,30 @@ class Orottick4Simulator:
                 a_runtime = runtime - o_runtime
 
             a_m4 = 0
+            a_m4pc = 0
             df = xrdf[xrdf['a_buy_date'] == a_buy_date]
             if len(df) > 0:
                 a_m4 = len(df)
-            a_m4pc, rdf, cdf = self.research_b_mpc(a_buy_date, oddf, a_runtime)
-            if rdf is not None:
-                more[f'rdf_{a_buy_date}'] = rdf
-            if cdf is not None:
-                more[f'cdf_{a_buy_date}'] = cdf
+                a_m4pc = 1
+            a_rw, a_rdf, a_cdf = self.m4pc_data(a_buy_date, oddf, a_runtime)
+            if a_rdf is not None:
+                more[f'rdf_{a_buy_date}'] = a_rdf
+            if a_cdf is not None:
+                more[f'cdf_{a_buy_date}'] = a_cdf
                 
             dix += 1
             if a_m4 > 0:
                 dix_m4 += 1
-                if a_m4pc > 0:
-                    dix_m4pc += 1
-                else:
-                    dix_m4pc_3 += 1
-            else:
-                if a_m4pc > 0:
-                    dix_m4pc_2 += 1
 
             if dix > 0 and dix % dcnt == 0:
                 if has_log_step:
-                    print(f'== [R] ==> {dix}, {dix_m4}, {dix_m4pc} --- {dix_m4pc_2}, {dix_m4pc_3} / {dsz}')
+                    print(f'== [R] ==> {dix}, {dix_m4} / {dsz}')
 
             rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4pc': a_m4pc, 'm4': a_m4}
-            rows.append(rw)
+            if a_rw is not None:
+                for key in a_rw.keys():
+                    rw[key] = a_rw[key]
+                rows.append(rw)
 
             if dix_m4 <= 1:
                 if dix > 0 and dix <= 50:
@@ -1510,9 +1557,7 @@ class Orottick4Simulator:
 
         if len(rows) > 0:
             rdf = pd.DataFrame(rows)
-            cdf = rdf[(rdf['m4'] > 0)&(rdf['m4pc'] > 0)]
-            if len(cdf) == 0:
-                cdf = None
+            cdf = xrdf
                 
         try:
             self.save_cache()
@@ -1522,7 +1567,7 @@ class Orottick4Simulator:
 
         text = '''
   -------------------------------
-          RESEARCH B
+           M4PC PREPARE
 ====================================
         '''
         print(text)
@@ -2648,18 +2693,18 @@ class Orottick4Simulator:
             if cdf is not None:
                 cdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-a-date_cnt-{BUY_DATE}.csv', index=False)
 
-        if METHOD == 'research_b':
-            ardf, acdf, more = ok4s.research_b(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
+        if METHOD == 'm4pc_prepare':
+            ardf, acdf, more = ok4s.m4pc_prepare(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
 
             if ardf is not None:
-                ardf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-{BUY_DATE}.csv', index=False)
+                ardf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-rdf-{BUY_DATE}.csv', index=False)
 
             if acdf is not None:
-                acdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-m4-{BUY_DATE}.csv', index=False)
+                acdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-cdf-{BUY_DATE}.csv', index=False)
 
             for key in more.keys():
                 adf = more[key]
                 if adf is not None:
-                    adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-research-b-{key}-{BUY_DATE}.csv', index=False)
+                    adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-{key}-{BUY_DATE}.csv', index=False)
                     
 # ------------------------------------------------------------ #
