@@ -2698,7 +2698,7 @@ class Orottick4Simulator:
                     ok4s.m4pl_step = ok4s.m4pm['m4pl_step']
 
 
-        m4pcm_fn = f'{M4P_MODEL_DIR}/{LOTTE_KIND}-m4pcm.pkl'
+        m4pcm_fn = f'{M4PC_MODEL_DIR}/{LOTTE_KIND}-m4pcm.pkl'
         if os.path.exists(m4pcm_fn):
             with open(m4pcm_fn, 'rb') as f:
                 ok4s.m4pcm = pickle.load(f)
