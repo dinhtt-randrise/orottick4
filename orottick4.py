@@ -1106,9 +1106,11 @@ class Orottick4Simulator:
             )
             
             vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
+            df = vadf[vadf['m4pc'] == 1]
+            vcnt_sz = len(df)
             vadf['nm4pc'] = model.predict(vadf[features])
             df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
-            vcnt = len(df)
+            vcnt = vcnt_sz - len(df)
 
             df = vadf[vadf['m4pc'] == 1]
             sz = len(df)
@@ -1118,7 +1120,7 @@ class Orottick4Simulator:
             scores = []
             for name, score in model.best_score_['valid_0'].items():
                 scores.append(score)
-            return np.mean(scores) - vcnt
+            return np.mean(scores) + vcnt
 
             
         study = optuna.create_study(direction='minimize',
@@ -1150,7 +1152,7 @@ class Orottick4Simulator:
         sz = len(df)
         print(f'== [M4PC_CNT_FINAL] ==> {vcnt} / {sz}')
 
-        m4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_sz': m4pc_sz, 'model': model}
+        m4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_sz': sz, 'model': model}
         with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
             pickle.dump(m4pcm, f)
 
