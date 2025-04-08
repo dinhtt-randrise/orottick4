@@ -1111,7 +1111,7 @@ class Orottick4Simulator:
             vadf['nm4pc'] = model.predict(vadf[features])
             df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
             vcnt2 = len(df)
-            vcnt = vcnt_sz - vnct2
+            vcnt = vcnt_sz - vcnt2
 
             df = vadf[vadf['m4pc'] == 1]
             sz = len(df)
