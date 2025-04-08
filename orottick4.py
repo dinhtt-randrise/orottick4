@@ -2892,6 +2892,6 @@ class Orottick4Simulator:
                     adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-{key}-{BUY_DATE}.csv', index=False)
 
         if METHOD == 'm4pc_train':
-            ok4s.m4pc_train(LOTTE_KIND, M4P_TRAIN_DATA_DIR, M4P_TRAIN_SAVE_DIR)
+            ok4s.m4pc_train(LOTTE_KIND, M4PC_TRAIN_DATA_DIR, M4PC_TRAIN_SAVE_DIR)
 
 # ------------------------------------------------------------ #
