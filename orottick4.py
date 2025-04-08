@@ -2702,6 +2702,7 @@ class Orottick4Simulator:
         if os.path.exists(m4pcm_fn):
             with open(m4pcm_fn, 'rb') as f:
                 ok4s.m4pcm = pickle.load(f)
+                print('== [M4PC_MODEL] ==> Loaded!')
         
         if METHOD == 'build_cache':
             cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
