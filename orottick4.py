@@ -1526,7 +1526,12 @@ class Orottick4Simulator:
     def capture_m4pc(self, v_buy_date, data_df, runtime):
         if self.m4pcm is None:
             return None
-            
+
+        SEED = 311
+        random.seed(SEED)
+        os.environ["PYTHONHASHSEED"] = str(SEED)
+        np.random.seed(SEED)
+        
         rw, rdf, cdf = self.m4pc_data(v_buy_date, data_df, runtime)
         if rdf is None:
             return None
@@ -1547,10 +1552,10 @@ class Orottick4Simulator:
         start_time = time.time()
         xdf = data_df[data_df['buy_date'] == v_buy_date]
         if len(xdf) == 0:
-            return 0, rdf, cdf
+            return rw, rdf, cdf
         ddf = data_df[data_df['buy_date'] < v_buy_date]
         if len(ddf) == 0:
-            return 0, rdf, cdf
+            return rw, rdf, cdf
         ddf = data_df[data_df['buy_date'] < v_buy_date]
         ardf, acdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind, True)
         if ardf is None:
