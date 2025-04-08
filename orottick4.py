@@ -1217,7 +1217,7 @@ class Orottick4Simulator:
             if data_df is None:
                 return rdf, cdf
 
-        ddf = data_df[data_df['buy_date'] <= v_buy_date]
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
         if len(ddf) == 0:
             return rdf, cdf
             
