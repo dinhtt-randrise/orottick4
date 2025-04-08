@@ -1100,7 +1100,7 @@ class Orottick4Simulator:
                 train_df[features],
                 train_df[target],
                 eval_set=[(valid_df[features], valid_df[target])],
-                eval_at=[1, 3, 5, 10, 20], # calc validation ndcg@1,3,5,10,20
+                #eval_at=[1, 3, 5, 10, 20], # calc validation ndcg@1,3,5,10,20
                 #early_stopping_rounds=50,
                 #verbose=10
             )
@@ -1136,7 +1136,7 @@ class Orottick4Simulator:
             train_df[features],
             train_df[target],
             eval_set=[(valid_df[features], valid_df[target])],
-            eval_at=[1, 3, 5, 10, 20],
+            #eval_at=[1, 3, 5, 10, 20],
             #early_stopping_rounds=50,
             #verbose=10
         )
