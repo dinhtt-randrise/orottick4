@@ -1114,7 +1114,8 @@ class Orottick4Simulator:
 
             df = vadf[vadf['m4pc'] == 1]
             sz = len(df)
-            print(f'== [M4PC_CNT] ==> {vcnt} / {sz}')
+            tn = trial.number
+            print(f'== [M4PC_CNT_{tn}] ==> {vcnt} / {sz}')
             
             # maximize mean ndcg
             scores = []
