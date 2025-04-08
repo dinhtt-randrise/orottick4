@@ -1069,6 +1069,7 @@ class Orottick4Simulator:
 
         features = ['date_cnt_ir', 'date_cnt_or', 'year_ir', 'year_or', 'p_year_ir', 'p_year_or', 'month_ir', 'month_or', 'day_ir', 'day_or', 'month_day_ir', 'month_day_or']
 
+        min_date_cnt = 1
         max_date_cnt = 56 * 5
         dcnt_step = 5
         dcnt_min = min_date_cnt
