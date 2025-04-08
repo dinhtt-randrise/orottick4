@@ -997,6 +997,169 @@ class Orottick4Simulator:
         '''
         print(text) 
 
+    def m4pc_train(self, lotte_kind, data_dir, save_dir):
+        self.print_heading()
+
+        text = '''
+====================================
+            M4PC TRAIN
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        print(f'LOTTE_KIND: {lotte_kind}')
+        print(f'DATA_DIR: {data_dir}')
+        print(f'SAVE_DIR: {save_dir}')
+
+        SEED = 311
+        random.seed(SEED)
+        os.environ["PYTHONHASHSEED"] = str(SEED)
+        np.random.seed(SEED)
+
+        all_df = None
+        rdf_glob_fn = glob.glob(f'{data_dir}/{lotte_kind}-m4pc-rdf-*.*.*.csv')
+        for rdf_fn in rdf_glob_fn:
+            df = pd.read_csv(rdf_fn)
+            if all_df is None:
+                all_df = df
+            else:
+                all_df = pd.concat([all_df, df])
+
+        all_df = all_df.sample(frac=1)
+
+        adf1 = all_df[all_df['m4pc'] == 1]
+        adf0 = all_df[all_df['m4pc'] == 0]
+
+        sz = len(adf1)
+        sz = int(round(sz * 0.2))
+        valid1_df = adf1[:sz]
+        train1_df = adf1[sz:]
+
+        sz = len(adf0)
+        sz = int(round(sz * 0.2))
+        valid0_df = adf0[:sz]
+        train0_df = adf0[sz:]
+
+        valid_df = pd.concat([valid1_df, valid0_df])
+        train_df = pd.concat([train1_df, train0_df])
+
+        valid_df = valid_df.sample(frac=1)
+        train_df = train_df.sample(frac=1)
+        
+        sz = len(all_df)
+        print(f'ALL_SZ: {sz}')
+
+        sz = len(train_df)
+        print(f'TRAIN_SZ: {sz}')
+
+        sz = len(valid_df)
+        print(f'VALID_SZ: {sz}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        features = ['date_cnt_ir', 'date_cnt_or', 'year_ir', 'year_or', 'p_year_ir', 'p_year_or', 'month_ir', 'month_or', 'day_ir', 'day_or', 'month_day_ir', 'month_day_or']
+
+        max_date_cnt = 56 * 5
+        dcnt_step = 5
+        dcnt_min = min_date_cnt
+        dcnt_max = dcnt_min + dcnt_step - 1
+        while dcnt_max <= max_date_cnt:
+            features.append(f'date_cnt_{dcnt_max}_ir')
+            features.append(f'date_cnt_{dcnt_max}_or')
+            dcnt_min += dcnt_step
+            dcnt_max = dcnt_min + dcnt_step - 1
+
+        target = 'm4pc'
+
+        def objective(trial):
+            # search param
+            param = {
+                'reg_alpha': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
+                'reg_lambda': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
+                'num_leaves': trial.suggest_int('num_leaves', 2, 256),
+                'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.1, 1), 
+                #'subsample': trial.suggest_uniform('subsample', 1e-8, 1), 
+                'min_child_samples': trial.suggest_int('min_child_samples', 5, 100), 
+            }
+             
+            #train model
+            model = lgb.LGBMClassifier(n_estimators=1000, **param, random_state=SEED,early_stopping_rounds=50,verbose=10)
+            model.fit(
+                train_df[features],
+                train_df[target],
+                eval_set=[(valid_df[features], valid_df[target])],
+                eval_at=[1, 3, 5, 10, 20], # calc validation ndcg@1,3,5,10,20
+                #early_stopping_rounds=50,
+                #verbose=10
+            )
+            
+            vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
+            vadf['nm4pc'] = model.predict(vadf[features])
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
+            vcnt = len(df)
+
+            df = vadf[vadf['m4pc'] == 1]
+            sz = len(df)
+            print(f'== [M4PC_CNT] ==> {vcnt} / {sz}')
+            
+            # maximize mean ndcg
+            scores = []
+            for name, score in model.best_score_['valid_0'].items():
+                scores.append(score)
+            return np.mean(scores) - vcnt
+
+            
+        study = optuna.create_study(direction='minimize',
+                                    sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
+                                   )
+        study.optimize(objective, n_trials=100)
+
+        print('Number of finished trials:', len(study.trials))
+        print('Best trial:', study.best_trial.params)        
+
+        # train with best params
+        best_params = study.best_trial.params
+        model = lgb.LGBMClassifier(n_estimators=1000, **best_params, random_state=SEED,early_stopping_rounds=50,verbose=10)
+        model.fit(
+            train_df[features],
+            train_df[target],
+            eval_set=[(valid_df[features], valid_df[target])],
+            eval_at=[1, 3, 5, 10, 20],
+            #early_stopping_rounds=50,
+            #verbose=10
+        )
+        
+        vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
+        vadf['nm4pc'] = model.predict(vadf[features])
+        df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
+        vcnt = len(df)
+
+        df = vadf[vadf['m4pc'] == 1]
+        sz = len(df)
+        print(f'== [M4PC_CNT_FINAL] ==> {vcnt} / {sz}')
+
+        m4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_sz': m4pc_sz, 'model': model}
+        with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
+            pickle.dump(m4pcm, f)
+
+        text = '''
+  -------------------------------
+            M4PC TRAIN
+====================================
+        '''
+        print(text) 
+
     def research_a(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None, catch_kind = 'same_month', silent = False):
         self.print_heading()
 
@@ -2467,6 +2630,9 @@ class Orottick4Simulator:
         M4PL_MIN = Orottick4Simulator.get_option(options, 'M4PL_MIN', -2)
         M4PL_STEP = Orottick4Simulator.get_option(options, 'M4PL_STEP', 0.0225)
 
+        M4PC_TRAIN_DATA_DIR = Orottick4Simulator.get_option(options, 'M4PC_TRAIN_DATA_DIR', '/kaggle/working')
+        M4PC_TRAIN_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4PC_TRAIN_SAVE_DIR', '/kaggle/working')
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -2724,5 +2890,8 @@ class Orottick4Simulator:
                 adf = more[key]
                 if adf is not None:
                     adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-{key}-{BUY_DATE}.csv', index=False)
-                    
+
+        if METHOD == 'm4pc_train':
+            ok4s.m4pc_train(LOTTE_KIND, M4P_TRAIN_DATA_DIR, M4P_TRAIN_SAVE_DIR)
+
 # ------------------------------------------------------------ #
