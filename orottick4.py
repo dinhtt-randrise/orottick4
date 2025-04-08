@@ -89,6 +89,8 @@ class Orottick4Simulator:
 
         self.lotte_kind = 'p4a'
 
+        self.m4pcm = None
+        
         self.m4pm = None
         self.m4p_cnt = -1
         self.m4p_ranker_only = False
@@ -1521,6 +1523,17 @@ class Orottick4Simulator:
 
         return xl_pred, xl_date_cnt    
 
+    def capture_m4pc(self, v_buy_date, data_df, runtime):
+        if self.m4pcm is None:
+            return None
+            
+        rw, rdf, cdf = self.m4pc_data(v_buy_date, data_df, runtime)
+        if rdf is None:
+            return None
+
+        p = self.m4pcm['model'].predict(rdf[self.m4pcm['features']])
+        return p[0]
+        
     def m4pc_data(self, v_buy_date, data_df, runtime):
         rdf = None
         cdf = None
@@ -2231,6 +2244,12 @@ class Orottick4Simulator:
             if pso == 'B' and pdf is not None:
                 if len(pdf) > 0:
                     if len(xdf) > 0:
+                        v_runtime = None
+                        if runtime is not None:
+                            vo_runtime = time.time() - start_time 
+                            v_runtime = runtime - vo_runtime 
+                        vm4pc2 = self.capture_m4pc(v_buy_date, data_df, v_runtime)
+                        
                         lx_pred, vm4pc = self.capture_m4p(pdf, xdf['sim_seed'].iloc[0])
                         if len(lx_pred) > 0:
                             m4pc = vm4pc
@@ -2240,7 +2259,11 @@ class Orottick4Simulator:
                                     lx_pred = lx_pred[:m4p_cnt]
                             lx_pred = [str(x) for x in lx_pred]
                             m4_pred = ', '.join(lx_pred)
-                            m4p_use = True
+                            m4p_use = True 
+
+                        if vm4pc2 is not None:
+                            m4pc = vm4pc2
+                             
                             
             if not m4p_use and len(kdf) > 0 and len(xdf) > 0:
                 kdf = kdf[kdf['m4'] > 0]
@@ -2638,6 +2661,8 @@ class Orottick4Simulator:
         M4PC_TRAIN_DATA_DIR = Orottick4Simulator.get_option(options, 'M4PC_TRAIN_DATA_DIR', '/kaggle/working')
         M4PC_TRAIN_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4PC_TRAIN_SAVE_DIR', '/kaggle/working')
 
+        M4PC_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4PC_MODEL_DIR', '/kaggle/working')
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -2671,7 +2696,13 @@ class Orottick4Simulator:
                     ok4s.m4pl_min = ok4s.m4pm['m4pl_min']
                 if 'm4pl_step' in ok4s.m4pm:
                     ok4s.m4pl_step = ok4s.m4pm['m4pl_step']
-                    
+
+
+        m4pcm_fn = f'{M4P_MODEL_DIR}/{LOTTE_KIND}-m4pcm.pkl'
+        if os.path.exists(m4pcm_fn):
+            with open(m4pcm_fn, 'rb') as f:
+                ok4s.m4pcm = pickle.load(f)
+        
         if METHOD == 'build_cache':
             cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
             if cdf is not None:
