@@ -1532,7 +1532,12 @@ class Orottick4Simulator:
             return None
 
         p = self.m4pcm['model'].predict(rdf[self.m4pcm['features']])
-        return p[0]
+
+        m4pc = int(p[0])
+        
+        print(f'== [M4PC] ==> {v_buy_date} -> {m4pc}')
+        
+        return m4pc
         
     def m4pc_data(self, v_buy_date, data_df, runtime):
         rdf = None
