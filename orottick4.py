@@ -1113,12 +1113,14 @@ class Orottick4Simulator:
             vadf['nm4pc'] = model.predict(vadf[features])
             df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
             vcnt2 = len(df)
-            vcnt = vcnt_sz - vcnt2
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
+            vcnt3 = len(df)
+            vcnt = vcnt_sz - (vcnt2 - vcnt3)
 
             df = vadf[vadf['m4pc'] == 1]
             sz = len(df)
             tn = trial.number
-            print(f'== [M4PC_CNT_{tn}] ==> {vcnt}, {vcnt2} / {sz}')
+            print(f'== [M4PC_CNT_{tn}] ==> {vcnt}, {vcnt2}, {vcnt3} / {sz}')
             
             # maximize mean ndcg
             scores = []
@@ -1151,12 +1153,14 @@ class Orottick4Simulator:
         vadf['nm4pc'] = model.predict(vadf[features])
         df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
         vcnt = len(df)
+        df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
+        vcnt2 = len(df)
 
         df = vadf[vadf['m4pc'] == 1]
         sz = len(df)
-        print(f'== [M4PC_CNT_FINAL] ==> {vcnt} / {sz}')
+        print(f'== [M4PC_CNT_FINAL] ==> {vcnt}, {vcnt2} / {sz}')
 
-        m4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_sz': sz, 'model': model}
+        m4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_cnt_fn': vcnt2, 'm4pc_sz': sz, 'model': model}
         with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
             pickle.dump(m4pcm, f)
 
