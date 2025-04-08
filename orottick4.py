@@ -1538,9 +1538,12 @@ class Orottick4Simulator:
 
         p = self.m4pcm['model'].predict(rdf[self.m4pcm['features']])
 
-        m4pc = int(p[0])
+        rdf['p'] = p
+        m4pc2 = str(p[0])
+        m4pc3 = int(p[0])
+        m4pc = int(rdf['p'].iloc[0])
         
-        print(f'== [M4PC] ==> {v_buy_date} -> {m4pc}')
+        print(f'== [M4PC] ==> {v_buy_date} -> {m4pc}, {m4pc2}, {m4pc3}')
         
         return m4pc
         
