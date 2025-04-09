@@ -1097,9 +1097,10 @@ class Orottick4Simulator:
             param = {
                 'reg_alpha': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
                 'reg_lambda': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
-                'max_depth': trial.suggest_int('max_depth', 3, 8),
+                'max_depth': trial.suggest_int('max_depth', 2, 8),
                 'num_leaves': trial.suggest_int('num_leaves', 2, 256),
-                'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.1, 1), 
+                'colsample_bytree': 1,
+                #'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.1, 1), 
                 #'subsample': trial.suggest_uniform('subsample', 1e-8, 1), 
                 'min_child_samples': trial.suggest_int('min_child_samples', 5, 100), 
             }
