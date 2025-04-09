@@ -1085,8 +1085,8 @@ class Orottick4Simulator:
         dcnt_min = min_date_cnt
         dcnt_max = dcnt_min + dcnt_step - 1
         while dcnt_max <= max_date_cnt:
-            features.append(f'date_cnt_{dcnt_max}_ir')
-            features.append(f'date_cnt_{dcnt_max}_or')
+            #features.append(f'date_cnt_{dcnt_max}_ir')
+            #features.append(f'date_cnt_{dcnt_max}_or')
             dcnt_min += dcnt_step
             dcnt_max = dcnt_min + dcnt_step - 1
 
