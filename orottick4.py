@@ -1186,10 +1186,11 @@ class Orottick4Simulator:
 
             return score, vm4pcm
 
+        rows = []
         try_no = 1
         mx_score = 1000
         m4pcm = None
-        while try_no <= 15:
+        while try_no <= 5:
             score, vm4pcm = do_try()
             if score < mx_score:
                 vcnt = vm4pcm['m4pc_cnt']
@@ -1197,8 +1198,12 @@ class Orottick4Simulator:
                 sz = vm4pcm['m4pc_sz']
                 print(f'== [M4PC_GOOD_{try_no}] ==> {vcnt}, {vcnt2} / {sz}')
                 m4pcm = vm4pcm
+                rw = {'try_no': try_no, 'm4pc_cnt': vcnt, 'm4pc_cnt_fn': vcnt2, 'm4pc_sz': sz}
+                rows.append(rw)
             try_no += 1
-            
+        sdf = pd.DataFrame(rows)
+        sdf.to_csv('/kaggle/working/sdf.csv', index=False)
+        
         with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
             pickle.dump(m4pcm, f)
 
