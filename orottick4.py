@@ -1000,6 +1000,8 @@ class Orottick4Simulator:
         print(text) 
 
     def m4pc_train(self, lotte_kind, data_dir, save_dir):
+        global all_df, valid_df, train_df
+        
         self.print_heading()
 
         text = '''
@@ -1039,6 +1041,9 @@ class Orottick4Simulator:
         sz = len(all_df)
         print(f'ALL_SZ: {sz}')
 
+        valid_df = None
+        train_df = None
+        
         #sz = len(train_df)
         #print(f'TRAIN_SZ: {sz}')
 
@@ -1113,6 +1118,8 @@ class Orottick4Simulator:
             return np.mean(scores) + vcnt
 
         def do_try():
+            global all_df, valid_df, train_df
+            
             all_df = all_df.sample(frac=1)
             
             adf1 = all_df[all_df['m4pc'] == 1]
