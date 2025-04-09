@@ -1190,9 +1190,10 @@ class Orottick4Simulator:
         try_no = 1
         mx_score = 1000
         m4pcm = None
-        while try_no <= 5:
+        while try_no <= 300:
             score, vm4pcm = do_try()
             if score < mx_score:
+                mx_score = score
                 vcnt = vm4pcm['m4pc_cnt']
                 vcnt2 = vm4pcm['m4pc_cnt_fn']
                 sz = vm4pcm['m4pc_sz']
