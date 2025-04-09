@@ -1057,6 +1057,9 @@ class Orottick4Simulator:
         valid_df = pd.concat([valid1_df, valid0_df])
         train_df = pd.concat([train1_df, train0_df])
 
+        train_df = pd.concat([valid_df, train_df])
+        valid_df = train_df
+
         valid_df = valid_df.sample(frac=1)
         train_df = train_df.sample(frac=1)
         
