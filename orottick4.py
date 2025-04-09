@@ -1115,7 +1115,7 @@ class Orottick4Simulator:
             vcnt2 = len(df)
             df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
             vcnt3 = len(df)
-            vcnt = vcnt_sz - (vcnt2 - vcnt3)
+            vcnt = vcnt2 - vcnt3
 
             df = vadf[vadf['m4pc'] == 1]
             sz = len(df)
@@ -1129,7 +1129,7 @@ class Orottick4Simulator:
             return np.mean(scores) + vcnt
 
             
-        study = optuna.create_study(direction='minimize',
+        study = optuna.create_study(direction='maximize',
                                     sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
                                    )
         study.optimize(objective, n_trials=100)
