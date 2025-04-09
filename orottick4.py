@@ -1036,42 +1036,15 @@ class Orottick4Simulator:
 
         all_df = all_df.sample(frac=1)
 
-        adf1 = all_df[all_df['m4pc'] == 1]
-        adf0 = all_df[all_df['m4pc'] == 0]
-
-        sz = len(adf1)
-        sz = int(round(sz * 0.2))
-        valid1_df = adf1[:sz]
-        train1_df = adf1[sz:]
-
-        sz = len(adf0)
-        sz = int(round(sz * 0.2))
-        valid0_df = adf0[:sz]
-        train0_df = adf0[sz:]
-
-        sz = len(valid1_df) * 5
-        valid0_df = valid0_df[:sz]
-        sz = len(train1_df) * 5
-        train0_df = train0_df[:sz]
-        
-        valid_df = pd.concat([valid1_df, valid0_df])
-        train_df = pd.concat([train1_df, train0_df])
-
-        train_df = pd.concat([valid_df, train_df])
-        valid_df = train_df
-
-        valid_df = valid_df.sample(frac=1)
-        train_df = train_df.sample(frac=1)
-        
         sz = len(all_df)
         print(f'ALL_SZ: {sz}')
 
-        sz = len(train_df)
-        print(f'TRAIN_SZ: {sz}')
+        #sz = len(train_df)
+        #print(f'TRAIN_SZ: {sz}')
 
-        sz = len(valid_df)
-        print(f'VALID_SZ: {sz}')
-
+        #sz = len(valid_df)
+        #print(f'VALID_SZ: {sz}')
+        
         text = '''
   -------------------------------
         '''
@@ -1085,12 +1058,14 @@ class Orottick4Simulator:
         dcnt_min = min_date_cnt
         dcnt_max = dcnt_min + dcnt_step - 1
         while dcnt_max <= max_date_cnt:
-            #features.append(f'date_cnt_{dcnt_max}_ir')
-            #features.append(f'date_cnt_{dcnt_max}_or')
+            features.append(f'date_cnt_{dcnt_max}_ir')
+            features.append(f'date_cnt_{dcnt_max}_or')
             dcnt_min += dcnt_step
             dcnt_max = dcnt_min + dcnt_step - 1
 
         target = 'm4pc'
+
+        try_no = 1
 
         def objective(trial):
             # search param
@@ -1129,7 +1104,7 @@ class Orottick4Simulator:
             df = vadf[vadf['m4pc'] == 1]
             sz = len(df)
             tn = trial.number
-            print(f'== [M4PC_CNT_{tn}] ==> {vcnt}, {vcnt2}, {vcnt3} / {sz}')
+            print(f'== [M4PC_CNT_{try_no}_{tn}] ==> {vcnt}, {vcnt2}, {vcnt3} / {sz}')
             
             # maximize mean ndcg
             scores = []
@@ -1137,39 +1112,86 @@ class Orottick4Simulator:
                 scores.append(score)
             return np.mean(scores) + vcnt
 
+        def do_try():
+            all_df = all_df.sample(frac=1)
             
-        study = optuna.create_study(direction='minimize',
-                                    sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
-                                   )
-        study.optimize(objective, n_trials=100)
+            adf1 = all_df[all_df['m4pc'] == 1]
+            adf0 = all_df[all_df['m4pc'] == 0]
+    
+            sz = len(adf1)
+            sz = int(round(sz * 0.2))
+            valid1_df = adf1[:sz]
+            train1_df = adf1[sz:]
+    
+            sz = len(adf0)
+            sz = int(round(sz * 0.2))
+            valid0_df = adf0[:sz]
+            train0_df = adf0[sz:]
+    
+            sz = len(valid1_df) * 5
+            valid0_df = valid0_df[:sz]
+            sz = len(train1_df) * 5
+            train0_df = train0_df[:sz]
+            
+            valid_df = pd.concat([valid1_df, valid0_df])
+            train_df = pd.concat([train1_df, train0_df])
+    
+            train_df = pd.concat([valid_df, train_df])
+            valid_df = train_df
+    
+            valid_df = valid_df.sample(frac=1)
+            train_df = train_df.sample(frac=1)
 
-        print('Number of finished trials:', len(study.trials))
-        print('Best trial:', study.best_trial.params)        
+            study = optuna.create_study(direction='minimize',
+                                        sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
+                                       )
+            study.optimize(objective, n_trials=100)
+    
+            print('Number of finished trials:', len(study.trials))
+            print('Best trial:', study.best_trial.params)        
+    
+            # train with best params
+            best_params = study.best_trial.params
+            model = lgb.LGBMClassifier(n_estimators=1000, **best_params, random_state=SEED,early_stopping_rounds=50,verbose=10)
+            model.fit(
+                train_df[features],
+                train_df[target],
+                eval_set=[(valid_df[features], valid_df[target])],
+                #eval_at=[1, 3, 5, 10, 20],
+                #early_stopping_rounds=50,
+                #verbose=10
+            )
+            
+            vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
+            
+            vadf['nm4pc'] = model.predict(vadf[features])
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
+            vcnt = len(df)
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
+            vcnt2 = len(df)
+    
+            df = vadf[vadf['m4pc'] == 1]
+            sz = len(df)
+            print(f'== [M4PC_CNT_{try_no}_FINAL] ==> {vcnt}, {vcnt2} / {sz}')
 
-        # train with best params
-        best_params = study.best_trial.params
-        model = lgb.LGBMClassifier(n_estimators=1000, **best_params, random_state=SEED,early_stopping_rounds=50,verbose=10)
-        model.fit(
-            train_df[features],
-            train_df[target],
-            eval_set=[(valid_df[features], valid_df[target])],
-            #eval_at=[1, 3, 5, 10, 20],
-            #early_stopping_rounds=50,
-            #verbose=10
-        )
-        
-        vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
-        vadf['nm4pc'] = model.predict(vadf[features])
-        df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
-        vcnt = len(df)
-        df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
-        vcnt2 = len(df)
+            score = sz - (vcnt - vcnt2)
+            vm4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_cnt_fn': vcnt2, 'm4pc_sz': sz, 'model': model}
 
-        df = vadf[vadf['m4pc'] == 1]
-        sz = len(df)
-        print(f'== [M4PC_CNT_FINAL] ==> {vcnt}, {vcnt2} / {sz}')
+            return score, vm4pcm
 
-        m4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_cnt_fn': vcnt2, 'm4pc_sz': sz, 'model': model}
+        try_no = 1
+        mx_score = 1000
+        m4pcm = None
+        while try_no <= 100:
+            score, vm4pcm = do_try()
+            if score < mx_score:
+                vcnt = vm4pcm['m4pc_cnt']
+                vcnt2 = vm4pcm['m4pc_cnt_fn']
+                sz = vm4pcm['m4pc_sz']
+                print(f'== [M4PC_GOOD_{try_no}] ==> {vcnt}, {vcnt2} / {sz}')
+                m4pcm = vm4pcm
+            try_no += 1
+            
         with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
             pickle.dump(m4pcm, f)
 
