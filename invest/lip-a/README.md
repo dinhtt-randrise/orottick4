@@ -21,7 +21,7 @@
 
   -------------------------------
 
-Follow "Research project A - Plan K" [ https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a ].
+Follow "Research project A - Plan O" [ https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a ].
 
 + Predict Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-rsp-a-k-2025-04-06
 
@@ -35,23 +35,23 @@ Follow "Research project A - Plan K" [ https://github.com/dinhtt-randrise/orotti
 + TCK_CNT: 280
 + F_TCK_CNT: 280
 + PRD_SORT_ORDER: B
-+ M4P_OBS: True
++ M4P_OBS: False
 + M4P_CNT: 10
 + M4P_VRY: False
 + M4PC_CHK: True
 + M4P_ONE: False
-+ M4P_OBS: True
 + M4P_MODEL: True
 + M4P_RANKER_ONLY: True
++ M4PC_MODEL: True
 + TCK_KIND: All 4 exact order
 + BROKER_COST: $0.3 / ticket
 
-==> [GOAL] Simulate buying tickets, track results and calculate ROI. By the way, real buying based on "Research project A - Plan K" with 2 times tickets.
+==> [GOAL] Simulate buying tickets, track results and calculate ROI. By the way, real buying based on "Research project A - Plan O" with 1 times tickets.
 ```
 
 ```
-  ----------- Plan K ------------
+  ----------- Plan O ------------
 ```
 
-![](https://github.com/dinhtt-randrise/orottick4/blob/596bf1be263710b22d460550c3d602ee6cd82602/research/rsp-a/orottick4-rsp-a-analyze-k.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/fed4e897e4927ee3e30e79a616ddd2b1ab4b1b37/research/rsp-a/orottick4-rsp-a-analyze-o.png)
 
