@@ -164,6 +164,15 @@ vok4.Orottick4Simulator.run(options, vok4, None)
 
 
 ====================================
+           M4PC MODELS
+  -------------------------------
+
+[ RSP A, Plan O]
+
++ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-m4pcm-rsp-a-o-2025-04-06
+
+
+====================================
            HOW TO INVEST
   -------------------------------
 
