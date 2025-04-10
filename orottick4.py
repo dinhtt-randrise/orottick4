@@ -1530,47 +1530,6 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
-    def research_b_predict(self, v_buy_date, data_df, runtime, catch_kind = 'previous_year'):
-        start_time = time.time()
-        xdf = data_df[data_df['buy_date'] == v_buy_date]
-        if len(xdf) == 0:
-            return None, None
-        ddf = data_df[data_df['buy_date'] < v_buy_date]
-        if len(ddf) == 0:
-            return None, None
-        ddf = data_df[data_df['buy_date'] < v_buy_date]
-        rdf, cdf = self.research_a(v_buy_date, None, None, data_df, 365 * 5, False, runtime, catch_kind, True)
-        if cdf is None:
-            return None, None
-        ddf = data_df[data_df['buy_date'] < v_buy_date]
-        if runtime is not None:
-            if time.time() - start_time > runtime:
-                return None, None
-        ddf = data_df[data_df['buy_date'] < v_buy_date]
-        x_n = xdf['n'].iloc[0]
-        x_sim_seed = self.capture_seed(x_n, 1)
-        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
-        ddf['x_date_cnt'] = [x+1 for x in range(len(ddf))]
-        cdf = cdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date'], ascending=[False, True, False])
-        al_date_cnt = list(cdf['a_date_cnt'].unique())
-        xl_date_cnt = []
-        xl_pred = []
-        for a_date_cnt in al_date_cnt: 
-            if runtime is not None:
-                if time.time() - start_time > runtime:
-                    break
-            df = ddf[ddf['x_date_cnt'] == a_date_cnt]
-            if len(df) == 0:
-                continue
-            b_w = df['w'].iloc[0]
-            b_n = df['n'].iloc[0]
-            b_sim_seed, b_sim_cnt = self.capture(b_w, b_n)
-            xp = self.reproduce_one(x_sim_seed, b_sim_cnt)
-            xl_date_cnt.append(a_date_cnt)
-            xl_pred.append(xp)
-
-        return xl_pred, xl_date_cnt    
-
     def capture_m4pc(self, v_buy_date, data_df, runtime):
         if self.m4pcm is None:
             return None
@@ -1833,146 +1792,6 @@ class Orottick4Simulator:
         print(text)
         
         return rdf, cdf, more
-
-    def research_b_old(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None):
-        self.print_heading()
-
-        text = '''
-====================================
-          RESEARCH B
-  -------------------------------
-        '''
-        print(text) 
-
-        text = '''
-  -------------------------------
-           PARAMETERS
-  -------------------------------
-        '''
-        print(text) 
-
-        catch_kind = 'previous_year'
-        v_data_df_is_none = False
-        if data_df is None:
-            v_data_df_is_none = True
-            
-        print(f'[BUFFER_DIR] {buffer_dir}')
-        print(f'[LOTTE_KIND] {lotte_kind}')
-        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
-        print(f'[BUY_DATE] {v_buy_date}')
-        print(f'[DATE_CNT] {v_date_cnt}')
-        print(f'[RUNTIME] {runtime}')
-        print(f'[CATCH_KIND] {catch_kind}')
-
-        text = '''
-  -------------------------------
-        '''
-        print(text) 
-
-        rdf = None
-        cdf = None
-        
-        if data_df is None:
-            d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
-            g = -1
-            d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
-            v_date = d2.strftime('%Y.%m.%d')
-    
-            data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
-            if data_df is None:
-                return rdf, cdf
-
-        ddf = data_df[data_df['buy_date'] <= v_buy_date]
-        if len(ddf) == 0:
-            return rdf, cdf
-            
-        ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
-        if len(ddf) == 0:
-            return rdf, cdf
-
-        oddf = ddf.sort_values(by=['buy_date'], ascending=[False])
-        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
-        if len(ddf) > v_date_cnt:
-            ddf = ddf[:v_date_cnt]
-        if len(ddf) == 0:
-            return rdf, cdf
-
-        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
-
-        start_time = time.time()
-
-        rows = []
-        dix = 0
-        dcnt = 10
-        dix_m4 = 0
-        dix_m4pc = 0
-        dcnt_m4 = 10
-        dsz = len(ddf)
-        for ri in range(len(ddf)):
-            if runtime is not None:
-                if time.time() - start_time > runtime:
-                    break
-
-            a_date = ddf['date'].iloc[ri]
-            a_buy_date = ddf['buy_date'].iloc[ri]
-            a_next_date = ddf['next_date'].iloc[ri]
-            a_w = ddf['w'].iloc[ri]
-            a_n = ddf['n'].iloc[ri]
-            a_runtime = None
-            if runtime is not None:
-                o_runtime = time.time() - start_time
-                a_runtime = runtime - o_runtime
-
-            a_m4 = 0
-            a_pred = ''
-            a_date_cnt = ''
-            al_pred, al_date_cnt = self.research_b_predict(a_buy_date, oddf, a_runtime, catch_kind)
-            a_m4pc = 0
-            if al_pred is not None and al_date_cnt is not None:
-                a_m4pc = 1
-                a_pred = ', '.join([str(x) for x in al_pred])
-                a_date_cnt = ', '.join([str(x) for x in al_date_cnt])
-                for a_p in a_pred:
-                    if self.match(a_w, a_p, 'm4'):
-                        a_m4 += 1
-
-            dix += 1
-            if a_m4 > 0:
-                dix_m4 += 1
-                if a_m4pc > 0:
-                    dix_m4pc += 1
-
-            if dix % dcnt == 0:
-                if has_log_step:
-                    print(f'== [R] ==> {dix}, {dix_m4}, {dix_m4pc} / {dsz}')
-
-            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'm4pc': a_m4pc, 'm4': a_m4, 'pred': a_pred, 'date_cnt': a_date_cnt}
-            rows.append(rw)
-
-            if dix_m4 % dcnt_m4 == 0:
-                if has_log_step:
-                    print(str(rw))
-
-        if len(rows) > 0:
-            rdf = pd.DataFrame(rows)
-            cdf = rdf[(rdf['m4'] > 0)&(rdf['m4pc'] > 0)]
-            if len(cdf) == 0:
-                cdf = None
-                
-        try:
-            self.save_cache()
-        except Exception as e:
-            msg = str(e)
-            print(f'=> [E] {msg}')
-
-        text = '''
-  -------------------------------
-          RESEARCH B
-====================================
-        '''
-        print(text)
-        
-        return rdf, cdf
         
     def simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 56, tck_cnt = 2, runtime = None):
         self.print_heading()
@@ -2724,6 +2543,13 @@ class Orottick4Simulator:
 
         M4PC_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4PC_MODEL_DIR', '/kaggle/working')
 
+        TCK_PRIZE = Orottick4Simulator.get_option(options, 'TCK_PRIZE', 5000)
+        BRK_COST = Orottick4Simulator.get_option(options, 'BRK_COST', 0.3)
+        PREDICT_NOTEBOOK = Orottick4Simulator.get_option(options, 'PREDICT_NOTEBOOK', 'https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-rsp-a-o-2025-04-06')
+        PERIOD_NO = Orottick4Simulator.get_option(options, 'PERIOD_NO', 1)
+        DAY_NO = Orottick4Simulator.get_option(options, 'DAY_NO', 1)
+        REAL_BUY_TIMES = Orottick4Simulator.get_option(options, 'REAL_BUY_TIMES', 1)
+
         if non_github_create_fn is None:
             USE_GITHUB = True
             
@@ -2783,7 +2609,15 @@ class Orottick4Simulator:
             if json_pred is not None:
                 with open(f'{RESULT_DIR}/{LOTTE_KIND}-pred-{BUY_DATE}.json', 'w') as f:
                     json.dump(json_pred, f)
-        
+
+            tck_cnt = F_TCK_CNT
+            if M4P_OBS:
+                tck_cnt = M4P_CNT
+            cost = (1 + BRK_COST) * tck_cnt
+            brk_cost = BRK_COST * tck_cnt
+            cost_rb = REAL_BUY_TIMES * cost            
+            brk_cost_rb = REAL_BUY_TIMES * brk_cost            
+                
                 text = '''
 ====================================
     PREDICT: [__LK__] __BD__
@@ -2801,26 +2635,26 @@ class Orottick4Simulator:
 
 + M4PC: __M4PC__
 
-+ Predict Notebook:
++ Predict Notebook: __PREDICT_NOTEBOOK__
 
 
   -------------------------------
               MONEY
   -------------------------------
 
-+ Period No: 
++ Period No: __PERIOD_NO__
 
-+ Day No: 
++ Day No: __DAY_NO__
 
-+ Tickets: 10
++ Tickets: __TCK_CNT__
 
-+ Cost: $13
++ Cost: $__COST__
 
-+ Total Cost: $13
++ Total Cost: $__COST__
 
-+ Broker Cost: $3
++ Broker Cost: $__BRK_COST__
 
-+ Total Broker Cost: $3
++ Total Broker Cost: $__BRK_COST__
 
 + Prize: $0
 
@@ -2839,13 +2673,13 @@ class Orottick4Simulator:
 
 + Confirmation Number: 
 
-+ Cost: $26
++ Cost: $__COST_RB__
 
-+ Total Cost: $26
++ Total Cost: $__COST_RB__
 
-+ Broker Cost: $6
++ Broker Cost: $__BRK_COST_RB__
 
-+ Total Broker Cost: $6
++ Total Broker Cost: $__BRK_COST_RB__
 
 + Prize: $0
 
@@ -2868,7 +2702,7 @@ class Orottick4Simulator:
                         if len(lx) != 1:
                             m4pc = 0
                 json_pred['m4pc'] = m4pc
-                text = text.replace('__LK__', str(LOTTE_KIND)).replace('__BD__', str(BUY_DATE)).replace('__RS__', str(json_pred['pred'])).replace('__M4__', str(json_pred['m4_pred'])).replace('__M4PC__', str(json_pred['m4pc']))
+                text = text.replace('__LK__', str(LOTTE_KIND)).replace('__BD__', str(BUY_DATE)).replace('__RS__', str(json_pred['pred'])).replace('__M4__', str(json_pred['m4_pred'])).replace('__M4PC__', str(json_pred['m4pc'])).replace('__PREDICT_NOTEBOOK__', PREDICT_NOTEBOOK).replace('__PERIOD_NO__', str(PERIOD_NO)).replace('__DAY_NO__', str(DAY_NO)).replace('__TCK_CNT__', str(tck_cnt)).replace('__COST__', str(cost)).replace('__BRK_COST__', str(brk_cost)).replace('__COST_RB__', str(brk_cost_rb)).replace('__BRK_COST_RB__', str(brk_cost_rb))
                 with open(f'{RESULT_DIR}/{LOTTE_KIND}-pred-{BUY_DATE}.txt', 'w') as f:
                     f.write(text)
                 print(text)
