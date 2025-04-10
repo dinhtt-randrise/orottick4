@@ -2616,7 +2616,16 @@ class Orottick4Simulator:
             cost = (1 + BRK_COST) * tck_cnt
             brk_cost = BRK_COST * tck_cnt
             cost_rb = REAL_BUY_TIMES * cost            
-            brk_cost_rb = REAL_BUY_TIMES * brk_cost            
+            brk_cost_rb = REAL_BUY_TIMES * brk_cost  
+            m4pc = json_pred['m4pc']
+            m4pc_txt = ''
+            if m4pc == 0:
+                cost = 0
+                brk_cost = 0
+                cost_rb = 0
+                brk_cost_rb = 0
+                m4pc_txt = '(Not bought <- m4pc = 0)'
+                
                 
                 text = '''
 ====================================
@@ -2648,7 +2657,7 @@ class Orottick4Simulator:
 
 + Tickets: __TCK_CNT__
 
-+ Cost: $__COST__
++ Cost: $__COST__  __M4PC_TXT__
 
 + Total Cost: $__COST__
 
@@ -2673,7 +2682,7 @@ class Orottick4Simulator:
 
 + Confirmation Number: 
 
-+ Cost: $__COST_RB__
++ Cost: $__COST_RB__  __M4PC_TXT__
 
 + Total Cost: $__COST_RB__
 
@@ -2702,7 +2711,7 @@ class Orottick4Simulator:
                         if len(lx) != 1:
                             m4pc = 0
                 json_pred['m4pc'] = m4pc
-                text = text.replace('__LK__', str(LOTTE_KIND)).replace('__BD__', str(BUY_DATE)).replace('__RS__', str(json_pred['pred'])).replace('__M4__', str(json_pred['m4_pred'])).replace('__M4PC__', str(json_pred['m4pc'])).replace('__PREDICT_NOTEBOOK__', PREDICT_NOTEBOOK).replace('__PERIOD_NO__', str(PERIOD_NO)).replace('__DAY_NO__', str(DAY_NO)).replace('__TCK_CNT__', str(tck_cnt)).replace('__COST__', str(cost)).replace('__BRK_COST__', str(brk_cost)).replace('__COST_RB__', str(brk_cost_rb)).replace('__BRK_COST_RB__', str(brk_cost_rb))
+                text = text.replace('__LK__', str(LOTTE_KIND)).replace('__BD__', str(BUY_DATE)).replace('__RS__', str(json_pred['pred'])).replace('__M4__', str(json_pred['m4_pred'])).replace('__M4PC__', str(json_pred['m4pc'])).replace('__PREDICT_NOTEBOOK__', PREDICT_NOTEBOOK).replace('__PERIOD_NO__', str(PERIOD_NO)).replace('__DAY_NO__', str(DAY_NO)).replace('__TCK_CNT__', str(tck_cnt)).replace('__COST__', str(cost)).replace('__BRK_COST__', str(brk_cost)).replace('__COST_RB__', str(brk_cost_rb)).replace('__BRK_COST_RB__', str(brk_cost_rb)).replace('  __M4PC_TXT__', m4pc_txt)
                 with open(f'{RESULT_DIR}/{LOTTE_KIND}-pred-{BUY_DATE}.txt', 'w') as f:
                     f.write(text)
                 print(text)
