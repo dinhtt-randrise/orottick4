@@ -1252,6 +1252,8 @@ class Orottick4Simulator:
         if not silent:
             print(text) 
 
+        start_time = time.time()
+
         rdf = None
         cdf = None
         
@@ -1280,8 +1282,6 @@ class Orottick4Simulator:
             return rdf, cdf
 
         ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
-
-        start_time = time.time()
 
         bdfd = v_buy_date.split('.')
         x_txt_year = bdfd[0]
@@ -1678,6 +1678,8 @@ class Orottick4Simulator:
         '''
         print(text) 
 
+        start_time = time.time()
+
         rdf = None
         cdf = None
         
@@ -1710,8 +1712,6 @@ class Orottick4Simulator:
             return rdf, cdf, more
 
         ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
-
-        start_time = time.time()
 
         rows = []
         dix = 0
