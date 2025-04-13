@@ -89,6 +89,8 @@ class Orottick4Simulator:
 
         self.lotte_kind = 'p4a'
 
+        self.mapcm = None
+        
         self.m4pcm = None
         
         self.m4pm = None
@@ -4254,7 +4256,13 @@ class Orottick4Simulator:
             with open(m4pcm_fn, 'rb') as f:
                 ok4s.m4pcm = pickle.load(f)
                 print('== [M4PC_MODEL] ==> Loaded!')
-        
+
+        mapcm_fn = f'{MAPC_MODEL_DIR}/{LOTTE_KIND}-mapcm.pkl'
+        if os.path.exists(mapcm_fn):
+            with open(mapcm_fn, 'rb') as f:
+                ok4s.mapcm = pickle.load(f)
+                print('== [MAPC_MODEL] ==> Loaded!')
+
         if METHOD == 'build_cache':
             cdf = ok4s.build_cache(BUY_DATE, CACHE_CNT, BUFFER_DIR, LOTTE_KIND, DATA_DF, RUNTIME)
             if cdf is not None:
