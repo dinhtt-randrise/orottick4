@@ -1288,7 +1288,7 @@ class Orottick4Simulator:
 
             rate = 0.2
             if valid_z_df is not None:
-                rate = 0.5
+                rate = 0.25
                 
             sz = len(adf1)
             sz = int(round(sz * rate))
@@ -1299,14 +1299,34 @@ class Orottick4Simulator:
             sz = int(round(sz * rate))
             valid0_df = adf0[:sz]
             train0_df = adf0[sz:]
+
+            sz = len(adf1) * 5
+            if len(valid0_df) > sz:
+                valid0_df = valid0_df[:sz]
+            if len(train0_df) > sz:
+                train0_df = train0_df[:sz]
                 
             valid_df = pd.concat([valid1_df, valid0_df])
             train_df = pd.concat([train1_df, train0_df])
 
             if valid_z_df is not None:
-                valid_df = pd.concat([valid_z_df, valid_df])
+                valid_z2_df = valid_z_df.sample(frac=1)
+                adf1 = valid_z2_df[valid_z2_df['m4pc'] == 1]
+                adf0 = valid_z2_df[valid_z2_df['m4pc'] == 0]
+                sz = len(adf1)
+                sz = int(round(sz * 5))
+                if len(adf0) > sz:
+                    adf0 = adf0[:sz]
+                valid_df = pd.concat([adf1, adf0 valid_df])
             if train_z_df is not None:
-                train_df = pd.concat([train_z_df, train_df])
+                train_z2_df = train_z_df.sample(frac=1)
+                adf1 = train_z2_df[train_z2_df['m4pc'] == 1]
+                adf0 = train_z2_df[train_z2_df['m4pc'] == 0]
+                sz = len(adf1)
+                sz = int(round(sz * 5))
+                if len(adf0) > sz:
+                    adf0 = adf0[:sz]
+                train_df = pd.concat([adf1, adf0, train_df])
                 
             valid_df = valid_df.sample(frac=1)
             train_df = train_df.sample(frac=1)
