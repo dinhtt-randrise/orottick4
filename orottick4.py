@@ -1067,7 +1067,7 @@ class Orottick4Simulator:
         return nddf, oddf, rows
         
     def m4pc_train(self, lotte_kind, data_dir, save_dir, runtime):
-        global dict_sc, min_score, test_df, all_df, valid_df, train_df
+        global dict_sc, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
 
         start_time = time.time()
         
@@ -1155,6 +1155,7 @@ class Orottick4Simulator:
 
         try_no = 1
         min_score = 1000000
+        min_best_trial_score = 1000000
         dict_sc = {}
 
         def objective(trial):
@@ -1212,7 +1213,7 @@ class Orottick4Simulator:
             return score
             
         def do_try():
-            global dict_sc, min_score, test_df, all_df, valid_df, train_df
+            global dict_sc, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
 
             dict_sc = {}
             
@@ -1270,7 +1271,10 @@ class Orottick4Simulator:
                 #verbose=10
             )
 
-            rw = {'try_no': try_no, 'score': 0}
+            if t_s < min_best_trial_score:
+                min_best_trial_score = t_s
+                
+            rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'score': 0}
 
             if valid_z_df is not None:
                 ddf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
