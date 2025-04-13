@@ -1198,7 +1198,7 @@ class Orottick4Simulator:
         def do_try():
             global test_df, all_df, valid_df, train_df
             
-            test_df = test_df.sample(frac=1)
+            #test_df = test_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
             
             adf1 = all_df[all_df['m4pc'] == 1]
