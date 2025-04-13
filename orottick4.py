@@ -1179,8 +1179,12 @@ class Orottick4Simulator:
                 #early_stopping_rounds=50,
                 #verbose=10
             )
-            
-            vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
+
+            if valid_z_df is not None:
+                vadf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
+            else:
+                vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
+    
             df = vadf[vadf['m4pc'] == 1]
             vcnt_sz = len(df)
             vadf['nm4pc'] = model.predict(vadf[features])
