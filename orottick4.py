@@ -1242,7 +1242,7 @@ class Orottick4Simulator:
                 #verbose=10
             )
 
-            rw = {'try_no': try_no, 'score'}
+            rw = {'try_no': try_no, 'score': 0}
             
             ddf = all_df.sort_values(by=['buy_date'], ascending=[False])
             ddf['nm4pc'] = model.predict(ddf[features])
