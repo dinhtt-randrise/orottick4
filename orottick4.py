@@ -2010,9 +2010,9 @@ class Orottick4Simulator:
                 if dix > 0 and dix % dcnt == 0:
                     if has_log_step:
                         print(f'== [R] {a_date_no}, {b_date_no} / {dhsz} : {dix}, {dix_ma} / {dsz} : {crsz}')
-                                    
+
                 if (dix_ma < 5 and dix < 5) or (dix_ma >= 5 and dix_ma % dcnt_ma == 0):
-                    if has_log_step:
+                    if has_log_step and a_ma > 0:
                         print(str(rw))
 
         if len(rows) > 0:
