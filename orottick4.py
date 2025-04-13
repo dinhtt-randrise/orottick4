@@ -1252,27 +1252,31 @@ class Orottick4Simulator:
             m4_1 = len(df)
             df = ddf[ddf['m4'] <= 0]
             m4_0 = len(df)
-            df = ddf[ddf['m4pc'] == 1]
+            df = ddf[ddf['nm4pc'] == 1]
             m4pc_1 = len(df)
-            df = ddf[ddf['m4pc'] == 0]
+            df = ddf[ddf['nm4pc'] == 0]
             m4pc_0 = len(df)
-            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 1)]
+            df = ddf[(ddf['m4'] > 0)&(ddf['nm4pc'] == 1)]
             m4_1__m4pc_1 = len(df)
-            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 0)]
+            df = ddf[(ddf['m4'] > 0)&(ddf['nm4pc'] == 0)]
             m4_1__m4pc_0 = len(df)
-            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 1)]
+            df = ddf[(ddf['m4'] <= 0)&(ddf['nm4pc'] == 1)]
             m4_0__m4pc_1 = len(df)
-            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 0)]
+            df = ddf[(ddf['m4'] <= 0)&(ddf['nm4pc'] == 0)]
             m4_0__m4pc_0 = len(df)
             nrw = {'a_score': 0, 'a_sz': sz, 'a_m4_1': m4_1, 'a_m4_0': m4_0, 'a_m4pc_1': m4pc_1, 'a_m4pc_0': m4pc_0, 'a_m4_1__m4pc_1': m4_1__m4pc_1, 'a_m4_1__m4pc_0': m4_1__m4pc_0, 'a_m4_0__m4pc_1': m4_0__m4pc_1, 'a_m4_0__m4pc_0': m4_0__m4pc_0}
             for key in nrw.keys():
                 rw[key] = nrw[key]
                 
-            vcnt = sz
-            vcnt2 = m4_0__m4pc_1
-            sz = m4pc_1
-
-            score = sz - (vcnt - vcnt2)
+            vadf = ddf
+            df = vadf[vadf['m4pc'] == 1]
+            vcnt_sz = len(df)
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
+            vcnt2 = len(df)
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
+            vcnt3 = len(df)
+            score = vcnt_sz - (vcnt2 - vcnt3)
+            
             rw['a_score'] = score
 
             ddf = test_df.sort_values(by=['buy_date'], ascending=[False])
@@ -1283,27 +1287,31 @@ class Orottick4Simulator:
             m4_1 = len(df)
             df = ddf[ddf['m4'] <= 0]
             m4_0 = len(df)
-            df = ddf[ddf['m4pc'] == 1]
+            df = ddf[ddf['nm4pc'] == 1]
             m4pc_1 = len(df)
-            df = ddf[ddf['m4pc'] == 0]
+            df = ddf[ddf['nm4pc'] == 0]
             m4pc_0 = len(df)
-            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 1)]
+            df = ddf[(ddf['m4'] > 0)&(ddf['nm4pc'] == 1)]
             m4_1__m4pc_1 = len(df)
-            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 0)]
+            df = ddf[(ddf['m4'] > 0)&(ddf['nm4pc'] == 0)]
             m4_1__m4pc_0 = len(df)
-            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 1)]
+            df = ddf[(ddf['m4'] <= 0)&(ddf['nm4pc'] == 1)]
             m4_0__m4pc_1 = len(df)
-            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 0)]
+            df = ddf[(ddf['m4'] <= 0)&(ddf['nm4pc'] == 0)]
             m4_0__m4pc_0 = len(df)
             nrw = {'t_score': 0, 't_sz': sz, 't_m4_1': m4_1, 't_m4_0': m4_0, 't_m4pc_1': m4pc_1, 't_m4pc_0': m4pc_0, 't_m4_1__m4pc_1': m4_1__m4pc_1, 't_m4_1__m4pc_0': m4_1__m4pc_0, 't_m4_0__m4pc_1': m4_0__m4pc_1, 't_m4_0__m4pc_0': m4_0__m4pc_0}
             for key in nrw.keys():
                 rw[key] = nrw[key]
-                
-            vcnt = sz
-            vcnt2 = m4_0__m4pc_1
-            sz = m4pc_1
 
-            score = sz - (vcnt - vcnt2)
+            vadf = ddf
+            df = vadf[vadf['m4pc'] == 1]
+            vcnt_sz = len(df)
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
+            vcnt2 = len(df)
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
+            vcnt3 = len(df)
+            score = vcnt_sz - (vcnt2 - vcnt3)
+
             rw['t_score'] = score
 
             rw['score'] = rw['a_score'] + rw['t_score']
