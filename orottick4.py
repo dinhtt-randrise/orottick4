@@ -2187,9 +2187,6 @@ class Orottick4Simulator:
                     if len(mdf) == 0:
                         continue
                     else:
-                        mdf2 = rdf[rdf[f'a_{mk}'] == 0]
-                        if len(mdf2) > 0:
-                            mdf = pd.concat([mdf, mdf2])
                         mdf = mdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[False, True, False, False])
                         more[f'mdf_{mk}'] = mdf
             except Exception as e:
