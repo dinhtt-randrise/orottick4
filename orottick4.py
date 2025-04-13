@@ -1775,6 +1775,31 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
+    def v4_capture_mapc(self, v_buy_date, data_df, runtime):
+        if self.mapcm is None:
+            return None
+
+        match_kind = self.mapcm['match_kind']
+        date_cnt_mx = self.mapcm['date_cnt_max']
+        
+        SEED = 311
+        random.seed(SEED)
+        os.environ["PYTHONHASHSEED"] = str(SEED)
+        np.random.seed(SEED)
+        
+        rw, rdf, cdf = self.v4_mapc_data(v_buy_date, data_df, runtime, date_cnt_mx, match_kind)
+        if rdf is None:
+            return None
+
+        p = self.mapcm['model'].predict(rdf[self.mapcm['features']])
+
+        rdf['p'] = p
+        mapc = int(rdf['p'].iloc[0])
+        
+        print(f'== [MAPC] ==> {v_buy_date} -> {mapc}')
+        
+        return mapc
+
     def v4_refine_mapc_ds(self, ddf, match_kind = 'm4'):
         dict_date = {}
         dict_year = {}
@@ -2132,7 +2157,7 @@ class Orottick4Simulator:
                     good = f' [GOOD:{score}:{min_score}] '
             print(f'== [MAPC_CNT_{try_no}_FINAL] {good} ==> ' + str(rw))
 
-            vmapcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model}
+            vmapcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model, 'match_kind': match_kind, 'date_cnt_max': date_cnt_mx}
 
             return rw, vmapcm
 
