@@ -4261,6 +4261,8 @@ class Orottick4Simulator:
 
         M4PC_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4PC_MODEL_DIR', '/kaggle/working')
 
+        MAPC_MODEL_DIR = Orottick4Simulator.get_option(options, 'MAPC_MODEL_DIR', '/kaggle/working')
+
         TCK_PRIZE = Orottick4Simulator.get_option(options, 'TCK_PRIZE', 5000)
         BRK_COST = Orottick4Simulator.get_option(options, 'BRK_COST', 0.3)
         PREDICT_NOTEBOOK = Orottick4Simulator.get_option(options, 'PREDICT_NOTEBOOK', 'https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-rsp-a-o-2025-04-06')
