@@ -1213,14 +1213,18 @@ class Orottick4Simulator:
             
             adf1 = all_df[all_df['m4pc'] == 1]
             adf0 = all_df[all_df['m4pc'] == 0]
-    
+
+            rate = 0.2
+            if valid_z_df is not None:
+                rate = 0.5
+                
             sz = len(adf1)
-            sz = int(round(sz * 0.2))
+            sz = int(round(sz * rate))
             valid1_df = adf1[:sz]
             train1_df = adf1[sz:]
     
             sz = len(adf0)
-            sz = int(round(sz * 0.2))
+            sz = int(round(sz * rate))
             valid0_df = adf0[:sz]
             train0_df = adf0[sz:]
                 
