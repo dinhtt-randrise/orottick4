@@ -1910,7 +1910,7 @@ class Orottick4Simulator:
             a_day_cnt = dict_day[a_txt_day]
 
             a_txt_month_day = bdfd[1] + '.' + bdfd[2]
-            a_month_day_cnt = dict_year_month[a_txt_month_day]
+            a_month_day_cnt = dict_month_day[a_txt_month_day]
 
             for rib in range(len(ddf)):
                 if runtime is not None:
