@@ -1460,8 +1460,8 @@ class Orottick4Simulator:
                     sdf = sdf.sort_values(by=['score', 't_score', 'a_score'], ascending=[True, True, True])
                     sdf.to_csv(f'{save_dir}/summary.csv', index=False)
                     with open(f'{save_dir}/{lotte_kind}-m4pcm-{try_no}.pkl', 'wb') as f:
-                        pickle.dump(m4pcm, f)
-                    dict_m4pcm[try_no] = m4pcm
+                        pickle.dump(vm4pcm, f)
+                    dict_m4pcm[try_no] = vm4pcm
                 except Exception as e:
                     print(f'== [E:{try_no}] ==> ' + str(e))        
             try_no += 1
@@ -1471,10 +1471,10 @@ class Orottick4Simulator:
             sdf = sdf.sort_values(by=['score', 't_score', 'a_score'], ascending=[True, True, True])
             try_no = sdf['try_no'].iloc[0]
             sdf.to_csv(f'{save_dir}/summary.csv', index=False)
-            m4pcm = dict_m4pcm[try_no]
+            vm4pcm = dict_m4pcm[try_no]
             
             with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
-                pickle.dump(m4pcm, f)
+                pickle.dump(vm4pcm, f)
 
         text = '''
   -------------------------------
