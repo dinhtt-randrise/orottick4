@@ -1256,7 +1256,7 @@ class Orottick4Simulator:
             t_p = study.best_trial.params
             t_c = study.trials
             t_s = dict_sc[t_n]
-            print(f'== [BEST_TRIAL] {t_n} / {t_c} : {t_s} ==> ' + str(t_p))
+            print(f'== [BEST_TRIAL_{try_no}] {t_n} / {t_c} : {t_s} ==> ' + str(t_p))
     
             # train with best params
             best_params = study.best_trial.params
