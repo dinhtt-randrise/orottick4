@@ -1130,7 +1130,7 @@ class Orottick4Simulator:
         return nddf, oddf, rows
         
     def m4pc_train(self, lotte_kind, data_dir, save_dir, runtime):
-        global dict_sc, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
+        global max_m4_1__m4pc_1, max_t_m4_1__m4pc_1, dict_sc, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
 
         start_time = time.time()
         
@@ -1219,6 +1219,8 @@ class Orottick4Simulator:
         try_no = 1
         min_score = 1000000
         min_best_trial_score = 1000000
+        max_m4_1__m4pc_1 = 0
+        max_t_m4_1__m4pc_1 = 0
         dict_sc = {}
 
         def objective(trial):
@@ -1276,7 +1278,7 @@ class Orottick4Simulator:
             return score
             
         def do_try():
-            global dict_sc, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
+            global dict_sc, max_t_m4_1__m4pc_1, max_m4_1__m4pc_1, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
 
             dict_sc = {}
             
@@ -1357,7 +1359,7 @@ class Orottick4Simulator:
             if t_s < min_best_trial_score:
                 min_best_trial_score = t_s
                 
-            rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'min_score': 0, 'score': 0}
+            rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'min_score': 0, 'score': 0, 'max_a_m4_1__m4pc_1': 0, 'max_t_m4_1__m4pc_1': 0}
 
             if valid_z_df is not None:
                 ddf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
@@ -1438,9 +1440,20 @@ class Orottick4Simulator:
             is_good = 0
             if score < min_score:
                 min_score = score
-                good = f' [GOOD:{min_score}] '
                 rw['min_score'] = min_score
                 is_good = 1
+            elif score == min_score:
+                if rw['a_m4_1__m4pc_1'] > max_m4_1__m4pc_1:
+                    max_m4_1__m4pc_1 = rw['a_m4_1__m4pc_1']
+                    rw['max_a_m4_1__m4pc_1'] = max_m4_1__m4pc_1
+                    is_good = 1
+                elif rw['a_m4_1__m4pc_1'] == max_m4_1__m4pc_1:
+                    if rw['t_m4_1__m4pc_1'] > max_t_m4_1__m4pc_1:
+                        max_t_m4_1__m4pc_1 = rw['t_m4_1__m4pc_1']
+                        rw['max_t_m4_1__m4pc_1'] = max_t_m4_1__m4pc_1
+                        is_good = 1
+            if is_good == 1:
+                good = f' [GOOD:{min_score}] '
             print(f'== [M4PC_CNT_{try_no}_FINAL] {good} ==> ' + str(rw))
 
             vm4pcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model}
