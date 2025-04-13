@@ -1252,8 +1252,11 @@ class Orottick4Simulator:
             )
 
             rw = {'try_no': try_no, 'score': 0}
-            
-            ddf = all_df.sort_values(by=['buy_date'], ascending=[False])
+
+            if valid_z_df is not None:
+                ddf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
+            else:
+                ddf = all_df.sort_values(by=['buy_date'], ascending=[False])
             ddf['nm4pc'] = model.predict(ddf[features])
 
             sz = len(ddf)
