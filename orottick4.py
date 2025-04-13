@@ -1316,6 +1316,9 @@ class Orottick4Simulator:
         try_no = 1
         dict_m4pcm = {}
         while try_no <= 1000:
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
             srw, vm4pcm = do_try()
             if srw['a_m4_1__m4pc_1'] > 0 and srw['t_m4_1__m4pc_1'] > 0:
                 rows.append(srw)
@@ -1328,15 +1331,16 @@ class Orottick4Simulator:
                 except Exception as e:
                     print(f'== [E:{try_no}] ==> ' + str(e))        
             try_no += 1
+
+        if len(rows) > 0:
+            sdf = pd.DataFrame(rows)
+            sdf = sdf.sort_values(by=['a_score', 't_score'], ascending=[True, True])
+            try_no = sdf['try_no'].iloc[0]
+            sdf.to_csv(f'{save_dir}/summary.csv', index=False)
+            m4pcm = dict_m4pcm[try_no]
             
-        sdf = pd.DataFrame(rows)
-        sdf = sdf.sort_values(by=['a_score', 't_score'], ascending=[True, True])
-        try_no = sdf['try_no'].iloc[0]
-        sdf.to_csv(f'{save_dir}/summary.csv', index=False)
-        m4pcm = dict_m4pcm[try_no]
-        
-        with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
-            pickle.dump(m4pcm, f)
+            with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
+                pickle.dump(m4pcm, f)
 
         text = '''
   -------------------------------
@@ -2965,6 +2969,6 @@ class Orottick4Simulator:
                     adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-{key}-{BUY_DATE}.csv', index=False)
 
         if METHOD == 'm4pc_train':
-            ok4s.m4pc_train(LOTTE_KIND, M4PC_TRAIN_DATA_DIR, M4PC_TRAIN_SAVE_DIR)
+            ok4s.m4pc_train(LOTTE_KIND, M4PC_TRAIN_DATA_DIR, M4PC_TRAIN_SAVE_DIR, RUNTIME)
 
 # ------------------------------------------------------------ #
