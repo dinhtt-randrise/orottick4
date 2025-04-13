@@ -1114,11 +1114,17 @@ class Orottick4Simulator:
 
         all_df = all_df.sort_values(by=['buy_date'], ascending=[False])
         list_year = list(all_df['year'].unique())
-
-        if len(list_year) >= 2:
+        valid_z_df = None
+        train_z_df = None
+        
+        if len(list_year) >= 3:
             list_year_test = [list_year[0]]
-            list_year_all = [list_year[x] for x in range(len(list_year)) if x > 0]
+            list_year_valid = [list_year[1]]
+            list_year_train = [list_year[2]]
+            list_year_all = [list_year[x] for x in range(len(list_year)) if x > 2]
             test_df = all_df[all_df['year'].isin(list_year_test)]
+            valid_z_df = all_df[all_df['year'].isin(list_year_valid)]
+            train_z_df = all_df[all_df['year'].isin(list_year_train)]
             all_df = all_df[all_df['year'].isin(list_year_all)]            
         else:
             test_df = all_df.sample(frac=1)
@@ -1213,15 +1219,15 @@ class Orottick4Simulator:
             sz = int(round(sz * 0.2))
             valid0_df = adf0[:sz]
             train0_df = adf0[sz:]
-    
-            sz = len(valid1_df) * 5
-            valid0_df = valid0_df[:sz]
-            sz = len(train1_df) * 5
-            train0_df = train0_df[:sz]
-            
+                
             valid_df = pd.concat([valid1_df, valid0_df])
             train_df = pd.concat([train1_df, train0_df])
-        
+
+            if valid_z_df is not None:
+                valid_df = pd.concat([valid_z_df, valid_df])
+            if train_z_df is not None:
+                train_df = pd.concat([train_z_df, train_df])
+                
             valid_df = valid_df.sample(frac=1)
             train_df = train_df.sample(frac=1)
 
