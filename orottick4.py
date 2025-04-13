@@ -1254,7 +1254,7 @@ class Orottick4Simulator:
 
             t_n = study.best_trial.number
             t_p = study.best_trial.params
-            t_c = study.trials
+            t_c = len(study.trials)
             t_s = dict_sc[t_n]
             print(f'== [BEST_TRIAL_{try_no}] {t_n} / {t_c} : {t_s} ==> ' + str(t_p))
     
