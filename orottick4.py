@@ -3132,10 +3132,63 @@ class Orottick4Simulator:
             if data_df is None:
                 return None
 
-        rdf, cdf, more = self.v4_mapc_prepare(v_buy_date, None, lotte_kind, data_df, v_date_cnt, date_cnt_mx, match_kind, has_log_step, runtime)
-
-        if rdf is None:
+        xdf = data_df[data_df['buy_date'] == v_buy_date]
+        if len(xdf) == 0:
             return None
+
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        if len(ddf) == 0:
+            return None
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        ddf = ddf[ddf['w'] >= 0]
+        if len(ddf) == 0:
+            return None
+        if len(ddf) > v_date_cnt:
+            ddf = ddf[:v_date_cnt]
+            
+        rows = []
+        ria = 0
+        a_date = xdf['date'].iloc[ria]
+        a_buy_date = xdf['buy_date'].iloc[ria]
+        a_next_date = xdf['next_date'].iloc[ria]
+        a_w = xdf['w'].iloc[ria]
+        a_n = xdf['n'].iloc[ria]
+
+        for rib in range(len(ddf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+                
+            b_date = ddf['date'].iloc[rib]
+            b_buy_date = ddf['buy_date'].iloc[rib]
+            b_next_date = ddf['next_date'].iloc[rib]
+            b_w = ddf['w'].iloc[rib]
+            b_n = ddf['n'].iloc[rib]
+                
+            a_runtime = None
+            if runtime is not None:
+                o_runtime = time.time() - start_time
+                a_runtime = runtime - o_runtime
+
+            a_rw, a_rdf, a_cdf = self.v4_mapc_data(a_buy_date, b_buy_date, data_df, a_runtime, date_cnt_mx, match_kind)
+            a_good = 1
+            if a_rw is None or a_rdf is None or a_cdf is None:
+                a_good = 0
+                                
+            if a_good == 1:
+                a_ma = 0
+                a_mapc = 0
+
+                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_w': a_w, 'a_n': a_n, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'a_ma': a_ma, 'a_mapc': a_mapc, f'a_ma_{match_kind}': a_ma, f'a_mapc_{match_kind}': a_mapc}
+                if a_rw is not None:
+                    for key in a_rw.keys():
+                        rw[key] = a_rw[key]
+                    rows.append(rw)
+
+        if len(rows) == 0:
+            return None
+
+        rdf = pd.DataFrame(rows)
             
         SEED = 311
         random.seed(SEED)
@@ -3158,7 +3211,6 @@ class Orottick4Simulator:
                     l_p = l_p[:tck_cnt]
 
         marsi = -1
-        xdf = data_df[data_df['buy_date'] == v_buy_date]
         if len(xdf) > 0:
             x_w = xdf['w'].iloc[0]
             if x_w >= 0:
