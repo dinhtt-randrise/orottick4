@@ -1161,7 +1161,7 @@ class Orottick4Simulator:
             }
              
             #train model
-            model = lgb.LGBMClassifier(n_estimators=1000, **param, random_state=SEED,early_stopping_rounds=50,verbose=10)
+            model = lgb.LGBMClassifier(n_estimators=1000, **param, random_state=SEED,early_stopping_rounds=50,verbose=-1)
             model.fit(
                 train_df[features],
                 train_df[target],
@@ -1232,7 +1232,7 @@ class Orottick4Simulator:
     
             # train with best params
             best_params = study.best_trial.params
-            model = lgb.LGBMClassifier(n_estimators=1000, **best_params, random_state=SEED,early_stopping_rounds=50,verbose=10)
+            model = lgb.LGBMClassifier(n_estimators=1000, **best_params, random_state=SEED,early_stopping_rounds=50,verbose=-1)
             model.fit(
                 train_df[features],
                 train_df[target],
@@ -1317,7 +1317,7 @@ class Orottick4Simulator:
         rows = []
         try_no = 1
         dict_m4pcm = {}
-        while try_no <= 1000:
+        while try_no <= 50000:
             if runtime is not None:
                 if time.time() - start_time > runtime:
                     break
