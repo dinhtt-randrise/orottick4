@@ -1067,7 +1067,7 @@ class Orottick4Simulator:
         return nddf, oddf, rows
         
     def m4pc_train(self, lotte_kind, data_dir, save_dir, runtime):
-        global all_df, valid_df, train_df
+        global test_df, all_df, valid_df, train_df
 
         start_time = time.time()
         
