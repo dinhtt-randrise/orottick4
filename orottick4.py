@@ -2079,7 +2079,7 @@ class Orottick4Simulator:
             if t_s < min_best_trial_score:
                 min_best_trial_score = t_s
                 
-            rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'min_score': min_score, 'score': 0}
+            rw = {'lotte_kind': lotte_kind, 'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'min_score': min_score, 'score': 0}
 
             if valid_z_df is not None:
                 ddf = valid_z_df.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
@@ -2161,7 +2161,7 @@ class Orottick4Simulator:
                     good = f' [GOOD:{score}:{min_score}] '
             print(f'== [MAPC_CNT_{try_no}_FINAL] {good} ==> ' + str(rw))
 
-            vmapcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model, 'match_kind': match_kind, 'date_cnt_max': date_cnt_mx}
+            vmapcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model, 'lotte_kind': lotte_kind, 'match_kind': match_kind, 'date_cnt_max': date_cnt_mx}
 
             return rw, vmapcm
 
@@ -3069,6 +3069,121 @@ class Orottick4Simulator:
             print(text) 
         
         return rdf, more
+
+    def v4_simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', data_df = None, v_date_cnt = 367, tck_cnt = 56 * 5, has_log_step = False, runtime = None):
+        self.print_heading()
+        
+        text = '''
+====================================
+           V4 SIMULATE
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        json_pred = {}
+
+        if self.mapcm is None:
+            return None
+
+        lotte_kind = self.mapcm['lotte_kind']
+        match_kind = self.mapcm['match_kind']
+        date_cnt_mx = self.mapcm['date_cnt_max']
+
+        v_data_df_is_none = False
+        if data_df is None:
+            v_data_df_is_none = True
+            
+        print(f'[BUFFER_DIR] {buffer_dir}')
+        print(f'[LOTTE_KIND] {lotte_kind}')
+        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+        print(f'[BUY_DATE] {v_buy_date}')
+        print(f'[DATE_CNT] {v_date_cnt}')
+        print(f'[RUNTIME] {runtime}')
+        print(f'[MATCH_KIND] {match_kind}')
+        print(f'[DATE_CNT_MAX] {date_cnt_mx}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        start_time = time.time()
+
+        rdf = None
+        cdf = None
+        v_date = None
+        
+        if data_df is None:
+            d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
+            g = -1
+            d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
+            v_date = d2.strftime('%Y.%m.%d')
+    
+            data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
+            if data_df is None:
+                return None
+
+        rdf, cdf, more = self.v4_mapc_prepare(v_buy_date, None, lotte_kind, data_df, v_date_cnt, date_cnt_mx, match_kind, has_log_step, runtime)
+
+        if rdf is None:
+            return None
+            
+        SEED = 311
+        random.seed(SEED)
+        os.environ["PYTHONHASHSEED"] = str(SEED)
+        np.random.seed(SEED)
+        
+        l_p = self.mapcm['model'].predict(rdf[self.mapcm['features']])
+
+        rdf['nmapc'] = l_p
+
+        rdf = rdf[rdf['nmapc'] == 1]
+        if len(rdf) == 0:
+            return None
+
+        rdf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+        l_p = list(rdf['a_p'].unique())
+        if tck_cnt is not None:
+            if tcK_cnt > 0:
+                if len(l_p) > tck_cnt:        
+                    l_p = l_p[:tck_cnt]
+
+        marsi = -1
+        xdf = data_df[data_df['buy_date'] == v_buy_date]
+        if len(xdf) > 0:
+            x_w = xdf['w'].iloc[0]
+            if x_w >= 0:
+                for xi in range(len(l_p)):
+                    x_p = l_p[xi]
+                    if self.match(x_w, x_p, match_kind):
+                        marsi = xi + 1
+                        break
+                        
+        lx_p = [str(x) for x in l_p]
+        s_p = ', '.join(lx_p)
+        json_pred = {'lotte_kind': lotte_kind, 'match_kind': match_kind, 'date': v_date, 'buy_date': v_buy_date, 'pred': s_p, 'marsi': marsi}
+                
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
+
+        text = '''
+  -------------------------------
+           V4 SIMULATE
+====================================
+        '''
+        print(text)
+        
+        return json_pred
 
     def capture_m4pc(self, v_buy_date, data_df, runtime):
         if self.m4pcm is None:
