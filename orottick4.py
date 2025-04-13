@@ -999,8 +999,77 @@ class Orottick4Simulator:
         '''
         print(text) 
 
-    def m4pc_train(self, lotte_kind, data_dir, save_dir):
+    def refine_m4pc_ds(self, ddf):
+        dict_date = {}
+        dict_year = {}
+        columns = list(ddf.columns)
+        ddf['ix'] = [x+1 for x in range(len(ddf))]
+        list_ix = []
+        col_year = []
+        for ri in range(len(ddf)):
+            buy_date = ddf['buy_date'].iloc[ri]
+            year = int(buy_date.split('.')[0])
+            col_year.append(year)
+            if buy_date not in dict_date:
+                dict_date[buy_date] = 1
+                if year in dict_year:
+                    dict_year[year] = dict_year[year] + 1
+                else:
+                    dict_year[year] = 1
+                list_ix.append(ddf['ix'].iloc[ri])
+        ddf['year'] = col_year
+        list_year = []
+        for year in dict_year.keys():
+            cnt = dict_year[year]
+            if cnt < 365:
+                continue
+            list_year.append(year)
+        if len(list_ix) == 0:
+            return None, None
+        ddf = ddf[ddf['ix'].isin(list_ix)]
+        if len(ddf) == 0:
+            return None, None
+        if len(list_year) == 0:
+            return None, None
+        ddf = ddf[ddf['year'].isin(list_year)]
+        if len(ddf) == 0:
+            return None, None
+        nddf = ddf[columns]
+        columns.append('year')
+        oddf = ddf[columns]
+        oddf = oddf.sort_values(by=['buy_date'], ascending=[False])
+        nddf = nddf.sort_values(by=['buy_date'], ascending=[False])
+        rows = []
+        for year in list_year:
+            ddf = oddf[oddf['year'] == year]
+            sz = len(ddf)
+            df = ddf[ddf['m4'] > 0]
+            m4_1 = len(df)
+            df = ddf[ddf['m4'] <= 0]
+            m4_0 = len(df)
+            df = ddf[ddf['m4pc'] == 1]
+            m4pc_1 = len(df)
+            df = ddf[ddf['m4pc'] == 0]
+            m4pc_0 = len(df)
+            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 1)]
+            m4_1__m4pc_1 = len(df)
+            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 0)]
+            m4_1__m4pc_0 = len(df)
+            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 1)]
+            m4_0__m4pc_1 = len(df)
+            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 0)]
+            m4_0__m4pc_0 = len(df)
+            ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+            last_date = ddf['buy_date'].iloc[0]
+            last_year = int(last_date.split('.')[0])
+            rw = {'last_date': last_date, 'last_year': last_year, 'sz': sz, 'm4_1': m4_1, 'm4_0': m4_0, 'm4pc_1': m4pc_1, 'm4pc_0': m4pc_0, 'm4_1__m4pc_1': m4_1__m4pc_1, 'm4_1__m4pc_0': m4_1__m4pc_0, 'm4_0__m4pc_1': m4_0__m4pc_1, 'm4_0__m4pc_0': m4_0__m4pc_0}
+            rows.append(rw)        
+        return nddf, oddf, rows
+        
+    def m4pc_train(self, lotte_kind, data_dir, save_dir, runtime):
         global all_df, valid_df, train_df
+
+        start_time = time.time()
         
         self.print_heading()
 
@@ -1036,20 +1105,26 @@ class Orottick4Simulator:
             else:
                 all_df = pd.concat([all_df, df])
 
-        all_df = all_df.sample(frac=1)
+        oddf, all_df, srows = self.refine_m4pc_ds(all_df)
 
-        sz = len(all_df)
-        print(f'ALL_SZ: {sz}')
+        for rw in srows:
+            print(str(rw))
+
+        all_df = all_df.sort_values(by=['buy_date'], ascending=[False])
+        list_year = list(all_df['year'].unique())
+
+        if len(list_year) >= 2:
+            list_year_test = [list_year[0]]
+            list_year_all = [list_year[x] for x in range(len(list_year)) if x > 0]
+            test_df = all_df[all_df['year'].isin(list_year_test)]
+            all_df = all_df[all_df['year'].isin(list_year_all)]            
+        else:
+            test_df = all_df.sample(frac=1)
+            all_df = all_df.sample(frac=1)
 
         valid_df = None
         train_df = None
-        
-        #sz = len(train_df)
-        #print(f'TRAIN_SZ: {sz}')
-
-        #sz = len(valid_df)
-        #print(f'VALID_SZ: {sz}')
-        
+                
         text = '''
   -------------------------------
         '''
@@ -1118,8 +1193,9 @@ class Orottick4Simulator:
             return np.mean(scores) + vcnt
 
         def do_try():
-            global all_df, valid_df, train_df
+            global test_all, all_df, valid_df, train_df
             
+            test_df = test_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
             
             adf1 = all_df[all_df['m4pc'] == 1]
@@ -1142,10 +1218,7 @@ class Orottick4Simulator:
             
             valid_df = pd.concat([valid1_df, valid0_df])
             train_df = pd.concat([train1_df, train0_df])
-    
-            train_df = pd.concat([valid_df, train_df])
-            valid_df = train_df
-    
+        
             valid_df = valid_df.sample(frac=1)
             train_df = train_df.sample(frac=1)
 
@@ -1168,42 +1241,99 @@ class Orottick4Simulator:
                 #early_stopping_rounds=50,
                 #verbose=10
             )
+
+            rw = {'try_no': try_no}
             
-            vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
-            
-            vadf['nm4pc'] = model.predict(vadf[features])
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
-            vcnt = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
-            vcnt2 = len(df)
-    
-            df = vadf[vadf['m4pc'] == 1]
-            sz = len(df)
-            print(f'== [M4PC_CNT_{try_no}_FINAL] ==> {vcnt}, {vcnt2} / {sz}')
+            ddf = all_df.sort_values(by=['buy_date'], ascending=[False])
+            ddf['nm4pc'] = model.predict(ddf[features])
+
+            sz = len(ddf)
+            df = ddf[ddf['m4'] > 0]
+            m4_1 = len(df)
+            df = ddf[ddf['m4'] <= 0]
+            m4_0 = len(df)
+            df = ddf[ddf['m4pc'] == 1]
+            m4pc_1 = len(df)
+            df = ddf[ddf['m4pc'] == 0]
+            m4pc_0 = len(df)
+            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 1)]
+            m4_1__m4pc_1 = len(df)
+            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 0)]
+            m4_1__m4pc_0 = len(df)
+            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 1)]
+            m4_0__m4pc_1 = len(df)
+            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 0)]
+            m4_0__m4pc_0 = len(df)
+            nrw = {'a_score': 0, 'a_sz': sz, 'a_m4_1': m4_1, 'a_m4_0': m4_0, 'a_m4pc_1': m4pc_1, 'a_m4pc_0': m4pc_0, 'a_m4_1__m4pc_1': m4_1__m4pc_1, 'a_m4_1__m4pc_0': m4_1__m4pc_0, 'a_m4_0__m4pc_1': m4_0__m4pc_1, 'a_m4_0__m4pc_0': m4_0__m4pc_0}
+            for key in nrw.keys():
+                rw[key] = nrw[key]
+                
+            vcnt = sz
+            vcnt2 = m4_0__m4pc_1
+            sz = m4pc_1
 
             score = sz - (vcnt - vcnt2)
-            vm4pcm = {'params': best_params, 'features': features, 'm4pc_cnt': vcnt, 'm4pc_cnt_fn': vcnt2, 'm4pc_sz': sz, 'model': model}
+            rw['a_score'] = score
 
-            return score, vm4pcm
+            ddf = test_df.sort_values(by=['buy_date'], ascending=[False])
+            ddf['nm4pc'] = model.predict(ddf[features])
+
+            sz = len(ddf)
+            df = ddf[ddf['m4'] > 0]
+            m4_1 = len(df)
+            df = ddf[ddf['m4'] <= 0]
+            m4_0 = len(df)
+            df = ddf[ddf['m4pc'] == 1]
+            m4pc_1 = len(df)
+            df = ddf[ddf['m4pc'] == 0]
+            m4pc_0 = len(df)
+            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 1)]
+            m4_1__m4pc_1 = len(df)
+            df = ddf[(ddf['m4'] > 0)&(ddf['m4pc'] == 0)]
+            m4_1__m4pc_0 = len(df)
+            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 1)]
+            m4_0__m4pc_1 = len(df)
+            df = ddf[(ddf['m4'] <= 0)&(ddf['m4pc'] == 0)]
+            m4_0__m4pc_0 = len(df)
+            nrw = {'t_score': 0, 't_sz': sz, 't_m4_1': m4_1, 't_m4_0': m4_0, 't_m4pc_1': m4pc_1, 't_m4pc_0': m4pc_0, 't_m4_1__m4pc_1': m4_1__m4pc_1, 't_m4_1__m4pc_0': m4_1__m4pc_0, 't_m4_0__m4pc_1': m4_0__m4pc_1, 't_m4_0__m4pc_0': m4_0__m4pc_0}
+            for key in nrw.keys():
+                rw[key] = nrw[key]
+                
+            vcnt = sz
+            vcnt2 = m4_0__m4pc_1
+            sz = m4pc_1
+
+            score = sz - (vcnt - vcnt2)
+            rw['t_score'] = score
+            
+            print(f'== [M4PC_CNT_{try_no}_FINAL] ==> ' + str(rw))
+
+            vm4pcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model}
+
+            return rw, vm4pcm
 
         rows = []
         try_no = 1
-        mx_score = 1000
-        m4pcm = None
-        while try_no <= 300:
-            score, vm4pcm = do_try()
-            if score < mx_score:
-                mx_score = score
-                vcnt = vm4pcm['m4pc_cnt']
-                vcnt2 = vm4pcm['m4pc_cnt_fn']
-                sz = vm4pcm['m4pc_sz']
-                print(f'== [M4PC_GOOD_{try_no}] ==> {vcnt}, {vcnt2} / {sz}')
-                m4pcm = vm4pcm
-                rw = {'try_no': try_no, 'm4pc_cnt': vcnt, 'm4pc_cnt_fn': vcnt2, 'm4pc_sz': sz}
-                rows.append(rw)
+        dict_m4pcm = {}
+        while try_no <= 1000:
+            srw, vm4pcm = do_try()
+            if srw['a_m4_1__m4pc_1'] > 0 and srw['t_m4_1__m4pc_1'] > 0:
+                rows.append(srw)
+                try:
+                    sdf = pd.DataFrame(rows)
+                    sdf.to_csv(f'{save_dir}/summary.csv', index=False)
+                    with open(f'{save_dir}/{lotte_kind}-m4pcm-{try_no}.pkl', 'wb') as f:
+                        pickle.dump(m4pcm, f)
+                    dict_m4pcm[try_no] = m4pcm
+                except Exception as e:
+                    print(f'== [E:{try_no}] ==> ' + str(e))        
             try_no += 1
+            
         sdf = pd.DataFrame(rows)
-        sdf.to_csv('/kaggle/working/sdf.csv', index=False)
+        sdf = sdf.sort_values(by=['a_score', 't_score'], ascending=[True, True])
+        try_no = sdf['try_no'].iloc[0]
+        sdf.to_csv(f'{save_dir}/summary.csv', index=False)
+        m4pcm = dict_m4pcm[try_no]
         
         with open(f'{save_dir}/{lotte_kind}-m4pcm.pkl', 'wb') as f:
             pickle.dump(m4pcm, f)
