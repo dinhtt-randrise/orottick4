@@ -1317,7 +1317,7 @@ class Orottick4Simulator:
                 sz = int(round(sz * 5))
                 if len(adf0) > sz:
                     adf0 = adf0[:sz]
-                valid_df = pd.concat([adf1, adf0 valid_df])
+                valid_df = pd.concat([adf1, adf0, valid_df])
             if train_z_df is not None:
                 train_z2_df = train_z_df.sample(frac=1)
                 adf1 = train_z2_df[train_z2_df['m4pc'] == 1]
