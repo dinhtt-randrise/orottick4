@@ -1270,12 +1270,11 @@ class Orottick4Simulator:
             for key in nrw.keys():
                 rw[key] = nrw[key]
                 
-            vadf = ddf
-            df = vadf[vadf['m4'] > 0]
+            df = ddf[ddf['m4'] > 0]
             vcnt_sz = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] > 0)]
+            df = ddf[(ddf['nm4pc'] == 1)&(ddf['m4'] > 0)]
             vcnt2 = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] <= 0)]
+            df = ddf[(ddf['nm4pc'] == 1)&(ddf['m4'] <= 0)]
             vcnt3 = len(df)
             score = vcnt_sz - (vcnt2 - vcnt3)
             
@@ -1305,12 +1304,11 @@ class Orottick4Simulator:
             for key in nrw.keys():
                 rw[key] = nrw[key]
 
-            vadf = ddf
-            df = vadf[vadf['m4'] > 0]
+            df = ddf[ddf['m4'] > 0]
             vcnt_sz = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] > 0)]
+            df = ddf[(ddf['nm4pc'] == 1)&(ddf['m4'] > 0)]
             vcnt2 = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] <= 0)]
+            df = ddf[(ddf['nm4pc'] == 1)&(ddf['m4'] <= 0)]
             vcnt3 = len(df)
             score = vcnt_sz - (vcnt2 - vcnt3)
 
