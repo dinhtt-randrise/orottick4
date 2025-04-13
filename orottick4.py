@@ -1122,6 +1122,9 @@ class Orottick4Simulator:
             test_df = all_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
 
+        all_df['m4pc'] = [1 if all_df['m4'].iloc[x] > 0 else 0 for x in range(len(all_df))]
+        test_df['m4pc'] = [1 if test_df['m4'].iloc[x] > 0 else 0 for x in range(len(test_df))]
+
         valid_df = None
         train_df = None
                 
