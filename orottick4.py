@@ -1775,7 +1775,7 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
-    def v4_capture_mapc(self, v_buy_date, data_df, runtime):
+    def v4_capture_mapc(self, v_buy_date, b_buy_date, data_df, runtime):
         if self.mapcm is None:
             return None
 
@@ -1787,7 +1787,7 @@ class Orottick4Simulator:
         os.environ["PYTHONHASHSEED"] = str(SEED)
         np.random.seed(SEED)
         
-        rw, rdf, cdf = self.v4_mapc_data(v_buy_date, data_df, runtime, date_cnt_mx, match_kind)
+        rw, rdf, cdf = self.v4_mapc_data(v_buy_date, b_buy_date, data_df, runtime, date_cnt_mx, match_kind)
         if rdf is None:
             return None
 
