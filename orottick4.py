@@ -2272,68 +2272,89 @@ class Orottick4Simulator:
         if len(ddf) == 0:
             return rdf, cdf, more
 
-        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
 
         rows = []
         dix = 0
         dcnt = 10
         dix_ma = 0
         dcnt_ma = 10
-        dsz = len(ddf)
+        dsz = len(ddf) * len(ddf)
         if dsz < 365:
             dcnt_ma = 1
-        for ri in range(len(ddf)):
+        for ria in range(len(ddf)):
             if runtime is not None:
                 if time.time() - start_time > runtime:
                     break
 
-            a_date = ddf['date'].iloc[ri]
-            a_buy_date = ddf['buy_date'].iloc[ri]
-            a_next_date = ddf['next_date'].iloc[ri]
-            a_w = ddf['w'].iloc[ri]
-            a_n = ddf['n'].iloc[ri]
-            a_runtime = None
-            if runtime is not None:
-                o_runtime = time.time() - start_time
-                a_runtime = runtime - o_runtime
+            a_date = ddf['date'].iloc[ria]
+            a_buy_date = ddf['buy_date'].iloc[ria]
+            a_next_date = ddf['next_date'].iloc[ria]
+            a_w = ddf['w'].iloc[ria]
+            a_n = ddf['n'].iloc[ria]
 
-            a_ma = 0
-            a_mapc = 0
-            df = xrdf[(xrdf['a_buy_date'] == a_buy_date)&(xrdf[f'a_{match_kind}'] == 1)]
-            if len(df) > 0:
-                a_ma = len(df)
-                a_mapc = 1
-            a_rw, a_rdf, a_cdf = self.v4_mapc_data(a_buy_date, data_df, a_runtime, date_cnt_mx, match_kind)
-            if a_rdf is not None:
-                more[f'rdf_{a_buy_date}'] = a_rdf
-            if a_cdf is not None:
-                more[f'cdf_{a_buy_date}'] = a_cdf
-                
-            dix += 1
-            if a_ma > 0:
-                dix_ma += 1
+            for rib in range(len(ddf)):
+                if runtime is not None:
+                    if time.time() - start_time > runtime:
+                        break
 
-            if dix > 0 and dix % dcnt == 0:
-                if has_log_step:
-                    print(f'== [R] ==> {dix}, {dix_ma} / {dsz}')
-
-            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'mapc': a_mapc, 'ma': a_ma, f'mapc_{match_kind}': a_mapc, f'ma_{match_kind}': a_ma}
-            if a_rw is not None:
-                for key in a_rw.keys():
-                    rw[key] = a_rw[key]
-                rows.append(rw)
-
-            if dix_ma <= 1:
-                if dix > 0 and dix <= 50:
+                if rib <= ria:
+                    continue
+                    
+                b_date = ddf['date'].iloc[rib]
+                b_buy_date = ddf['buy_date'].iloc[rib]
+                b_next_date = ddf['next_date'].iloc[rib]
+                b_w = ddf['w'].iloc[rib]
+                b_n = ddf['n'].iloc[rib]
+                    
+                a_runtime = None
+                if runtime is not None:
+                    o_runtime = time.time() - start_time
+                    a_runtime = runtime - o_runtime
+    
+                a_rw, a_rdf, a_cdf = self.v4_mapc_data(a_buy_date, b_buy_date, data_df, a_runtime, date_cnt_mx, match_kind)
+                a_good = 1
+                if a_rw is None or a_rdf is None or a_cdf is None:
+                    a_good = 0
+                    
+                if a_rdf is not None:
+                    more[f'rdf_{a_buy_date}'] = a_rdf
+                if a_cdf is not None:
+                    more[f'cdf_{a_buy_date}'] = a_cdf
+                    
+                dix += 1
+                if a_ma > 0:
+                    dix_ma += 1
+    
+                if dix > 0 and dix % dcnt == 0:
                     if has_log_step:
-                        print(str(rw))                    
-                elif dix % dcnt == 0:
-                    if has_log_step:
-                        print(str(rw))
+                        print(f'== [R] ==> {dix}, {dix_ma} / {dsz}')
 
-            if dix_ma > 1 and dix_ma % dcnt_ma == 0:
-                if has_log_step:
-                    print(str(rw))
+                if a_good == 1:
+                    a_ma = 0
+                    a_mapc = 0
+                    df = xrdf[(xrdf['a_buy_date'] == a_buy_date)&(xrdf['b_buy_date'] == b_buy_date)&(xrdf[f'a_{match_kind}'] == 1)]
+                    if len(df) > 0:
+                        a_ma = len(df)
+                        a_mapc = 1
+
+                    rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_w': a_w, 'a_n': a_n, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'a_ma': a_ma, 'a_mapc': a_mapc, f'a_ma_{match_kind}': a_ma, f'a_mapc_{match_kind}': a_mapc}
+                    if a_rw is not None:
+                        for key in a_rw.keys():
+                            rw[key] = a_rw[key]
+                        rows.append(rw)
+
+                    if dix_ma <= 1:
+                        if dix > 0 and dix <= 50:
+                            if has_log_step:
+                                print(str(rw))                    
+                        elif dix % dcnt == 0:
+                            if has_log_step:
+                                print(str(rw))
+        
+                    if dix_ma > 1 and dix_ma % dcnt_ma == 0:
+                        if has_log_step:
+                            print(str(rw))
 
         if len(rows) > 0:
             rdf = pd.DataFrame(rows)
@@ -2354,7 +2375,7 @@ class Orottick4Simulator:
         
         return rdf, cdf, more
 
-    def v4_mapc_data(self, v_buy_date, data_df, runtime, date_cnt_mx = 365 * 5, match_kind = 'm4'):
+    def v4_mapc_data(self, v_buy_date, b_buy_date, data_df, runtime, date_cnt_mx = 365 * 5, match_kind = 'm4'):
         rdf = None
         cdf = None
         rw = None
@@ -2362,9 +2383,20 @@ class Orottick4Simulator:
         xdf = data_df[data_df['buy_date'] == v_buy_date]
         if len(xdf) == 0:
             return rw, rdf, cdf
+        bdf = data_df[data_df['buy_date'] == b_buy_date]
+        if len(bdf) == 0:
+            return rw, rdf, cdf
         ddf = data_df[data_df['buy_date'] < v_buy_date]
         if len(ddf) == 0:
             return rw, rdf, cdf
+
+        a_n = xdf['n'].iloc[0]
+        a_sim_seed = self.capture_seed(1, a_n)
+        b_w = bdf['w'].iloc[0]
+        b_n = bdf['n'].iloc[0]
+        b_sim_seed, b_sim_cnt = self.capture(b_w, b_n)
+        a_p = self.reproduce_one(a_sim_seed, b_sim_cnt)
+        
         ddf = data_df[data_df['buy_date'] < v_buy_date]
         ardf, more = self.v4_research(v_buy_date, None, None, data_df, date_cnt_mx, False, runtime, True)
         if ardf is None:
@@ -2373,19 +2405,21 @@ class Orottick4Simulator:
             return rw, rdf, cdf
         oardf = ardf
 
-        ardf = ardf[ardf[f'a_{match_kind}'] == 1]
+        rw = {'a_p': a_p}
+
+        # ----- A ----- #
+        
+        ardf = oardf[oardf[f'a_{match_kind}'] == 1]
         if len(ardf) == 0:
             return rw, rdf, cdf
-
-        rw = {}
 
         date_cnt_step = 5
         min_date_cnt = 1
         max_date_cnt = min_date_cnt + date_cnt_step - 1
         while max_date_cnt <= date_cnt_mx:
             df1 = ardf[(ardf['a_date_cnt'] >= min_date_cnt)&(ardf['a_date_cnt'] <= max_date_cnt)]
-            rw[f'date_cnt_{max_date_cnt}_ir'] = len(df1)
-            rw[f'date_cnt_{max_date_cnt}_or'] = len(ardf) - len(df1)
+            rw[f'a_date_cnt_{max_date_cnt}_ir'] = len(df1)
+            rw[f'a_date_cnt_{max_date_cnt}_or'] = len(ardf) - len(df1)
 
         bdfd = v_buy_date.split('.')
         a_year = int(bdfd[0])
@@ -2409,77 +2443,188 @@ class Orottick4Simulator:
         df1 = ardf
 
         df = df1[df1['a_year'] == a_year]
-        rw['year_ir'] = len(df)
-        rw['year_or'] = len(df1) - len(df)
+        rw['a_year_ir'] = len(df)
+        rw['a_year_or'] = len(df1) - len(df)
 
         df = df1[df1['a_year'] == a_p_year]
-        rw['p_year_ir'] = len(df)
-        rw['p_year_or'] = len(df1) - len(df)
+        rw['a_p_year_ir'] = len(df)
+        rw['a_p_year_or'] = len(df1) - len(df)
 
         df = df1[df1['a_year'] == a_n_year]
-        rw['n_year_ir'] = len(df)
-        rw['n_year_or'] = len(df1) - len(df)
+        rw['a_n_year_ir'] = len(df)
+        rw['a_n_year_or'] = len(df1) - len(df)
 
         df = df1[df1['a_month'] == a_month]
-        rw['month_ir'] = len(df)
-        rw['month_or'] = len(df1) - len(df)
+        rw['a_month_ir'] = len(df)
+        rw['a_month_or'] = len(df1) - len(df)
 
         df = df1[df1['a_month'] == a_p_month]
-        rw['p_month_ir'] = len(df)
-        rw['p_month_or'] = len(df1) - len(df)
+        rw['a_p_month_ir'] = len(df)
+        rw['a_p_month_or'] = len(df1) - len(df)
 
         df = df1[df1['a_month'] == a_n_month]
-        rw['n_month_ir'] = len(df)
-        rw['n_month_or'] = len(df1) - len(df)
+        rw['a_n_month_ir'] = len(df)
+        rw['a_n_month_or'] = len(df1) - len(df)
 
         df = df1[df1['a_day'] == a_day]
-        rw['day_ir'] = len(df)
-        rw['day_or'] = len(df1) - len(df)
+        rw['a_day_ir'] = len(df)
+        rw['a_day_or'] = len(df1) - len(df)
 
         df = df1[df1['a_day'] == a_p_day]
-        rw['p_day_ir'] = len(df)
-        rw['p_day_or'] = len(df1) - len(df)
+        rw['a_p_day_ir'] = len(df)
+        rw['a_p_day_or'] = len(df1) - len(df)
 
         df = df1[df1['a_day'] == a_n_day]
-        rw['n_day_ir'] = len(df)
-        rw['n_day_or'] = len(df1) - len(df)
+        rw['a_n_day_ir'] = len(df)
+        rw['a_n_day_or'] = len(df1) - len(df)
 
         df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_day)]
-        rw['month_day_ir'] = len(df)
-        rw['month_day_or'] = len(df1) - len(df)
+        rw['a_month_day_ir'] = len(df)
+        rw['a_month_day_or'] = len(df1) - len(df)
 
         if a_p_day == 1:
             df = df1[(df1['a_month'] == a_p_month)&(df1['a_day'] == 28)]
         else:
             df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_p_day)]
-        rw['p_month_day_ir'] = len(df)
-        rw['p_month_day_or'] = len(df1) - len(df)
+        rw['a_p_month_day_ir'] = len(df)
+        rw['a_p_month_day_or'] = len(df1) - len(df)
 
         if a_n_day == 28:
             df = df1[(df1['a_month'] == a_n_month)&(df1['a_day'] == 1)]
         else:
             df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_n_day)]
-        rw['n_month_day_ir'] = len(df)
-        rw['n_month_day_or'] = len(df1) - len(df)
+        rw['a_n_month_day_ir'] = len(df)
+        rw['a_n_month_day_or'] = len(df1) - len(df)
 
 
         df = df1[(df1['a_month'] == a_month)&(df1['a_year'] == a_year)]
-        rw['year_month_ir'] = len(df)
-        rw['year_month_or'] = len(df1) - len(df)
+        rw['a_year_month_ir'] = len(df)
+        rw['a_year_month_or'] = len(df1) - len(df)
 
         if a_p_month == 1:
             df = df1[(df1['a_month'] == 12)&(df1['a_year'] == a_p_year)]
         else:
             df = df1[(df1['a_month'] == a_p_month)&(df1['a_year'] == a_year)]
-        rw['p_year_month_ir'] = len(df)
-        rw['p_year_month_or'] = len(df1) - len(df)
+        rw['a_p_year_month_ir'] = len(df)
+        rw['a_p_year_month_or'] = len(df1) - len(df)
 
         if a_n_month == 12:
             df = df1[(df1['a_month'] == 1)&(df1['a_year'] == a_n_year)]
         else:
             df = df1[(df1['a_month'] == a_n_month)&(df1['a_year'] == a_year)]
-        rw['n_year_month_ir'] = len(df)
-        rw['n_year_month_or'] = len(df1) - len(df)
+        rw['a_n_year_month_ir'] = len(df)
+        rw['a_n_year_month_or'] = len(df1) - len(df)
+
+        # ----- B ----- #
+        
+        ardf = oardf[oardf[f'a_{match_kind}'] == 1]
+        if len(ardf) == 0:
+            return rw, rdf, cdf
+        ardf = ardf[ardf['b_buy_date'] < b_buy_date]
+        if len(ardf) == 0:
+            return rw, rdf, cdf
+        
+        date_cnt_step = 5
+        min_date_cnt = 1
+        max_date_cnt = min_date_cnt + date_cnt_step - 1
+        while max_date_cnt <= date_cnt_mx:
+            df1 = ardf[(ardf['a_date_cnt'] >= min_date_cnt)&(ardf['a_date_cnt'] <= max_date_cnt)]
+            rw[f'b_date_cnt_{max_date_cnt}_ir'] = len(df1)
+            rw[f'b_date_cnt_{max_date_cnt}_or'] = len(ardf) - len(df1)
+
+        bdfd = v_buy_date.split('.')
+        a_year = int(bdfd[0])
+        a_p_year = a_year - 1
+        a_n_year = a_year + 1
+        a_month = int(bdfd[1])
+        a_p_month = a_month - 1
+        if a_p_month < 1:
+            a_p_month = 12
+        a_n_month = a_month + 1
+        if a_n_month > 12:
+            a_n_month = 1
+        a_day = int(bdfd[2])
+        a_p_day = a_day - 1
+        if a_p_day < 1:
+            a_p_day = 28
+        a_n_day = a_day + 1
+        if a_n_day > 28:
+            a_n_day = 1
+            
+        df1 = ardf
+
+        df = df1[df1['a_year'] == a_year]
+        rw['b_year_ir'] = len(df)
+        rw['b_year_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_year'] == a_p_year]
+        rw['b_p_year_ir'] = len(df)
+        rw['b_p_year_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_year'] == a_n_year]
+        rw['b_n_year_ir'] = len(df)
+        rw['b_n_year_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_month'] == a_month]
+        rw['b_month_ir'] = len(df)
+        rw['b_month_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_month'] == a_p_month]
+        rw['b_p_month_ir'] = len(df)
+        rw['b_p_month_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_month'] == a_n_month]
+        rw['b_n_month_ir'] = len(df)
+        rw['b_n_month_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_day'] == a_day]
+        rw['b_day_ir'] = len(df)
+        rw['b_day_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_day'] == a_p_day]
+        rw['b_p_day_ir'] = len(df)
+        rw['b_p_day_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_day'] == a_n_day]
+        rw['b_n_day_ir'] = len(df)
+        rw['b_n_day_or'] = len(df1) - len(df)
+
+        df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_day)]
+        rw['b_month_day_ir'] = len(df)
+        rw['b_month_day_or'] = len(df1) - len(df)
+
+        if a_p_day == 1:
+            df = df1[(df1['a_month'] == a_p_month)&(df1['a_day'] == 28)]
+        else:
+            df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_p_day)]
+        rw['b_p_month_day_ir'] = len(df)
+        rw['b_p_month_day_or'] = len(df1) - len(df)
+
+        if a_n_day == 28:
+            df = df1[(df1['a_month'] == a_n_month)&(df1['a_day'] == 1)]
+        else:
+            df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_n_day)]
+        rw['b_n_month_day_ir'] = len(df)
+        rw['b_n_month_day_or'] = len(df1) - len(df)
+
+
+        df = df1[(df1['a_month'] == a_month)&(df1['a_year'] == a_year)]
+        rw['b_year_month_ir'] = len(df)
+        rw['b_year_month_or'] = len(df1) - len(df)
+
+        if a_p_month == 1:
+            df = df1[(df1['a_month'] == 12)&(df1['a_year'] == a_p_year)]
+        else:
+            df = df1[(df1['a_month'] == a_p_month)&(df1['a_year'] == a_year)]
+        rw['b_p_year_month_ir'] = len(df)
+        rw['b_p_year_month_or'] = len(df1) - len(df)
+
+        if a_n_month == 12:
+            df = df1[(df1['a_month'] == 1)&(df1['a_year'] == a_n_year)]
+        else:
+            df = df1[(df1['a_month'] == a_n_month)&(df1['a_year'] == a_year)]
+        rw['b_n_year_month_ir'] = len(df)
+        rw['b_n_year_month_or'] = len(df1) - len(df)
 
         rdf = pd.DataFrame([rw])
         cdf = oardf
