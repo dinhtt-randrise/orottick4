@@ -1357,7 +1357,7 @@ class Orottick4Simulator:
             if t_s < min_best_trial_score:
                 min_best_trial_score = t_s
                 
-            rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'score': 0}
+            rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'min_score': 0, 'score': 0}
 
             if valid_z_df is not None:
                 ddf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
@@ -1432,9 +1432,10 @@ class Orottick4Simulator:
 
             rw['score'] = rw['a_score'] + rw['t_score']
 
+            rw['min_score'] = min_score
             score = rw['score']
             good = ''
-            if rw['a_m4_1__m4pc_1'] > 0 and rw['t_m4_1__m4pc_1'] > 0:
+            if rw['a_m4_1__m4pc_1'] > 0 or rw['t_m4_1__m4pc_1'] > 0:
                 if score < min_score:
                     min_score = score
                     good = f' [GOOD:{min_score}] '
@@ -1452,7 +1453,7 @@ class Orottick4Simulator:
                 if time.time() - start_time > runtime:
                     break
             srw, vm4pcm = do_try()
-            if srw['a_m4_1__m4pc_1'] > 0 and srw['t_m4_1__m4pc_1'] > 0:
+            if srw['a_m4_1__m4pc_1'] > 0 or srw['t_m4_1__m4pc_1'] > 0:
                 rows.append(srw)
                 try:
                     sdf = pd.DataFrame(rows)
