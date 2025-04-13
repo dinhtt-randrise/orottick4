@@ -1193,7 +1193,7 @@ class Orottick4Simulator:
             return np.mean(scores) + vcnt
 
         def do_try():
-            global test_all, all_df, valid_df, train_df
+            global test_df, all_df, valid_df, train_df
             
             test_df = test_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
