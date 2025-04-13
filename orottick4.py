@@ -1067,7 +1067,7 @@ class Orottick4Simulator:
         return nddf, oddf, rows
         
     def m4pc_train(self, lotte_kind, data_dir, save_dir, runtime):
-        global min_score, test_df, all_df, valid_df, train_df
+        global dict_sc, min_score, test_df, all_df, valid_df, train_df
 
         start_time = time.time()
         
@@ -1155,8 +1155,11 @@ class Orottick4Simulator:
 
         try_no = 1
         min_score = 1000000
+        dict_sc = {}
 
         def objective(trial):
+            global dict_sc
+            
             # search param
             param = {
                 'reg_alpha': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
@@ -1204,10 +1207,14 @@ class Orottick4Simulator:
             scores = []
             for name, score in model.best_score_['valid_0'].items():
                 scores.append(score)
-            return np.mean(scores) + vcnt
-
+            score = np.mean(scores) + vcnt
+            dict_sc[tn] = score
+            return score
+            
         def do_try():
-            global min_score, test_df, all_df, valid_df, train_df
+            global dict_sc, min_score, test_df, all_df, valid_df, train_df
+
+            dict_sc = {}
             
             #test_df = test_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
@@ -1244,9 +1251,12 @@ class Orottick4Simulator:
                                         sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
                                        )
             study.optimize(objective, n_trials=100)
-    
-            print('Number of finished trials:', len(study.trials))
-            print('Best trial:', study.best_trial.params)        
+
+            t_n = study.best_trial.number
+            t_p = study.best_trial.params
+            t_c = study.trials
+            t_s = dict_sc[t_n]
+            print(f'== [BEST_TRIAL] {t_n} / {t_c} : {t_s} ==> ' + str(t_p))
     
             # train with best params
             best_params = study.best_trial.params
