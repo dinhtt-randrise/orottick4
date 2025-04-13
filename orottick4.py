@@ -1775,6 +1775,289 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
+    def v4_mapc_prepare(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 367, date_cnt_mx = 365 * 5, match_kind = 'm4, has_log_step = False, runtime = None):
+        self.print_heading()
+
+        more = {}
+        
+        text = '''
+====================================
+          V4 MAPC PREPARE
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        v_data_df_is_none = False
+        if data_df is None:
+            v_data_df_is_none = True
+            
+        print(f'[BUFFER_DIR] {buffer_dir}')
+        print(f'[LOTTE_KIND] {lotte_kind}')
+        print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+        print(f'[BUY_DATE] {v_buy_date}')
+        print(f'[DATE_CNT] {v_date_cnt}')
+        print(f'[RUNTIME] {runtime}')
+        print(f'[MATCH_KIND] {match_kind}')
+        print(f'[DATE_CNT_MAX] {date_cnt_mx}')
+
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        start_time = time.time()
+
+        rdf = None
+        cdf = None
+        
+        if data_df is None:
+            d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
+            g = -1
+            d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
+            v_date = d2.strftime('%Y.%m.%d')
+    
+            data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
+            if data_df is None:
+                return rdf, cdf, more
+
+        ddf = data_df[data_df['buy_date'] <= v_buy_date]
+        if len(ddf) == 0:
+            return rdf, cdf, more
+            
+        ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
+        if len(ddf) == 0:
+            return rdf, cdf, more
+
+        xrdf, xmore = self.v4_research(v_buy_date, None, lotte_kind, data_df, date_cnt_mx, False, runtime, True)
+        
+        oddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        if len(ddf) > v_date_cnt:
+            ddf = ddf[:v_date_cnt]
+        if len(ddf) == 0:
+            return rdf, cdf, more
+
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+
+        rows = []
+        dix = 0
+        dcnt = 10
+        dix_ma = 0
+        dcnt_ma = 10
+        dsz = len(ddf)
+        if dsz < 365:
+            dcnt_ma = 1
+        for ri in range(len(ddf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+
+            a_date = ddf['date'].iloc[ri]
+            a_buy_date = ddf['buy_date'].iloc[ri]
+            a_next_date = ddf['next_date'].iloc[ri]
+            a_w = ddf['w'].iloc[ri]
+            a_n = ddf['n'].iloc[ri]
+            a_runtime = None
+            if runtime is not None:
+                o_runtime = time.time() - start_time
+                a_runtime = runtime - o_runtime
+
+            a_ma = 0
+            a_mapc = 0
+            df = xrdf[(xrdf['a_buy_date'] == a_buy_date)&(xrdf[f'a_{match_kind}'] == 1)]
+            if len(df) > 0:
+                a_ma = len(df)
+                a_mapc = 1
+            a_rw, a_rdf, a_cdf = self.v4_mapc_data(a_buy_date, data_df, a_runtime, date_cnt_mx, match_kind)
+            if a_rdf is not None:
+                more[f'rdf_{a_buy_date}'] = a_rdf
+            if a_cdf is not None:
+                more[f'cdf_{a_buy_date}'] = a_cdf
+                
+            dix += 1
+            if a_ma > 0:
+                dix_ma += 1
+
+            if dix > 0 and dix % dcnt == 0:
+                if has_log_step:
+                    print(f'== [R] ==> {dix}, {dix_ma} / {dsz}')
+
+            rw = {'date': a_date, 'buy_date': a_buy_date, 'next_date': a_next_date, 'w': a_w, 'n': a_n, 'mapc': a_mapc, 'ma': a_ma, f'mapc_{match_kind}': a_mapc, f'ma_{match_kind}': a_ma}
+            if a_rw is not None:
+                for key in a_rw.keys():
+                    rw[key] = a_rw[key]
+                rows.append(rw)
+
+            if dix_ma <= 1:
+                if dix > 0 and dix <= 50:
+                    if has_log_step:
+                        print(str(rw))                    
+                elif dix % dcnt == 0:
+                    if has_log_step:
+                        print(str(rw))
+
+            if dix_ma > 1 and dix_ma % dcnt_ma == 0:
+                if has_log_step:
+                    print(str(rw))
+
+        if len(rows) > 0:
+            rdf = pd.DataFrame(rows)
+            cdf = xrdf
+                
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
+
+        text = '''
+  -------------------------------
+          V4 MAPC PREPARE
+====================================
+        '''
+        print(text)
+        
+        return rdf, cdf, more
+
+    def v4_mapc_data(self, v_buy_date, data_df, runtime, date_cnt_mx = 365 * 5, match_kind = 'm4'):
+        rdf = None
+        cdf = None
+        rw = None
+        start_time = time.time()
+        xdf = data_df[data_df['buy_date'] == v_buy_date]
+        if len(xdf) == 0:
+            return rw, rdf, cdf
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        if len(ddf) == 0:
+            return rw, rdf, cdf
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        ardf, more = self.v4_research(v_buy_date, None, None, data_df, date_cnt_mx, False, runtime, True)
+        if ardf is None:
+            return rw, rdf, cdf
+        if len(ardf) == 0:
+            return rw, rdf, cdf
+        oardf = ardf
+
+        ardf = ardf[ardf[f'a_{match_kind}'] == 1]
+        if len(ardf) == 0:
+            return rw, rdf, cdf
+
+        rw = {}
+
+        date_cnt_step = 5
+        min_date_cnt = 1
+        max_date_cnt = min_date_cnt + date_cnt_step - 1
+        while max_date_cnt <= date_cnt_mx:
+            df1 = ardf[(ardf['a_date_cnt'] >= min_date_cnt)&(ardf['a_date_cnt'] <= max_date_cnt)]
+            rw[f'date_cnt_{max_date_cnt}_ir'] = len(df1)
+            rw[f'date_cnt_{max_date_cnt}_or'] = len(ardf) - len(df1)
+
+        bdfd = v_buy_date.split('.')
+        a_year = int(bdfd[0])
+        a_p_year = a_year - 1
+        a_n_year = a_year + 1
+        a_month = int(bdfd[1])
+        a_p_month = a_month - 1
+        if a_p_month < 1:
+            a_p_month = 12
+        a_n_month = a_month + 1
+        if a_n_month > 12:
+            a_n_month = 1
+        a_day = int(bdfd[2])
+        a_p_day = a_day - 1
+        if a_p_day < 1:
+            a_p_day = 28
+        a_n_day = a_day + 1
+        if a_n_day > 28:
+            a_n_day = 1
+            
+        df1 = ardf
+
+        df = df1[df1['a_year'] == a_year]
+        rw['year_ir'] = len(df)
+        rw['year_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_year'] == a_p_year]
+        rw['p_year_ir'] = len(df)
+        rw['p_year_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_year'] == a_n_year]
+        rw['n_year_ir'] = len(df)
+        rw['n_year_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_month'] == a_month]
+        rw['month_ir'] = len(df)
+        rw['month_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_month'] == a_p_month]
+        rw['p_month_ir'] = len(df)
+        rw['p_month_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_month'] == a_n_month]
+        rw['n_month_ir'] = len(df)
+        rw['n_month_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_day'] == a_day]
+        rw['day_ir'] = len(df)
+        rw['day_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_day'] == a_p_day]
+        rw['p_day_ir'] = len(df)
+        rw['p_day_or'] = len(df1) - len(df)
+
+        df = df1[df1['a_day'] == a_n_day]
+        rw['n_day_ir'] = len(df)
+        rw['n_day_or'] = len(df1) - len(df)
+
+        df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_day)]
+        rw['month_day_ir'] = len(df)
+        rw['month_day_or'] = len(df1) - len(df)
+
+        if a_p_day == 1:
+            df = df1[(df1['a_month'] == a_p_month)&(df1['a_day'] == 28)]
+        else:
+            df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_p_day)]
+        rw['p_month_day_ir'] = len(df)
+        rw['p_month_day_or'] = len(df1) - len(df)
+
+        if a_n_day == 28:
+            df = df1[(df1['a_month'] == a_n_month)&(df1['a_day'] == 1)]
+        else:
+            df = df1[(df1['a_month'] == a_month)&(df1['a_day'] == a_n_day)]
+        rw['n_month_day_ir'] = len(df)
+        rw['n_month_day_or'] = len(df1) - len(df)
+
+
+        df = df1[(df1['a_month'] == a_month)&(df1['a_year'] == a_year)]
+        rw['year_month_ir'] = len(df)
+        rw['year_month_or'] = len(df1) - len(df)
+
+        if a_p_month == 1:
+            df = df1[(df1['a_month'] == 12)&(df1['a_year'] == a_p_year)]
+        else:
+            df = df1[(df1['a_month'] == a_p_month)&(df1['a_year'] == a_year)]
+        rw['p_year_month_ir'] = len(df)
+        rw['p_year_month_or'] = len(df1) - len(df)
+
+        if a_n_month == 12:
+            df = df1[(df1['a_month'] == 1)&(df1['a_year'] == a_n_year)]
+        else:
+            df = df1[(df1['a_month'] == a_n_month)&(df1['a_year'] == a_year)]
+        rw['n_year_month_ir'] = len(df)
+        rw['n_year_month_or'] = len(df1) - len(df)
+
+        rdf = pd.DataFrame([rw])
+        cdf = oardf
+        
+        return rw, rdf, cdf
+
     def v4_research(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None, silent = False):
         self.print_heading()
 
