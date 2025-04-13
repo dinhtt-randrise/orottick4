@@ -1435,15 +1435,17 @@ class Orottick4Simulator:
             rw['min_score'] = min_score
             score = rw['score']
             good = ''
-            if rw['a_m4_1__m4pc_1'] > 0 or rw['t_m4_1__m4pc_1'] > 0:
-                if score < min_score:
-                    min_score = score
-                    good = f' [GOOD:{min_score}] '
+            is_good = 0
+            if score < min_score:
+                min_score = score
+                good = f' [GOOD:{min_score}] '
+                rw['min_score'] = min_score
+                is_good = 1
             print(f'== [M4PC_CNT_{try_no}_FINAL] {good} ==> ' + str(rw))
 
             vm4pcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model}
 
-            return rw, vm4pcm
+            return rw, vm4pcm, is_good
 
         rows = []
         try_no = 1
@@ -1452,8 +1454,8 @@ class Orottick4Simulator:
             if runtime is not None:
                 if time.time() - start_time > runtime:
                     break
-            srw, vm4pcm = do_try()
-            if srw['a_m4_1__m4pc_1'] > 0 or srw['t_m4_1__m4pc_1'] > 0:
+            srw, vm4pcm, is_good = do_try()
+            if is_good == 1:
                 rows.append(srw)
                 try:
                     sdf = pd.DataFrame(rows)
