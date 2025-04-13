@@ -1242,7 +1242,7 @@ class Orottick4Simulator:
                 #verbose=10
             )
 
-            rw = {'try_no': try_no}
+            rw = {'try_no': try_no, 'score'}
             
             ddf = all_df.sort_values(by=['buy_date'], ascending=[False])
             ddf['nm4pc'] = model.predict(ddf[features])
@@ -1305,6 +1305,8 @@ class Orottick4Simulator:
 
             score = sz - (vcnt - vcnt2)
             rw['t_score'] = score
+
+            rw['score'] = rw['a_score'] + rw['t_score']
             
             print(f'== [M4PC_CNT_{try_no}_FINAL] ==> ' + str(rw))
 
@@ -1324,6 +1326,7 @@ class Orottick4Simulator:
                 rows.append(srw)
                 try:
                     sdf = pd.DataFrame(rows)
+                    sdf = sdf.sort_values(by=['score', 't_score', 'a_score'], ascending=[True, True, True])
                     sdf.to_csv(f'{save_dir}/summary.csv', index=False)
                     with open(f'{save_dir}/{lotte_kind}-m4pcm-{try_no}.pkl', 'wb') as f:
                         pickle.dump(m4pcm, f)
@@ -1334,7 +1337,7 @@ class Orottick4Simulator:
 
         if len(rows) > 0:
             sdf = pd.DataFrame(rows)
-            sdf = sdf.sort_values(by=['a_score', 't_score'], ascending=[True, True])
+            sdf = sdf.sort_values(by=['score', 't_score', 'a_score'], ascending=[True, True, True])
             try_no = sdf['try_no'].iloc[0]
             sdf.to_csv(f'{save_dir}/summary.csv', index=False)
             m4pcm = dict_m4pcm[try_no]
