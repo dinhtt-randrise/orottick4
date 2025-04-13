@@ -289,7 +289,7 @@ class Orottick4Simulator:
                 if cnt < 4:
                     return False
                 return True
-        elif match_kind == 'm4fa':
+        elif match_kind == 'm3fa':
             wa = self.n2a(w)
             pa = self.n2a(p)
             wa = [wa[x] for x in range(len(wa)) if x < 3]
@@ -310,7 +310,7 @@ class Orottick4Simulator:
                 if cnt < 3:
                     return False
                 return True
-        elif match_kind == 'm4la':
+        elif match_kind == 'm3la':
             wa = self.n2a(w)
             pa = self.n2a(p)
             wa = [wa[x] for x in range(len(wa)) if x > 0]
