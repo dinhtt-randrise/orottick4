@@ -1775,7 +1775,7 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
-    def v4_mapc_prepare(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 367, date_cnt_mx = 365 * 5, match_kind = 'm4, has_log_step = False, runtime = None):
+    def v4_mapc_prepare(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 367, date_cnt_mx = 365 * 5, match_kind = 'm4', has_log_step = False, runtime = None):
         self.print_heading()
 
         more = {}
@@ -3465,6 +3465,7 @@ class Orottick4Simulator:
         LOTTE_KIND = Orottick4Simulator.get_option(options, 'LOTTE_KIND', 'p4a')
         DATA_DF = Orottick4Simulator.get_option(options, 'DATA_DF', None)
         DATE_CNT = Orottick4Simulator.get_option(options, 'DATE_CNT', 56 * 5)
+        DATE_CNT_MAX = Orottick4Simulator.get_option(options, 'DATE_CNT_MAX', 365 * 5)
         O_DATE_CNT = Orottick4Simulator.get_option(options, 'O_DATE_CNT', 7)
         TCK_CNT = Orottick4Simulator.get_option(options, 'TCK_CNT', 56 * 5)
         F_TCK_CNT = Orottick4Simulator.get_option(options, 'F_TCK_CNT', 250)
@@ -3810,5 +3811,19 @@ class Orottick4Simulator:
                 for key in more.keys():
                     mdf = more[key]
                     mdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-{key}-{BUY_DATE}.csv', index=False)
-                    
+
+        if METHOD == 'v4_mapc_prepare':
+            ardf, acdf, more = ok4s.v4_mapc_prepare(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, DATE_CNT_MAX, MATCH_KIND, HAS_STEP_LOG, RUNTIME)
+
+            if ardf is not None:
+                ardf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-rdf-{BUY_DATE}.csv', index=False)
+
+            if acdf is not None:
+                acdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-cdf-{BUY_DATE}.csv', index=False)
+
+            for key in more.keys():
+                adf = more[key]
+                if adf is not None:
+                    adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-{key}-{BUY_DATE}.csv', index=False)
+                                                  
 # ------------------------------------------------------------ #
