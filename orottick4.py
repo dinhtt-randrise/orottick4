@@ -1876,6 +1876,7 @@ class Orottick4Simulator:
         l_mk = ['m4', 'm3f', 'm3l', 'm4a', 'm3fa', 'm3la']
         a_mdict = {}
         rows = []
+        dhsz = len(ddf)
         dsz = len(ddf) * len(ddf)
         dix = 0
         dix_ma = 0
@@ -1986,7 +1987,7 @@ class Orottick4Simulator:
                 dix += 1
                 if dix > 0 and dix % dcnt == 0:
                     if has_log_step:
-                        print(f'== [R] {a_date_no}, {b_date_no} : {dix}, {dix_ma} / {dsz}')
+                        print(f'== [R] {a_date_no}, {b_date_no} / {dhsz} : {dix}, {dix_ma} / {dsz}')
                     
                 if a_ma <= 0:
                     continue
