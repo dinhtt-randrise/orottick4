@@ -1949,7 +1949,7 @@ class Orottick4Simulator:
                 a_date_cnt = ria - rib
                 b_date_no = rib + 1
 
-                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_txt_year': a_txt_year, 'a_year': a_year, 'a_txt_month': a_txt_month, 'a_month': a_month, 'a_txt_year_month': a_txt_year_month, 'a_txt_day': a_txt_day, 'a_day': a_day, 'a_txt_month_day': a_txt_month_day, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'a_date_cnt_same': 0, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
+                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_txt_year': a_txt_year, 'a_year': a_year, 'a_txt_month': a_txt_month, 'a_month': a_month, 'a_txt_year_month': a_txt_year_month, 'a_txt_day': a_txt_day, 'a_day': a_day, 'a_txt_month_day': a_txt_month_day, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'a_date_cnt_same': 0, 'a_ma': 0, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
 
                 rw[f'a_year_cnt'] = a_year_cnt
                 rw[f'a_month_cnt'] = a_month_cnt
@@ -1996,19 +1996,20 @@ class Orottick4Simulator:
                     else:
                         a_mdict[f'{a_txt_month_day}_{mk}'] = 1
 
+                rw['a_ma'] = a_ma
+                
                 if a_ma > 0:
                     dix_ma += 1
                     
+                rows.append(rw)
+
+                crsz = len(rows)
+                
                 dix += 1
                 if dix > 0 and dix % dcnt == 0:
                     if has_log_step:
-                        print(f'== [R] {a_date_no}, {b_date_no} / {dhsz} : {dix}, {dix_ma} / {dsz}')
-                    
-                if a_ma <= 0:
-                    continue
-                    
-                rows.append(rw)
-                
+                        print(f'== [R] {a_date_no}, {b_date_no} / {dhsz} : {dix}, {dix_ma} / {dsz} : {crsz}')
+                                    
                 if (dix_ma < 5 and dix < 5) or (dix_ma >= 5 and dix_ma % dcnt_ma == 0):
                     if has_log_step:
                         print(str(rw))
@@ -2019,9 +2020,14 @@ class Orottick4Simulator:
             rdf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
 
             try:
-                l_txt_year = list(rdf['a_txt_year'].unique())
                 for mk in l_mk:
+                    ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
                     nrdf = None
+                    zrdf = rdf[rdf['a_ma'] == 0]
+                    rdf = rdf[rdf['a_ma'] == 1]
+                    l_txt_year = []
+                    if len(rdf) > 0:
+                        l_txt_year = list(rdf['a_txt_year'].unique())
                     for t_txt_year in l_txt_year:
                         df = rdf[rdf['a_txt_year'] == t_txt_year]
                         v = 0
@@ -2032,11 +2038,23 @@ class Orottick4Simulator:
                             nrdf = df
                         else:
                             nrdf = pd.concat([nrdf, df])
-                    rdf = nrdf
+                    if nrdf is not None and zrdf is not None and len(nrdf) > 0 and len(zrdf) > 0:
+                        rdf = pd.concat([nrdf, zrdf])
+                    elif nrdf is not None and len(nrdf) > 0:
+                        rdf = nrdf
+                    elif zrdf is not None and len(zrdf) > 0:
+                        rdf = zrdf
+                    else:
+                        rdf = ordf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
     
-                l_txt_month = list(rdf['a_txt_month'].unique())
                 for mk in l_mk:
+                    ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
                     nrdf = None
+                    zrdf = rdf[rdf['a_ma'] == 0]
+                    rdf = rdf[rdf['a_ma'] == 1]
+                    l_txt_month = []
+                    if len(rdf) > 0:
+                        l_txt_month = list(rdf['a_txt_month'].unique())
                     for t_txt_month in l_txt_month:
                         df = rdf[rdf['a_txt_month'] == t_txt_month]
                         v = 0
@@ -2047,11 +2065,23 @@ class Orottick4Simulator:
                             nrdf = df
                         else:
                             nrdf = pd.concat([nrdf, df])
-                    rdf = nrdf
-   
-                l_txt_year_month = list(rdf['a_txt_year_month'].unique())
+                    if nrdf is not None and zrdf is not None and len(nrdf) > 0 and len(zrdf) > 0:
+                        rdf = pd.concat([nrdf, zrdf])
+                    elif nrdf is not None and len(nrdf) > 0:
+                        rdf = nrdf
+                    elif zrdf is not None and len(zrdf) > 0:
+                        rdf = zrdf
+                    else:
+                        rdf = ordf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+                        
                 for mk in l_mk:
+                    ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
                     nrdf = None
+                    zrdf = rdf[rdf['a_ma'] == 0]
+                    rdf = rdf[rdf['a_ma'] == 1]
+                    l_txt_year_month = []
+                    if len(rdf) > 0:
+                        l_txt_year_month = list(rdf['a_txt_year_month'].unique())
                     for t_txt_year_month in l_txt_year_month:
                         df = rdf[rdf['a_txt_year_month'] == t_txt_year_month]
                         v = 0
@@ -2062,11 +2092,23 @@ class Orottick4Simulator:
                             nrdf = df
                         else:
                             nrdf = pd.concat([nrdf, df])
-                    rdf = nrdf
+                    if nrdf is not None and zrdf is not None and len(nrdf) > 0 and len(zrdf) > 0:
+                        rdf = pd.concat([nrdf, zrdf])
+                    elif nrdf is not None and len(nrdf) > 0:
+                        rdf = nrdf
+                    elif zrdf is not None and len(zrdf) > 0:
+                        rdf = zrdf
+                    else:
+                        rdf = ordf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
    
-                l_txt_day = list(rdf['a_txt_day'].unique())
                 for mk in l_mk:
+                    ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
                     nrdf = None
+                    zrdf = rdf[rdf['a_ma'] == 0]
+                    rdf = rdf[rdf['a_ma'] == 1]
+                    l_txt_day = []
+                    if len(rdf) > 0:
+                        l_txt_day = list(rdf['a_txt_day'].unique())
                     for t_txt_day in l_txt_day:
                         df = rdf[rdf['a_txt_day'] == t_txt_day]
                         v = 0
@@ -2077,11 +2119,23 @@ class Orottick4Simulator:
                             nrdf = df
                         else:
                             nrdf = pd.concat([nrdf, df])
-                    rdf = nrdf
+                    if nrdf is not None and zrdf is not None and len(nrdf) > 0 and len(zrdf) > 0:
+                        rdf = pd.concat([nrdf, zrdf])
+                    elif nrdf is not None and len(nrdf) > 0:
+                        rdf = nrdf
+                    elif zrdf is not None and len(zrdf) > 0:
+                        rdf = zrdf
+                    else:
+                        rdf = ordf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
 
-                l_txt_month_day = list(rdf['a_txt_month_day'].unique())
                 for mk in l_mk:
+                    ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
                     nrdf = None
+                    zrdf = rdf[rdf['a_ma'] == 0]
+                    rdf = rdf[rdf['a_ma'] == 1]
+                    l_txt_month_day = []
+                    if len(rdf) > 0:
+                        l_txt_month_day = list(rdf['a_txt_month_day'].unique())
                     for t_txt_month_day in l_txt_month_day:
                         df = rdf[rdf['a_txt_month_day'] == t_txt_month_day]
                         v = 0
@@ -2092,10 +2146,22 @@ class Orottick4Simulator:
                             nrdf = df
                         else:
                             nrdf = pd.concat([nrdf, df])
-                    rdf = nrdf
+                    if nrdf is not None and zrdf is not None and len(nrdf) > 0 and len(zrdf) > 0:
+                        rdf = pd.concat([nrdf, zrdf])
+                    elif nrdf is not None and len(nrdf) > 0:
+                        rdf = nrdf
+                    elif zrdf is not None and len(zrdf) > 0:
+                        rdf = zrdf
+                    else:
+                        rdf = ordf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
 
-                l_date_cnt = list(rdf['a_date_cnt'].unique())
+                ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
                 nrdf = None
+                zrdf = rdf[rdf['a_ma'] == 0]
+                rdf = rdf[rdf['a_ma'] == 1]
+                l_date_cnt = []
+                if len(rdf) > 0:
+                    l_date_cnt = list(rdf['a_date_cnt'].unique())
                 for t_date_cnt in l_date_cnt:
                     df = rdf[rdf['a_date_cnt'] == t_date_cnt]
                     df['a_date_cnt_same'] = len(df)
@@ -2103,7 +2169,14 @@ class Orottick4Simulator:
                         nrdf = df
                     else:
                         nrdf = pd.concat([nrdf, df])
-                rdf = nrdf
+                if nrdf is not None and zrdf is not None and len(nrdf) > 0 and len(zrdf) > 0:
+                    rdf = pd.concat([nrdf, zrdf])
+                elif nrdf is not None and len(nrdf) > 0:
+                    rdf = nrdf
+                elif zrdf is not None and len(zrdf) > 0:
+                    rdf = zrdf
+                else:
+                    rdf = ordf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
 
                 rdf = rdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[False, True, False, False])
 
