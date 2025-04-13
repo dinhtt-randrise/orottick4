@@ -1808,17 +1808,21 @@ class Orottick4Simulator:
         list_ix = []
         col_year = []
         for ri in range(len(ddf)):
-            buy_date = ddf['buy_date'].iloc[ri]
-            year = int(buy_date.split('.')[0])
+            a_buy_date = ddf['a_buy_date'].iloc[ri]
+            b_buy_date = ddf['b_buy_date'].iloc[ri]
+            key = a_buy_date + '__' + b_buy_date
+            year = int(a_buy_date.split('.')[0])
             col_year.append(year)
-            if buy_date not in dict_date:
-                dict_date[buy_date] = 1
+            if a_buy_date not in dict_date:
+                dict_date[a_buy_date] = 1
                 if year in dict_year:
                     dict_year[year] = dict_year[year] + 1
                 else:
                     dict_year[year] = 1
+            if key not in dict_date:
+                dict_date[key] = 1
                 list_ix.append(ddf['ix'].iloc[ri])
-        ddf['year'] = col_year
+        ddf['a_year'] = col_year
         list_year = []
         for year in dict_year.keys():
             cnt = dict_year[year]
@@ -1832,36 +1836,36 @@ class Orottick4Simulator:
             return None, None
         if len(list_year) == 0:
             return None, None
-        ddf = ddf[ddf['year'].isin(list_year)]
+        ddf = ddf[ddf['a_year'].isin(list_year)]
         if len(ddf) == 0:
             return None, None
         nddf = ddf[columns]
-        columns.append('year')
+        columns.append('a_year')
         oddf = ddf[columns]
-        oddf = oddf.sort_values(by=['buy_date'], ascending=[False])
-        nddf = nddf.sort_values(by=['buy_date'], ascending=[False])
+        oddf = oddf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+        nddf = nddf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
         rows = []
         for year in list_year:
-            ddf = oddf[oddf['year'] == year]
+            ddf = oddf[oddf['a_year'] == year]
             sz = len(ddf)
-            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] > 0]
             ma_1 = len(df)
-            df = ddf[ddf[f'ma_{match_kind}'] <= 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] <= 0]
             ma_0 = len(df)
-            df = ddf[ddf[f'mapc_{match_kind}'] == 1]
+            df = ddf[ddf[f'a_mapc_{match_kind}'] == 1]
             mapc_1 = len(df)
-            df = ddf[ddf[f'mapc_{match_kind}'] == 0]
+            df = ddf[ddf[f'a_mapc_{match_kind}'] == 0]
             mapc_0 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf[f'mapc_{match_kind}'] == 1)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] > 0)&(ddf[f'a_mapc_{match_kind}'] == 1)]
             ma_1__m4pc_1 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf[f'mapc_{match_kind}'] == 0)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] > 0)&(ddf[f'a_mapc_{match_kind}'] == 0)]
             ma_1__m4pc_0 = len(df)
             df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf[f'mapc_{match_kind}'] == 1)]
             ma_0__m4pc_1 = len(df)
             df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf[f'mapc_{match_kind}'] == 0)]
             ma_0__m4pc_0 = len(df)
-            ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
-            last_date = ddf['buy_date'].iloc[0]
+            ddf = ddf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+            last_date = ddf['a_buy_date'].iloc[0]
             last_year = int(last_date.split('.')[0])
             rw = {'last_date': last_date, 'last_year': last_year, 'match_kind': match_kind, 'sz': sz, 'ma_1': ma_1, 'ma_0': ma_0, 'mapc_1': mapc_1, 'mapc_0': mapc_0, 'ma_1__mapc_1': ma_1__mapc_1, 'ma_1__mapc_0': ma_1__mapc_0, 'ma_0__mapc_1': ma_0__mapc_1, 'ma_0__mapc_0': ma_0__mapc_0}
             rows.append(rw)        
@@ -1912,7 +1916,7 @@ class Orottick4Simulator:
         for rw in srows:
             print(str(rw))
 
-        all_df[f'mapc_{match_kind}'] = [1 if all_df[f'ma_{match_kind}'].iloc[x] > 0 else 0 for x in range(len(all_df))]
+        all_df[f'a_mapc_{match_kind}'] = [1 if all_df[f'a_ma_{match_kind}'].iloc[x] > 0 else 0 for x in range(len(all_df))]
 
         all_df = all_df.sort_values(by=['buy_date'], ascending=[False])
         list_year = list(all_df['year'].unique())
@@ -1940,16 +1944,16 @@ class Orottick4Simulator:
         '''
         print(text) 
 
-        feat_exc = ['date', 'buy_date', 'next_date', 'w', 'n', 'mapc', 'ma']
+        feat_exc = ['a_date', 'a_buy_date', 'a_next_date', 'a_w', 'a_n', 'b_date', 'b_buy_date', 'b_next_date', 'b_w', 'b_n', 'a_mapc', 'a_ma', 'a_p']
         l_mk = ['m4', 'm3f', 'm3l', 'm4a', 'm3fa', 'm3la']
         for mk in l_mk:
-            feat_exc.append(f'ma_{mk}')
-            feat_exc.append(f'mapc_{mk}')
+            feat_exc.append(f'a_ma_{mk}')
+            feat_exc.append(f'a_mapc_{mk}')
             
         features = all_df.columns
         features = [c for c in features if c not in feat_exc]
         
-        target = f'mapc_{match_kind}'
+        target = f'a_mapc_{match_kind}'
 
         try_no = 1
         min_score = min_score_start
@@ -1988,16 +1992,16 @@ class Orottick4Simulator:
             else:
                 vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
     
-            df = vadf[vadf[f'mapc_{match_kind}'] == 1]
+            df = vadf[vadf[f'a_mapc_{match_kind}'] == 1]
             vcnt_sz = len(df)
             vadf['nmapc'] = model.predict(vadf[features])
-            df = vadf[(vadf['nmapc'] == 1)&(vadf[f'mapc_{match_kind}'] == 1)]
+            df = vadf[(vadf['nmapc'] == 1)&(vadf[f'a_mapc_{match_kind}'] == 1)]
             vcnt2 = len(df)
-            df = vadf[(vadf['nmapc'] == 1)&(vadf[f'mapc_{match_kind}'] == 0)]
+            df = vadf[(vadf['nmapc'] == 1)&(vadf[f'a_mapc_{match_kind}'] == 0)]
             vcnt3 = len(df)
             vcnt = vcnt_sz - (vcnt2 - vcnt3)
 
-            df = vadf[vadf[f'mapc_{match_kind}'] == 1]
+            df = vadf[vadf[f'a_mapc_{match_kind}'] == 1]
             sz = len(df)
             tn = trial.number
             #print(f'== [MAPC_CNT_{try_no}_{tn}] ==> {vcnt}, {vcnt2}, {vcnt3} / {sz}')
@@ -2018,8 +2022,8 @@ class Orottick4Simulator:
             #test_df = test_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
             
-            adf1 = all_df[all_df[f'mapc_{match_kind}'] == 1]
-            adf0 = all_df[all_df[f'mapc_{match_kind}'] == 0]
+            adf1 = all_df[all_df[f'a_mapc_{match_kind}'] == 1]
+            adf0 = all_df[all_df[f'a_mapc_{match_kind}'] == 0]
 
             rate = valid_rate_single
             if valid_z_df is not None:
@@ -2078,71 +2082,71 @@ class Orottick4Simulator:
             rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'min_score': min_score, 'score': 0}
 
             if valid_z_df is not None:
-                ddf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
+                ddf = valid_z_df.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
             else:
-                ddf = all_df.sort_values(by=['buy_date'], ascending=[False])
+                ddf = all_df.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
             ddf['nmapc'] = model.predict(ddf[features])
 
             sz = len(ddf)
-            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] > 0]
             ma_1 = len(df)
-            df = ddf[ddf[f'ma_{match_kind}'] <= 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] <= 0]
             ma_0 = len(df)
             df = ddf[ddf['nmapc'] == 1]
             mapc_1 = len(df)
             df = ddf[ddf['nmapc'] == 0]
             mapc_0 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 1)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] > 0)&(ddf['nmapc'] == 1)]
             ma_1__mapc_1 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 0)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] > 0)&(ddf['nmapc'] == 0)]
             ma_1__mapc_0 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 1)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 1)]
             ma_0__mapc_1 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 0)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 0)]
             ma_0__mapc_0 = len(df)
             nrw = {'a_score': 0, 'a_sz': sz, 'a_ma_1': ma_1, 'a_ma_0': ma_0, 'a_mapc_1': mapc_1, 'a_mapc_0': mapc_0, 'a_ma_1__mapc_1': ma_1__mapc_1, 'a_ma_1__mapc_0': ma_1__mapc_0, 'a_ma_0__mapc_1': ma_0__mapc_1, 'a_ma_0__mapc_0': ma_0__mapc_0}
             for key in nrw.keys():
                 rw[key] = nrw[key]
                 
-            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] > 0]
             vcnt_sz = len(df)
-            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] > 0)]
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'a_ma_{match_kind}'] > 0)]
             vcnt2 = len(df)
-            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] <= 0)]
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'a_ma_{match_kind}'] <= 0)]
             vcnt3 = len(df)
             score = vcnt_sz - (vcnt2 - vcnt3)
             
             rw['a_score'] = score
 
-            ddf = test_df.sort_values(by=['buy_date'], ascending=[False])
+            ddf = test_df.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
             ddf['nmapc'] = model.predict(ddf[features])
 
             sz = len(ddf)
-            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] > 0]
             ma_1 = len(df)
-            df = ddf[ddf[f'ma_{match_kind}'] <= 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] <= 0]
             ma_0 = len(df)
             df = ddf[ddf['nmapc'] == 1]
             mapc_1 = len(df)
             df = ddf[ddf['nmapc'] == 0]
             mapc_0 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 1)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] > 0)&(ddf['nmapc'] == 1)]
             ma_1__mapc_1 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 0)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] > 0)&(ddf['nmapc'] == 0)]
             ma_1__mapc_0 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 1)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 1)]
             ma_0__mapc_1 = len(df)
-            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 0)]
+            df = ddf[(ddf[f'a_ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 0)]
             ma_0__mapc_0 = len(df)
             nrw = {'a_score': 0, 'a_sz': sz, 'a_ma_1': ma_1, 'a_ma_0': ma_0, 'a_mapc_1': mapc_1, 'a_mapc_0': mapc_0, 'a_ma_1__mapc_1': ma_1__mapc_1, 'a_ma_1__mapc_0': ma_1__mapc_0, 'a_ma_0__mapc_1': ma_0__mapc_1, 'a_ma_0__mapc_0': ma_0__mapc_0}
             for key in nrw.keys():
                 rw[key] = nrw[key]
 
-            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            df = ddf[ddf[f'a_ma_{match_kind}'] > 0]
             vcnt_sz = len(df)
-            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] > 0)]
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'a_ma_{match_kind}'] > 0)]
             vcnt2 = len(df)
-            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] <= 0)]
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'a_ma_{match_kind}'] <= 0)]
             vcnt3 = len(df)
             score = vcnt_sz - (vcnt2 - vcnt3)
 
