@@ -1775,6 +1775,409 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
+    def v4_refine_mapc_ds(self, ddf, match_kind = 'm4'):
+        dict_date = {}
+        dict_year = {}
+        columns = list(ddf.columns)
+        ddf['ix'] = [x+1 for x in range(len(ddf))]
+        list_ix = []
+        col_year = []
+        for ri in range(len(ddf)):
+            buy_date = ddf['buy_date'].iloc[ri]
+            year = int(buy_date.split('.')[0])
+            col_year.append(year)
+            if buy_date not in dict_date:
+                dict_date[buy_date] = 1
+                if year in dict_year:
+                    dict_year[year] = dict_year[year] + 1
+                else:
+                    dict_year[year] = 1
+                list_ix.append(ddf['ix'].iloc[ri])
+        ddf['year'] = col_year
+        list_year = []
+        for year in dict_year.keys():
+            cnt = dict_year[year]
+            if cnt < 365:
+                continue
+            list_year.append(year)
+        if len(list_ix) == 0:
+            return None, None
+        ddf = ddf[ddf['ix'].isin(list_ix)]
+        if len(ddf) == 0:
+            return None, None
+        if len(list_year) == 0:
+            return None, None
+        ddf = ddf[ddf['year'].isin(list_year)]
+        if len(ddf) == 0:
+            return None, None
+        nddf = ddf[columns]
+        columns.append('year')
+        oddf = ddf[columns]
+        oddf = oddf.sort_values(by=['buy_date'], ascending=[False])
+        nddf = nddf.sort_values(by=['buy_date'], ascending=[False])
+        rows = []
+        for year in list_year:
+            ddf = oddf[oddf['year'] == year]
+            sz = len(ddf)
+            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            ma_1 = len(df)
+            df = ddf[ddf[f'ma_{match_kind}'] <= 0]
+            ma_0 = len(df)
+            df = ddf[ddf[f'mapc_{match_kind}'] == 1]
+            mapc_1 = len(df)
+            df = ddf[ddf[f'mapc_{match_kind}'] == 0]
+            mapc_0 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf[f'mapc_{match_kind}'] == 1)]
+            ma_1__m4pc_1 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf[f'mapc_{match_kind}'] == 0)]
+            ma_1__m4pc_0 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf[f'mapc_{match_kind}'] == 1)]
+            ma_0__m4pc_1 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf[f'mapc_{match_kind}'] == 0)]
+            ma_0__m4pc_0 = len(df)
+            ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+            last_date = ddf['buy_date'].iloc[0]
+            last_year = int(last_date.split('.')[0])
+            rw = {'last_date': last_date, 'last_year': last_year, 'match_kind': match_kind, 'sz': sz, 'ma_1': ma_1, 'ma_0': ma_0, 'mapc_1': mapc_1, 'mapc_0': mapc_0, 'ma_1__mapc_1': ma_1__mapc_1, 'ma_1__mapc_0': ma_1__mapc_0, 'ma_0__mapc_1': ma_0__mapc_1, 'ma_0__mapc_0': ma_0__mapc_0}
+            rows.append(rw)        
+        return nddf, oddf, rows
+        
+    def v4_mapc_train(self, lotte_kind, data_dir, save_dir, runtime, match_kind = 'm4', try_no_start = 1, try_no_end = 50000, valid_rate_single = 0.2, valid_rate_multiple = 0.5, min_score_start = 1000000):
+        global dict_sc, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
+
+        start_time = time.time()
+        
+        self.print_heading()
+
+        text = '''
+====================================
+          V4 MAPC TRAIN
+  -------------------------------
+        '''
+        print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        print(text) 
+
+        print(f'LOTTE_KIND: {lotte_kind}')
+        print(f'DATA_DIR: {data_dir}')
+        print(f'SAVE_DIR: {save_dir}')
+        print(f'MATCH_KIND: {match_kind}')
+
+        SEED = 311
+        random.seed(SEED)
+        os.environ["PYTHONHASHSEED"] = str(SEED)
+        np.random.seed(SEED)
+
+        all_df = None
+        rdf_glob_fn = glob.glob(f'{data_dir}/{lotte_kind}-{match_kind}-mapc-rdf-*.*.*.csv')
+        for rdf_fn in rdf_glob_fn:
+            df = pd.read_csv(rdf_fn)
+            if all_df is None:
+                all_df = df
+            else:
+                all_df = pd.concat([all_df, df])
+
+        oddf, all_df, srows = self.v4_refine_mapc_ds(all_df, match_kind)
+
+        for rw in srows:
+            print(str(rw))
+
+        all_df[f'mapc_{match_kind}'] = [1 if all_df[f'ma_{match_kind}'].iloc[x] > 0 else 0 for x in range(len(all_df))]
+
+        all_df = all_df.sort_values(by=['buy_date'], ascending=[False])
+        list_year = list(all_df['year'].unique())
+        valid_z_df = None
+        train_z_df = None
+        
+        if len(list_year) >= 3:
+            list_year_test = [list_year[0]]
+            list_year_valid = [list_year[1]]
+            list_year_train = [list_year[2]]
+            list_year_all = [list_year[x] for x in range(len(list_year)) if x > 2]
+            test_df = all_df[all_df['year'].isin(list_year_test)]
+            valid_z_df = all_df[all_df['year'].isin(list_year_valid)]
+            train_z_df = all_df[all_df['year'].isin(list_year_train)]
+            all_df = all_df[all_df['year'].isin(list_year_all)]            
+        else:
+            test_df = all_df.sample(frac=1)
+            all_df = all_df.sample(frac=1)
+
+        valid_df = None
+        train_df = None
+                
+        text = '''
+  -------------------------------
+        '''
+        print(text) 
+
+        feat_exc = ['date', 'buy_date', 'next_date', 'w', 'n', 'mapc', 'ma']
+        l_mk = ['m4', 'm3f', 'm3l', 'm4a', 'm3fa', 'm3la']
+        for mk in l_mk:
+            feat_exc.append(f'ma_{mk}')
+            feat_exc.append(f'mapc_{mk}')
+            
+        features = all_df.columns
+        features = [c for c in features if c not in feat_exc]
+        
+        target = f'mapc_{match_kind}'
+
+        try_no = 1
+        min_score = min_score_start
+        min_best_trial_score = 1000000
+        dict_sc = {}
+
+        def objective(trial):
+            global dict_sc
+            
+            # search param
+            param = {
+                'reg_alpha': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
+                'reg_lambda': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
+                'max_depth': trial.suggest_int('max_depth', 2, 8),
+                'num_leaves': trial.suggest_int('num_leaves', 2, 256),
+                'colsample_bytree': 1,
+                #'colsample_bytree': trial.suggest_uniform('colsample_bytree', 0.1, 1), 
+                #'subsample': trial.suggest_uniform('subsample', 1e-8, 1), 
+                'min_child_samples': trial.suggest_int('min_child_samples', 5, 100), 
+            }
+             
+            #train model
+            model = lgb.LGBMClassifier(n_estimators=1000, **param, random_state=SEED,early_stopping_rounds=50,verbose=-1)
+            model.fit(
+                train_df[features],
+                train_df[target],
+                eval_set=[(valid_df[features], valid_df[target])],
+                #eval_at=[1, 3, 5, 10, 20], # calc validation ndcg@1,3,5,10,20
+                #early_stopping_rounds=50,
+                #verbose=10
+            )
+
+            if valid_z_df is not None:
+                vadf = pd.concat([train_df, valid_df])
+                vadf = vadf.sort_values(by=['buy_date'], ascending=[False])
+            else:
+                vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
+    
+            df = vadf[vadf[f'mapc_{match_kind}'] == 1]
+            vcnt_sz = len(df)
+            vadf['nmapc'] = model.predict(vadf[features])
+            df = vadf[(vadf['nmapc'] == 1)&(vadf[f'mapc_{match_kind}'] == 1)]
+            vcnt2 = len(df)
+            df = vadf[(vadf['nmapc'] == 1)&(vadf[f'mapc_{match_kind}'] == 0)]
+            vcnt3 = len(df)
+            vcnt = vcnt_sz - (vcnt2 - vcnt3)
+
+            df = vadf[vadf[f'mapc_{match_kind}'] == 1]
+            sz = len(df)
+            tn = trial.number
+            #print(f'== [MAPC_CNT_{try_no}_{tn}] ==> {vcnt}, {vcnt2}, {vcnt3} / {sz}')
+            
+            # maximize mean ndcg
+            scores = []
+            for name, score in model.best_score_['valid_0'].items():
+                scores.append(score)
+            score = np.mean(scores) + vcnt
+            dict_sc[tn] = score
+            return score
+            
+        def do_try():
+            global dict_sc, min_best_trial_score, min_score, test_df, all_df, valid_df, train_df
+
+            dict_sc = {}
+            
+            #test_df = test_df.sample(frac=1)
+            all_df = all_df.sample(frac=1)
+            
+            adf1 = all_df[all_df[f'mapc_{match_kind}'] == 1]
+            adf0 = all_df[all_df[f'mapc_{match_kind}'] == 0]
+
+            rate = valid_rate_single
+            if valid_z_df is not None:
+                rate = valid_rate_multiple
+                
+            sz = len(adf1)
+            sz = int(round(sz * rate))
+            valid1_df = adf1[:sz]
+            train1_df = adf1[sz:]
+    
+            sz = len(adf0)
+            sz = int(round(sz * rate))
+            valid0_df = adf0[:sz]
+            train0_df = adf0[sz:]
+                
+            valid_df = pd.concat([valid1_df, valid0_df])
+            train_df = pd.concat([train1_df, train0_df])
+
+            if valid_z_df is not None:
+                valid_df = pd.concat([valid_z_df, valid_df])
+            if train_z_df is not None:
+                train_df = pd.concat([train_z_df, train_df])
+                
+            valid_df = valid_df.sample(frac=1)
+            train_df = train_df.sample(frac=1)
+
+            if try_no < try_no_start:
+                return None, None
+                
+            study = optuna.create_study(direction='minimize',
+                                        sampler=optuna.samplers.TPESampler(seed=SEED) #fix random seed
+                                       )
+            study.optimize(objective, n_trials=100)
+
+            t_n = study.best_trial.number
+            t_p = study.best_trial.params
+            t_c = len(study.trials)
+            t_s = dict_sc[t_n]
+            print(f'== [BEST_TRIAL_{try_no}] {t_n} / {t_c} : {t_s} ==> ' + str(t_p))
+    
+            # train with best params
+            best_params = study.best_trial.params
+            model = lgb.LGBMClassifier(n_estimators=1000, **best_params, random_state=SEED,early_stopping_rounds=50,verbose=-1)
+            model.fit(
+                train_df[features],
+                train_df[target],
+                eval_set=[(valid_df[features], valid_df[target])],
+                #eval_at=[1, 3, 5, 10, 20],
+                #early_stopping_rounds=50,
+                #verbose=10
+            )
+
+            if t_s < min_best_trial_score:
+                min_best_trial_score = t_s
+                
+            rw = {'try_no': try_no, 'min_best_trial_score': min_best_trial_score, 'best_trial_score': t_s, 'min_score': min_score, 'score': 0}
+
+            if valid_z_df is not None:
+                ddf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
+            else:
+                ddf = all_df.sort_values(by=['buy_date'], ascending=[False])
+            ddf['nmapc'] = model.predict(ddf[features])
+
+            sz = len(ddf)
+            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            ma_1 = len(df)
+            df = ddf[ddf[f'ma_{match_kind}'] <= 0]
+            ma_0 = len(df)
+            df = ddf[ddf['nmapc'] == 1]
+            mapc_1 = len(df)
+            df = ddf[ddf['nmapc'] == 0]
+            mapc_0 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 1)]
+            ma_1__mapc_1 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 0)]
+            ma_1__mapc_0 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 1)]
+            ma_0__mapc_1 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 0)]
+            ma_0__mapc_0 = len(df)
+            nrw = {'a_score': 0, 'a_sz': sz, 'a_ma_1': ma_1, 'a_ma_0': ma_0, 'a_mapc_1': mapc_1, 'a_mapc_0': mapc_0, 'a_ma_1__mapc_1': ma_1__mapc_1, 'a_ma_1__mapc_0': ma_1__mapc_0, 'a_ma_0__mapc_1': ma_0__mapc_1, 'a_ma_0__mapc_0': ma_0__mapc_0}
+            for key in nrw.keys():
+                rw[key] = nrw[key]
+                
+            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            vcnt_sz = len(df)
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] > 0)]
+            vcnt2 = len(df)
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] <= 0)]
+            vcnt3 = len(df)
+            score = vcnt_sz - (vcnt2 - vcnt3)
+            
+            rw['a_score'] = score
+
+            ddf = test_df.sort_values(by=['buy_date'], ascending=[False])
+            ddf['nmapc'] = model.predict(ddf[features])
+
+            sz = len(ddf)
+            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            ma_1 = len(df)
+            df = ddf[ddf[f'ma_{match_kind}'] <= 0]
+            ma_0 = len(df)
+            df = ddf[ddf['nmapc'] == 1]
+            mapc_1 = len(df)
+            df = ddf[ddf['nmapc'] == 0]
+            mapc_0 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 1)]
+            ma_1__mapc_1 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] > 0)&(ddf['nmapc'] == 0)]
+            ma_1__mapc_0 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 1)]
+            ma_0__mapc_1 = len(df)
+            df = ddf[(ddf[f'ma_{match_kind}'] <= 0)&(ddf['nmapc'] == 0)]
+            ma_0__mapc_0 = len(df)
+            nrw = {'a_score': 0, 'a_sz': sz, 'a_ma_1': ma_1, 'a_ma_0': ma_0, 'a_mapc_1': mapc_1, 'a_mapc_0': mapc_0, 'a_ma_1__mapc_1': ma_1__mapc_1, 'a_ma_1__mapc_0': ma_1__mapc_0, 'a_ma_0__mapc_1': ma_0__mapc_1, 'a_ma_0__mapc_0': ma_0__mapc_0}
+            for key in nrw.keys():
+                rw[key] = nrw[key]
+
+            df = ddf[ddf[f'ma_{match_kind}'] > 0]
+            vcnt_sz = len(df)
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] > 0)]
+            vcnt2 = len(df)
+            df = ddf[(ddf['nmapc'] == 1)&(ddf[f'ma_{match_kind}'] <= 0)]
+            vcnt3 = len(df)
+            score = vcnt_sz - (vcnt2 - vcnt3)
+
+            rw['t_score'] = score
+
+            rw['score'] = rw['a_score'] + rw['t_score']
+
+            score = rw['score']
+            good = ''
+            if rw['a_ma_1__mapc_1'] > 0 and rw['t_ma_1__mapc_1'] > 0:
+                if score < min_score:
+                    good = f' [GOOD:{score}:{min_score}] '
+            print(f'== [MAPC_CNT_{try_no}_FINAL] {good} ==> ' + str(rw))
+
+            vmapcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model}
+
+            return rw, vmapcm
+
+        rows = []
+        try_no = 1
+        dict_mapcm = {}
+        while try_no <= try_no_end:
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+            srw, vmapcm = do_try()
+            if srw is not None and vmapcm is not None:
+                score = srw['score']
+                if srw['a_ma_1__mapc_1'] > 0 and srw['t_ma_1__mapc_1'] > 0:
+                    if score < min_score:
+                        min_score = score
+                        rows.append(srw)
+                        try:
+                            sdf = pd.DataFrame(rows)
+                            sdf = sdf.sort_values(by=['score', 't_score', 'a_score'], ascending=[True, True, True])
+                            sdf.to_csv(f'{save_dir}/summary.csv', index=False)
+                            with open(f'{save_dir}/{lotte_kind}-mapcm-{try_no}.pkl', 'wb') as f:
+                                pickle.dump(mapcm, f)
+                            dict_mapcm[try_no] = mapcm
+                        except Exception as e:
+                            print(f'== [E:{try_no}] ==> ' + str(e))        
+            try_no += 1
+
+        if len(rows) > 0:
+            sdf = pd.DataFrame(rows)
+            sdf = sdf.sort_values(by=['score', 't_score', 'a_score'], ascending=[True, True, True])
+            try_no = sdf['try_no'].iloc[0]
+            sdf.to_csv(f'{save_dir}/summary.csv', index=False)
+            mapcm = dict_mapcm[try_no]
+            
+            with open(f'{save_dir}/{lotte_kind}-mapcm.pkl', 'wb') as f:
+                pickle.dump(mapcm, f)
+
+        text = '''
+  -------------------------------
+          V4 MAPC TRAIN
+====================================
+        '''
+        print(text) 
+
     def v4_mapc_prepare(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 367, date_cnt_mx = 365 * 5, match_kind = 'm4', has_log_step = False, runtime = None):
         self.print_heading()
 
@@ -3505,6 +3908,14 @@ class Orottick4Simulator:
         M4PC_TRAIN_DATA_DIR = Orottick4Simulator.get_option(options, 'M4PC_TRAIN_DATA_DIR', '/kaggle/working')
         M4PC_TRAIN_SAVE_DIR = Orottick4Simulator.get_option(options, 'M4PC_TRAIN_SAVE_DIR', '/kaggle/working')
 
+        MAPC_TRAIN_DATA_DIR = Orottick4Simulator.get_option(options, 'MAPC_TRAIN_DATA_DIR', '/kaggle/working')
+        MAPC_TRAIN_SAVE_DIR = Orottick4Simulator.get_option(options, 'MAPC_TRAIN_SAVE_DIR', '/kaggle/working')
+        MAPC_TRY_NO_START = Orottick4Simulator.get_option(options, 'MAPC_TRY_NO_START', 1)
+        MAPC_TRY_NO_END = Orottick4Simulator.get_option(options, 'MAPC_TRY_NO_END', 50000)
+        MAPC_VALID_RATE_SINGLE = Orottick4Simulator.get_option(options, 'MAPC_VALID_RATE_SINGLE', 0.2)
+        MAPC_VALID_RATE_MULTIPLE = Orottick4Simulator.get_option(options, 'MAPC_VALID_RATE_MULTIPLE', 0.5)
+        MAPC_MIN_SCORE_START = Orottick4Simulator.get_option(options, 'MAPC_MIN_SCORE_START', 1000000)
+
         M4PC_MODEL_DIR = Orottick4Simulator.get_option(options, 'M4PC_MODEL_DIR', '/kaggle/working')
 
         TCK_PRIZE = Orottick4Simulator.get_option(options, 'TCK_PRIZE', 5000)
@@ -3816,14 +4227,17 @@ class Orottick4Simulator:
             ardf, acdf, more = ok4s.v4_mapc_prepare(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, DATE_CNT_MAX, MATCH_KIND, HAS_STEP_LOG, RUNTIME)
 
             if ardf is not None:
-                ardf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-rdf-{BUY_DATE}.csv', index=False)
+                ardf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-{MATCH_KIND}-mapc-rdf-{BUY_DATE}.csv', index=False)
 
             if acdf is not None:
-                acdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-cdf-{BUY_DATE}.csv', index=False)
+                acdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-{MATCH_KIND}-mapc-cdf-{BUY_DATE}.csv', index=False)
 
             for key in more.keys():
                 adf = more[key]
                 if adf is not None:
-                    adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-m4pc-{key}-{BUY_DATE}.csv', index=False)
-                                                  
+                    adf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-{MATCH_KIND}-mapc-{key}-{BUY_DATE}.csv', index=False)
+
+        if METHOD == 'v4_mapc_train':
+            ok4s.v4_mapc_train(LOTTE_KIND, MAPC_TRAIN_DATA_DIR, MAPC_TRAIN_SAVE_DIR, RUNTIME, MATCH_KIND, MAPC_TRY_NO_START, MAPC_TRY_NO_END, MAPC_VALID_RATE_SINGLE, MAPC_VALID_RATE_MULTIPLE, MAPC_MIN_SCORE_START)
+
 # ------------------------------------------------------------ #
