@@ -1181,7 +1181,8 @@ class Orottick4Simulator:
             )
 
             if valid_z_df is not None:
-                vadf = valid_z_df.sort_values(by=['buy_date'], ascending=[False])
+                vadf = pd.concat([train_df, valid_df])
+                vadf = vadf.sort_values(by=['buy_date'], ascending=[False])
             else:
                 vadf = all_df.sort_values(by=['buy_date'], ascending=[False])
     
