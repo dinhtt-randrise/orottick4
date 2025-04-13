@@ -1187,7 +1187,7 @@ class Orottick4Simulator:
             df = vadf[vadf['m4pc'] == 1]
             sz = len(df)
             tn = trial.number
-            print(f'== [M4PC_CNT_{try_no}_{tn}] ==> {vcnt}, {vcnt2}, {vcnt3} / {sz}')
+            #print(f'== [M4PC_CNT_{try_no}_{tn}] ==> {vcnt}, {vcnt2}, {vcnt3} / {sz}')
             
             # maximize mean ndcg
             scores = []
@@ -1319,9 +1319,10 @@ class Orottick4Simulator:
 
             score = rw['score']
             good = ''
-            if score < min_score:
-                min_score = score
-                good = f' [GOOD:{min_score}] '
+            if rw['a_m4_1__m4pc_1'] > 0 and rw['t_m4_1__m4pc_1'] > 0:
+                if score < min_score:
+                    min_score = score
+                    good = f' [GOOD:{min_score}] '
             print(f'== [M4PC_CNT_{try_no}_FINAL] {good} ==> ' + str(rw))
 
             vm4pcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model}
