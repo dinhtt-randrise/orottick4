@@ -1110,6 +1110,8 @@ class Orottick4Simulator:
         for rw in srows:
             print(str(rw))
 
+        all_df['m4pc'] = [1 if all_df['m4'].iloc[x] > 0 else 0 for x in range(len(all_df))]
+
         all_df = all_df.sort_values(by=['buy_date'], ascending=[False])
         list_year = list(all_df['year'].unique())
 
@@ -1121,9 +1123,6 @@ class Orottick4Simulator:
         else:
             test_df = all_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
-
-        all_df['m4pc'] = [1 if all_df['m4'].iloc[x] > 0 else 0 for x in range(len(all_df))]
-        test_df['m4pc'] = [1 if test_df['m4'].iloc[x] > 0 else 0 for x in range(len(test_df))]
 
         valid_df = None
         train_df = None
@@ -1272,11 +1271,11 @@ class Orottick4Simulator:
                 rw[key] = nrw[key]
                 
             vadf = ddf
-            df = vadf[vadf['m4pc'] == 1]
+            df = vadf[vadf['m4'] > 0]
             vcnt_sz = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] > 0)]
             vcnt2 = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] <= 0)]
             vcnt3 = len(df)
             score = vcnt_sz - (vcnt2 - vcnt3)
             
@@ -1307,11 +1306,11 @@ class Orottick4Simulator:
                 rw[key] = nrw[key]
 
             vadf = ddf
-            df = vadf[vadf['m4pc'] == 1]
+            df = vadf[vadf['m4'] > 0]
             vcnt_sz = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 1)]
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] > 0)]
             vcnt2 = len(df)
-            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4pc'] == 0)]
+            df = vadf[(vadf['nm4pc'] == 1)&(vadf['m4'] <= 0)]
             vcnt3 = len(df)
             score = vcnt_sz - (vcnt2 - vcnt3)
 
