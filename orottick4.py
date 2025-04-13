@@ -1067,7 +1067,7 @@ class Orottick4Simulator:
         return nddf, oddf, rows
         
     def m4pc_train(self, lotte_kind, data_dir, save_dir, runtime):
-        global test_df, all_df, valid_df, train_df
+        global min_score, test_df, all_df, valid_df, train_df
 
         start_time = time.time()
         
@@ -1148,6 +1148,7 @@ class Orottick4Simulator:
         target = 'm4pc'
 
         try_no = 1
+        min_score = 1000000
 
         def objective(trial):
             # search param
@@ -1195,7 +1196,7 @@ class Orottick4Simulator:
             return np.mean(scores) + vcnt
 
         def do_try():
-            global test_df, all_df, valid_df, train_df
+            global min_score, test_df, all_df, valid_df, train_df
             
             #test_df = test_df.sample(frac=1)
             all_df = all_df.sample(frac=1)
@@ -1315,8 +1316,13 @@ class Orottick4Simulator:
             rw['t_score'] = score
 
             rw['score'] = rw['a_score'] + rw['t_score']
-            
-            print(f'== [M4PC_CNT_{try_no}_FINAL] ==> ' + str(rw))
+
+            score = rw['score']
+            good = ''
+            if score < min_score:
+                min_score = score
+                good = f' [GOOD:{min_score}] '
+            print(f'== [M4PC_CNT_{try_no}_FINAL] {good} ==> ' + str(rw))
 
             vm4pcm = {'params': best_params, 'features': features, 'scores': rw, 'model': model}
 
