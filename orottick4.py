@@ -270,6 +270,52 @@ class Orottick4Simulator:
                 return True
             else:
                 return False
+        elif match_kind == 'm4a':
+            wa = self.n2a(w)
+            pa = self.n2a(p)
+            if w < 0:
+                return False
+            else:
+                cnt = 0
+                for p in pa:
+                    if p in wa:
+                        cnt += 1
+                if cnt >= 4:
+                    return True
+                else:
+                    return False
+        elif match_kind == 'm4fa':
+            wa = self.n2a(w)
+            pa = self.n2a(p)
+            wa = [wa[x] for x in range(len(wa)) if x < 3]
+            pa = [pa[x] for x in range(len(pa)) if x < 3]
+            if w < 0:
+                return False
+            else:
+                cnt = 0
+                for p in pa:
+                    if p in wa:
+                        cnt += 1
+                if cnt >= 3:
+                    return True
+                else:
+                    return False
+        elif match_kind == 'm4la':
+            wa = self.n2a(w)
+            pa = self.n2a(p)
+            wa = [wa[x] for x in range(len(wa)) if x > 0]
+            pa = [pa[x] for x in range(len(pa)) if x > 0]
+            if w < 0:
+                return False
+            else:
+                cnt = 0
+                for p in pa:
+                    if p in wa:
+                        cnt += 1
+                if cnt >= 3:
+                    return True
+                else:
+                    return False
         elif match_kind == 'm3':
             wa = self.n2a(w)
             pa = self.n2a(p)
@@ -1714,6 +1760,364 @@ class Orottick4Simulator:
         
         return rdf, cdf
 
+    def v4_research(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 365 * 5, has_log_step = False, runtime = None, silent = False):
+        self.print_heading()
+
+        text = '''
+====================================
+           V4 RESEARCH
+  -------------------------------
+        '''
+        if not silent:
+            print(text) 
+
+        text = '''
+  -------------------------------
+           PARAMETERS
+  -------------------------------
+        '''
+        if not silent:
+            print(text) 
+
+        v_data_df_is_none = False
+        if data_df is None:
+            v_data_df_is_none = True
+
+        if not silent:
+            print(f'[BUFFER_DIR] {buffer_dir}')
+            print(f'[LOTTE_KIND] {lotte_kind}')
+            print(f'[DATA_DF_IS_NONE] {v_data_df_is_none}')
+            print(f'[BUY_DATE] {v_buy_date}')
+            print(f'[DATE_CNT] {v_date_cnt}')
+            print(f'[RUNTIME] {runtime}')
+
+        text = '''
+  -------------------------------
+        '''
+        if not silent:
+            print(text) 
+
+        start_time = time.time()
+
+        rdf = None
+        more = {}
+        
+        if data_df is None:
+            d1 = datetime.strptime(v_buy_date, "%Y.%m.%d")
+            g = -1
+            d2 = d1 + timedelta(minutes=int(+(g*(60 * 24))))
+            v_date = d2.strftime('%Y.%m.%d')
+    
+            data_df = self.download_drawing(buffer_dir, lotte_kind, v_date)
+            if data_df is None:
+                return rdf, more
+
+        ddf = data_df[data_df['buy_date'] < v_buy_date]
+        if len(ddf) == 0:
+            return rdf, more
+            
+        ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
+        if len(ddf) == 0:
+            return rdf, more
+
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[False])
+        if len(ddf) > v_date_cnt:
+            ddf = ddf[:v_date_cnt]
+        if len(ddf) == 0:
+            return rdf, more
+
+        ddf = ddf.sort_values(by=['buy_date'], ascending=[True])
+
+        bdfd = v_buy_date.split('.')
+        x_txt_year = bdfd[0]
+        x_txt_month = bdfd[1]
+        x_txt_day = bdfd[2]
+        
+        dict_year = {}
+        dict_month = {}
+        dict_year_month = {}
+        dict_day = {}
+        dict_month_day = {}        
+
+        for ri in range(len(ddf)):
+            t_buy_date = ddf['buy_date'].iloc[ri]
+            bdfd = t_buy_date.split('.')
+
+            year = bdfd[0]
+            if year in dict_year:
+                dict_year[year] = dict_year[year] + 1
+            else:
+                dict_year[year] = 1
+
+            month = bdfd[1]
+            if month in dict_month:
+                dict_month[month] = dict_month[month] + 1
+            else:
+                dict_month[month] = 1
+            
+            year_month = bdfd[0] + '.' + bdfd[1]
+            if year_month in dict_year_month:
+                dict_year_month[year_month] = dict_year_month[year_month] + 1
+            else:
+                dict_year_month[year_month] = 1
+
+            day = bdfd[2]
+            if day in dict_day:
+                dict_day[day] = dict_day[day] + 1
+            else:
+                dict_day[day] = 1
+
+            month_day = bdfd[1] + '.' + bdfd[2]
+            if month_day in dict_year_month:
+                dict_month_day[month_day] = dict_month_day[month_day] + 1
+            else:
+                dict_month_day[month_day] = 1
+            
+        l_mk = ['m4', 'm3f', 'm3l', 'm4a', 'm3fa', 'm3la']
+        a_mdict = {}
+        rows = []
+        dsz = len(ddf) * len(ddf)
+        dix = 0
+        dix_ma = 0
+        dcnt = 1000
+        dcnt_ma = 100
+        for ria in range(len(ddf)):
+            if runtime is not None:
+                if time.time() - start_time > runtime:
+                    break
+
+            a_date = ddf['date'].iloc[ria]
+            a_buy_date = ddf['buy_date'].iloc[ria]
+            a_next_date = ddf['next_date'].iloc[ria]
+            a_w = ddf['w'].iloc[ria]
+            a_n = ddf['n'].iloc[ria]
+            a_sim_seed, a_sim_cnt = self.capture(a_w, a_n)
+
+            bdfd = a_buy_date.split('.')
+            a_txt_year = bdfd[0]
+            a_year = int(a_txt_year)
+            a_year_cnt = dict_year[a_txt_year]
+
+            a_txt_month = bdfd[1]
+            a_month = int(a_txt_month)
+            a_month_cnt = dict_month[a_txt_month]
+            
+            a_txt_year_month = bdfd[0] + '.' + bdfd[1]
+            a_year_month_cnt = dict_year_month[a_txt_year_month]
+
+            a_txt_day = bdfd[2]
+            a_day = int(a_txt_day)
+            a_day_cnt = dict_day[a_txt_day]
+
+            a_txt_month_day = bdfd[1] + '.' + bdfd[2]
+            a_month_day_cnt = dict_year_month[a_txt_month_day]
+
+            for rib in range(len(ddf)):
+                if runtime is not None:
+                    if time.time() - start_time > runtime:
+                        break
+
+                if rib >= ria:
+                    break
+
+                b_date = ddf['date'].iloc[rib]
+                b_buy_date = ddf['buy_date'].iloc[rib]
+                b_next_date = ddf['next_date'].iloc[rib]
+                b_w = ddf['w'].iloc[rib]
+                b_n = ddf['n'].iloc[rib]
+                b_sim_seed, b_sim_cnt = self.capture(b_w, b_n)
+
+                a_p = self.reproduce_one(a_sim_seed, b_sim_cnt)
+
+                a_date_no = ria + 1
+                a_date_cnt = ria - rib
+                b_date_no = rib + 1
+
+                rw = {'a_date': a_date, 'a_buy_date': a_buy_date, 'a_next_date': a_next_date, 'a_txt_year': a_txt_year, 'a_year': a_year, 'a_txt_month': a_txt_month, 'a_month': a_month, 'a_txt_year_month': a_txt_year_month, 'a_txt_day': a_txt_day, 'a_day': a_day, 'a_txt_month_day': a_txt_month_day, 'a_w': a_w, 'a_n': a_n, 'a_sim_seed': a_sim_seed, 'a_sim_cnt': a_sim_cnt, 'a_p': a_p, 'a_date_no': a_date_no, 'a_date_cnt': a_date_cnt, 'a_date_cnt_same': 0, 'b_date': b_date, 'b_buy_date': b_buy_date, 'b_next_date': b_next_date, 'b_w': b_w, 'b_n': b_n, 'b_sim_seed': b_sim_seed, 'b_sim_cnt': b_sim_cnt, 'b_date_no': b_date_no}
+
+                rw[f'a_year_cnt'] = a_year_cnt
+                rw[f'a_month_cnt'] = a_month_cnt
+                rw[f'a_year_month_cnt'] = a_year_month_cnt
+                rw[f'a_day_cnt'] = a_day_cnt
+                rw[f'a_month_day_cnt'] = a_month_day_cnt
+
+                a_ma = 0
+                for mk in l_mk:
+                    a_m = 0
+                    if self.match(a_w, a_p, mk):
+                        a_m = 1
+                        a_ma = 1
+                        
+                    rw[f'a_{mk}'] = a_m                
+                    rw[f'a_year_cnt_{mk}'] = 0
+                    rw[f'a_month_cnt_{mk}'] = 0
+                    rw[f'a_year_month_cnt_{mk}'] = 0
+                    rw[f'a_day_cnt_{mk}'] = 0
+                    rw[f'a_month_day_cnt_{mk}'] = 0
+
+                    if f'{a_txt_year}_{mk}' in a_mdict:
+                        a_mdict[f'{a_txt_year}_{mk}'] = a_mdict[f'{a_txt_year}_{mk}'] + 1
+                    else:
+                        a_mdict[f'{a_txt_year}_{mk}'] = 1
+    
+                    if f'{a_txt_month}_{mk}' in a_mdict:
+                        a_mdict[f'{a_txt_month}_{mk}'] = a_mdict[f'{a_txt_month}_{mk}'] + 1
+                    else:
+                        a_mdict[f'{a_txt_month}_{mk}'] = 1
+                
+                    if f'{a_txt_year_month}_{mk}' in a_mdict:
+                        a_mdict[f'{a_txt_year_month}_{mk}'] = a_mdict[f'{a_txt_year_month}_{mk}'] + 1
+                    else:
+                        a_mdict[f'{a_txt_year_month}_{mk}'] = 1
+    
+                    if f'{a_txt_day}_{mk}' in a_mdict:
+                        a_mdict[f'{a_txt_day}_{mk}'] = a_mdict[f'{a_txt_day}_{mk}'] + 1
+                    else:
+                        a_mdict[f'{a_txt_day}_{mk}'] = 1
+
+                    if f'{a_txt_month_day}_{mk}' in a_mdict:
+                        a_mdict[f'{a_txt_month_day}_{mk}'] = a_mdict[f'{a_txt_month_day}_{mk}'] + 1
+                    else:
+                        a_mdict[f'{a_txt_month_day}_{mk}'] = 1
+
+                if a_ma > 0:
+                    dix_ma += 1
+                    
+                dix += 1
+                if dix > 0 and dix % dcnt == 0:
+                    if has_log_step:
+                        print(f'== [R] {dix}, {dix_ma} / {dsz}')
+                    
+                if a_ma <= 0:
+                    continue
+                    
+                rows.append(rw)
+                
+                if (dix_ma < 5) or (dix_ma >= 5 and dix_ma % dcnt_ma == 0):
+                    if has_log_step:
+                        print(str(rw))
+
+        if len(rows) > 0:
+            rdf = pd.DataFrame(rows)
+            ordf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+            rdf = rdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+
+            try:
+                l_txt_year = list(rdf['a_txt_year'].unique())
+                for mk in l_mk:
+                    nrdf = None
+                    for t_txt_year in l_txt_year:
+                        df = rdf[rdf['a_txt_year'] == t_txt_year]
+                        v = 0
+                        if f'{t_txt_year}_{mk}' in a_mdict:
+                            v = a_mdict[f'{t_txt_year}_{mk}']
+                        df[f'a_year_cnt_{mk}'] = v
+                        if nrdf is None:
+                            nrdf = df
+                        else:
+                            nrdf = pd.concat([nrdf, df])
+                    rdf = nrdf
+    
+                l_txt_month = list(rdf['a_txt_month'].unique())
+                for mk in l_mk:
+                    nrdf = None
+                    for t_txt_month in l_txt_month:
+                        df = rdf[rdf['a_txt_month'] == t_txt_month]
+                        v = 0
+                        if f'{t_txt_month}_{mk}' in a_mdict:
+                            v = a_mdict[f'{t_txt_month}_{mk}']
+                        df[f'a_month_cnt_{mk}'] = v
+                        if nrdf is None:
+                            nrdf = df
+                        else:
+                            nrdf = pd.concat([nrdf, df])
+                    rdf = nrdf
+   
+                l_txt_year_month = list(rdf['a_txt_year_month'].unique())
+                for mk in l_mk:
+                    nrdf = None
+                    for t_txt_year_month in l_txt_year_month:
+                        df = rdf[rdf['a_txt_year_month'] == t_txt_year_month]
+                        v = 0
+                        if f'{t_txt_year_month}_{mk}' in a_mdict:
+                            v = a_mdict[f'{t_txt_year_month}_{mk}']
+                        df[f'a_year_month_cnt_{mk}'] = v
+                        if nrdf is None:
+                            nrdf = df
+                        else:
+                            nrdf = pd.concat([nrdf, df])
+                    rdf = nrdf
+   
+                l_txt_day = list(rdf['a_txt_day'].unique())
+                for mk in l_mk:
+                    nrdf = None
+                    for t_txt_day in l_txt_day:
+                        df = rdf[rdf['a_txt_day'] == t_txt_day]
+                        v = 0
+                        if f'{t_txt_day}_{mk}' in a_mdict:
+                            v = a_mdict[f'{t_txt_day}_{mk}']
+                        df[f'a_day_cnt_{mk}'] = v
+                        if nrdf is None:
+                            nrdf = df
+                        else:
+                            nrdf = pd.concat([nrdf, df])
+                    rdf = nrdf
+
+                l_txt_month_day = list(rdf['a_txt_month_day'].unique())
+                for mk in l_mk:
+                    nrdf = None
+                    for t_txt_month_day in l_txt_month_day:
+                        df = rdf[rdf['a_txt_month_day'] == t_txt_month_day]
+                        v = 0
+                        if f'{t_txt_month_day}_{mk}' in a_mdict:
+                            v = a_mdict[f'{t_txt_month_day}_{mk}']
+                        df[f'a_month_day_cnt_{mk}'] = v
+                        if nrdf is None:
+                            nrdf = df
+                        else:
+                            nrdf = pd.concat([nrdf, df])
+                    rdf = nrdf
+
+                l_date_cnt = list(rdf['a_date_cnt'].unique())
+                nrdf = None
+                for t_date_cnt in l_date_cnt:
+                    df = rdf[rdf['a_date_cnt'] == t_date_cnt]
+                    df['a_date_cnt_same'] = len(df)
+                    if nrdf is None:
+                        nrdf = df
+                    else:
+                        nrdf = pd.concat([nrdf, df])
+                rdf = nrdf
+
+                rdf = rdf.sort_values(by=['a_date_cnt_same', 'a_date_cnt', 'a_buy_date', 'b_buy_date'], ascending=[False, True, False, False])
+
+                for mk in l_mk:
+                    mdf = rdf[(rdf['a_date_cnt_same'] > 1)&(rdf[f'a_{mk}'] > 0)]
+                    if len(mdf) == 0:
+                        continue
+                    else:
+                        more[f'mdf_{mk}'] = mdf
+            except Exception as e:
+                msg = str(e)
+                print(f'=> [E] {msg}')
+                rdf = ordf
+                
+        try:
+            self.save_cache()
+        except Exception as e:
+            msg = str(e)
+            print(f'=> [E] {msg}')
+
+        text = '''
+  -------------------------------
+           V4 RESEARCH
+====================================
+        '''
+        if not silent:
+            print(text) 
+        
+        return rdf, more
+
     def capture_m4pc(self, v_buy_date, data_df, runtime):
         if self.m4pcm is None:
             return None
@@ -3021,4 +3425,15 @@ class Orottick4Simulator:
         if METHOD == 'm4pc_train':
             ok4s.m4pc_train(LOTTE_KIND, M4PC_TRAIN_DATA_DIR, M4PC_TRAIN_SAVE_DIR, RUNTIME)
 
+        if METHOD == 'v4_research':
+            rdf, more = ok4s.v4_research(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, HAS_STEP_LOG, RUNTIME)
+
+            if rdf is not None:
+                rdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-rdf-{BUY_DATE}.csv', index=False)
+
+            if more is not None:
+                for key in more.keys():
+                    mdf = more[key]
+                    mdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-{key}-{BUY_DATE}.csv', index=False)
+                    
 # ------------------------------------------------------------ #
