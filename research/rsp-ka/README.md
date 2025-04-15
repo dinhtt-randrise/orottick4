@@ -25,13 +25,23 @@ using random simulating.
 
 Single attribute is expressed by one integer in specified range.
 
-Study example of future w/ single attribute:
+Study examples of future with single attribute:
 
 + Oregon Lottery - Pick 4 drawing [ https://www.oregonlottery.org/jackpot/pick-4/ ]
   o 1 PM  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-p4a-2025-01-01 ]
   o 4 PM  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-p4b-2025-01-01 ]
   o 7 PM  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-p4c-2025-01-01 ]
   o 10 PM  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-p4d-2025-01-01 ]
++ Nasdaq - Amazon.com stock price [ https://www.nasdaq.com/market-activity/stocks/amzn/historical ]
+  o Open price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s1o-2025-01-01 ]
+  o Close price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s1c-2025-01-01 ]
+  o High price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s1h-2025-01-01 ]
+  o Low price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s1l-2025-01-01 ]
++ Nasdaq - Microsoft stock price [ https://www.nasdaq.com/market-activity/stocks/msft/historical ]
+  o Open price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s2o-2025-01-01 ]
+  o Close price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s2c-2025-01-01 ]
+  o High price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s2h-2025-01-01 ]
+  o Low price  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-s2l-2025-01-01 ]
 
   -------------------------------
               Data
