@@ -137,15 +137,25 @@ Method of estimating if we can predict future
 
 def pairing(data_df):
     ddf = data_df.sort_values(by=['buy_date'], ascending=[True])
+    dsz = len(ddf) * len(ddf)
+    dcnt = 1000
+    dix = 0
     rows = []
     for ria in range(len(ddf)):
+        if time.time() - START_TIME > RUNTIME:
+            break
+            
         a_buy_date = ddf['buy_date'].iloc[ria]
         a_year = int(a_buy_date.split('.')[0])
         a_w = ddf['w'].iloc[ria]
         a_n = ddf['n'].iloc[ria]
         for rib in range(len(ddf)):
+            if time.time() - START_TIME > RUNTIME:
+                break
+            
             if rib >= ria:
                 break
+                
             b_buy_date = ddf['buy_date'].iloc[rib]
             a_p = predict(a_buy_date, b_buy_date, data_df)
             b_w = ddf['w'].iloc[rib]
@@ -155,6 +165,11 @@ def pairing(data_df):
                 a_m = 1
             rw = {'a_buy_date': a_buy_date, 'a_w': a_w, 'a_n': a_n, 'a_p': a_p, 'a_m': a_m, 'b_buy_date': b_buy_date, 'b_w': b_w, 'b_n': b_n}
             rows.append(rw)
+
+            dix += 1
+            if dix > 0 and dix % dcnt == 0:
+                print(f'== [P] {a_buy_date}, {b_buy_date} : {dix} / {dsz}')
+
     mdf = pd.DataFrame(rows)
     mdf = mdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
     return mdf
