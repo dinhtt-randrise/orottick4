@@ -248,4 +248,23 @@ def analyze_year_range(year_min, year_max, ddf, m_1_cnt_min = 365, m_0_cnt_max =
             possible = True
     return possible, asdf, more
 
+
+====================================
+             PROCESS
+  -------------------------------
+
+  -------------------------------
+             Pairing
+  -------------------------------
+
+=====>] Oregon Lottery - Pick 4 drawing [<=====
+
++ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-p4a-2-2025-01-01
+
++ 4 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-p4b-2-2025-01-01
+
++ 7 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-p4c-2-2025-01-01
+
++ 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-p4d-2-2025-01-01
+
 ```
