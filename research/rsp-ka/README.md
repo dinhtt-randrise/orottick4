@@ -16,8 +16,10 @@ RSP-KA: Random simulating with single attribute
               GOAL
   -------------------------------
 
-Our goal is estimating if we can predict future (w/ single attribute)
+Our goal is:
++ estimating if we can predict future (w/ single attribute)
 using random simulating.
++ estimating if we can gain profits by predicting future (w/ single attribute)
 
   -------------------------------
      Future w/ single attribue
