@@ -106,4 +106,35 @@ def predict(buy_date, past_buy_date, data_df):
     p = reproduce_one(a_sim_seed, b_sim_cnt)
     return p
 
+  -------------------------------
+Method of estimating if we can predict future
+  -------------------------------
+
+=====>] Pairing [<=====
+
+def pairing(data_df):
+    ddf = data_df.sort_values(by=['buy_date'], ascending=[True])
+    rows = []
+    for ria in range(len(ddf)):
+        a_buy_date = ddf['buy_date'].iloc[ria]
+        a_year = int(a_buy_date.split('.')[0])
+        a_w = ddf['w'].iloc[ria]
+        a_n = ddf['n'].iloc[ria]
+        for rib in range(len(ddf)):
+            if rib <= ria:
+                continue
+            b_buy_date = ddf['buy_date'].iloc[rib]
+            a_p = predict(a_buy_date, b_buy_date, data_df)
+            b_w = ddf['w'].iloc[rib]
+            b_n = ddf['n'].iloc[rib]
+            a_m = 0
+            if a_p == a_w:
+                a_m = 1
+            rw = {'a_buy_date': a_buy_date, 'a_w': a_w, 'a_n': a_n, 'a_p': a_p, 'a_m': a_m, 'b_buy_date': b_buy_date, 'b_w': b_w, 'b_n': b_n}
+            rows.append(rw)
+    mdf = pd.DataFrame(rows)
+    mdf = mdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+    return mdf
+
+
 ```
