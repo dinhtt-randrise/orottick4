@@ -177,6 +177,12 @@ def pairing(data_df):
 =====>] Analyze pairing dataset in one year [<=====
 
 def analyze_year(year, vddf):
+    if 'a_year' not in vddf.columns:
+        a_year_list = []
+        for ri in range(len(vddf)):
+            a_year = int(str(vddf['a_buy_date'].iloc[ri]).split('.')[0])
+            a_year_list.append(a_year)
+        vddf['a_year'] = a_year_list
     ddf = vddf[vddf['a_year'] == year]
     if len(ddf) == 0:
         return None, None
@@ -204,6 +210,12 @@ def analyze_year(year, vddf):
 =====>] Analyze pairing dataset in year range [<=====
 
 def analyze_year_range(year_min, year_max, ddf, match_cnt_min = 365, possible_rate = 0.5):
+    if 'a_year' not in ddf.columns:
+        a_year_list = []
+        for ri in range(len(ddf)):
+            a_year = int(str(ddf['a_buy_date'].iloc[ri]).split('.')[0])
+            a_year_list.append(a_year)
+        ddf['a_year'] = a_year_list
     year = year_min
     asdf = None
     more = {}
