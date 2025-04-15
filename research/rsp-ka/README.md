@@ -121,8 +121,8 @@ def pairing(data_df):
         a_w = ddf['w'].iloc[ria]
         a_n = ddf['n'].iloc[ria]
         for rib in range(len(ddf)):
-            if rib <= ria:
-                continue
+            if rib >= ria:
+                break
             b_buy_date = ddf['buy_date'].iloc[rib]
             a_p = predict(a_buy_date, b_buy_date, data_df)
             b_w = ddf['w'].iloc[rib]
@@ -178,8 +178,12 @@ def analyze_year_range(year_min, year_max, ddf):
             else:
                 asdf = pd.concat([asdf, sdf])
         year += 1
+    possible = False
     if asdf is not None:
         asdf = asdf.sort_values(by=['a_year'], ascending=[False])
-    return asdf, more
+        df = asdf[asdf['a_m_1_cnt'] >= 365]
+        if len(df) > len(asdf) / 2.0:
+            possible = True
+    return possible, asdf, more
 
 ```
