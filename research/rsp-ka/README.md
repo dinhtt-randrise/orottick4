@@ -219,7 +219,7 @@ def analyze_year(year, vddf):
 
 =====>] Analyze pairing dataset in year range [<=====
 
-def analyze_year_range(year_min, year_max, ddf, match_cnt_min = 365, possible_rate = 0.5):
+def analyze_year_range(year_min, year_max, ddf, m_1_cnt_min = 365, m_0_cnt_max = 0, possible_year_rate = 0.5):
     if 'a_year' not in ddf.columns:
         a_year_list = []
         for ri in range(len(ddf)):
@@ -241,8 +241,8 @@ def analyze_year_range(year_min, year_max, ddf, match_cnt_min = 365, possible_ra
     possible = False
     if asdf is not None:
         asdf = asdf.sort_values(by=['a_year'], ascending=[False])
-        df = asdf[asdf['a_m_1_cnt'] >= match_cnt_min]
-        if len(df) > len(asdf) * possible_rate:
+        df = asdf[(asdf['a_m_1_cnt'] >= m_1_cnt_min)&(asdf['a_m_0_cnt'] <= m_0_cnt_max)]
+        if len(df) > len(asdf) * possible_year_rate:
             possible = True
     return possible, asdf, more
 
