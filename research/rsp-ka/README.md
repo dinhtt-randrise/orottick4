@@ -136,5 +136,50 @@ def pairing(data_df):
     mdf = mdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
     return mdf
 
+=====>] Analyze pairing dataset in one year [<=====
+
+def analyze_year(year, vddf):
+    ddf = vddf[vddf['a_year'] == year]
+    if len(ddf) == 0:
+        return None, None
+    a_buy_date_list = list(ddf['a_buy_date'].unique())
+    if len(a_buy_date_list) < 365:
+        return None, None
+    rows = []
+    for a_buy_date in a_buy_date_list:
+        a_m_cnt = 0
+        dfa = ddf[ddf['a_buy_date'] == a_buy_date]
+        if len(dfa) > 0:
+            df1 = dfa[dfa['a_m'] > 0]
+            a_m_cnt = len(df1)
+        rw = {'a_buy_date': a_buy_date, 'a_m_cnt': a_m_cnt}
+        rows.append(rw)
+    cdf = pd.DataFrame(rows)
+    df1 = cdf[cdf['a_m_cnt'] > 0]
+    a_m_1_cnt = len(df1)
+    df0 = cdf[cdf['a_m_cnt'] == 0]
+    a_m_0_cnt = len(df0)
+    rw = {'a_year': year, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt}
+    sdf = pd.DataFrame([rw])
+    return cdf, sdf
+
+=====>] Analyze pairing dataset in year range [<=====
+
+def analyze_year_range(year_min, year_max, ddf):
+    year = year_min
+    asdf = None
+    more = {}
+    while year <= year_max:
+        cdf, sdf = analyze_year(year, ddf)
+        if sdf is not None and cdf is not None:
+            more[f'cdf_{year}'] = cdf
+            if asdf is None:
+                asdf = sdf
+            else:
+                asdf = pd.concat([asdf, sdf])
+        year += 1
+    if asdf is not None:
+        asdf = asdf.sort_values(by=['a_year'], ascending=[False])
+    return asdf, more
 
 ```
