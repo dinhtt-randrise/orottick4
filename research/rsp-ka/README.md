@@ -188,18 +188,89 @@ def pairing(data_df):
 
 =====>] Analyze pairing dataset in one year [<=====
 
+def load_cm_model():
+    global CM_MODEL
+
+    CM_MODEL = None
+    if CM_MODEL_FILE is not None:
+        if os.path.exists(CM_MODEL_FILE):
+            with open(CM_MODEL_FILE, 'rb') as f:
+                CM_MODEL = pickle.load(f)
+                print(f'== [CM_MODEL] ==> Loaded!')
+
+def calc_cv_tax_rate(cv):
+    rate = 0.15
+
+    if cv < 4400:
+        return rate + 0.0475
+    elif cv < 11050:
+        return rate + 0.0675
+    elif cv < 125000:
+        return rate + 0.0875
+    else:
+        return rate + 0.0990
+        
+def calc_roi(a_buy_date, a_date_cnt, a_pos, dfb, ddf):
+    if INVEST_KIND == 'MP':
+        df1 = dfb[dfb['a_m'] > 0]
+        a_m_cnt = len(df1)
+        a_cost = MP_COST * a_date_cnt
+        a_prize = a_m_cnt * MP_PRIZE
+        a_return = a_prize - a_cost
+        if a_pos == 0:
+            a_m_cnt = 0
+            a_cost = 0
+            a_prize = 0
+            a_return = 0
+    
+        return a_cost, a_prize, a_return
+    elif INVEST_KIND == 'CV':
+        if a_pos == 0:
+            return 0, 0, 0            
+        tddf = ddf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
+        tadf = tddf[tddf['a_buy_date'] == a_buy_date]
+        tbdf = tddf[tddf['a_buy_date'] < a_buy_date]
+        if len(tadf) == 0 or len(tbdf) == 0:
+            return 0, 0, 0
+        b_date_list = list(tbdf['a_buy_date'].unique())
+        if len(b_date_list) < CV_CYCLE_SIZE:
+            return 0, 0, 0
+        b_date_list = b_date_list[CV_CYCLE_SIZE:]
+        if len(b_date_list) == 0:
+            return 0, 0, 0            
+        b_buy_date = b_date_list[0]
+        tbdf = tddf[tddf['a_buy_date'] == b_buy_date]
+        if len(tbdf) == 0:
+            return 0, 0, 0
+        a_w = tadf['a_w'].iloc[0] * CV_ADJUST_RATE * CV_STOCK_CNT
+        b_w = tbdf['a_w'].iloc[0] * CV_ADJUST_RATE * CV_STOCK_CNT
+        a_cost = b_w
+        a_prize = a_w - b_w
+        if a_prize > 0:
+            a_tax = calc_cv_tax_rate(a_prize) * a_prize
+            a_prize = 0
+            a_return = a_prize
+        else:
+            a_return = a_prize
+            a_prize = 0
+        return a_cost, a_prize, a_return            
+    else:
+        return 0, 0, 0
+        
+def check_match_possible(a_buy_date, vddf):
+    possible = 1
+    pdf = None
+    if CM_MODEL is None:
+        return possible, pdf
+    else:
+        return possible, pdf
+        
 def analyze_year(year, vddf):
-    if 'a_year' not in vddf.columns:
-        a_year_list = []
-        for ri in range(len(vddf)):
-            a_year = int(str(vddf['a_buy_date'].iloc[ri]).split('.')[0])
-            a_year_list.append(a_year)
-        vddf['a_year'] = a_year_list
     ddf = vddf[vddf['a_year'] == year]
     if len(ddf) == 0:
         return None, None
     a_buy_date_list = list(ddf['a_buy_date'].unique())
-    if len(a_buy_date_list) < 365:
+    if len(a_buy_date_list) < PAIR_DATE_CNT_MIN:
         return None, None
     rows = []
     for a_buy_date in a_buy_date_list:
@@ -208,45 +279,113 @@ def analyze_year(year, vddf):
         if len(dfa) > 0:
             df1 = dfa[dfa['a_m'] > 0]
             a_m_cnt = len(df1)
-        rw = {'a_buy_date': a_buy_date, 'a_m_cnt': a_m_cnt}
+        rw = {'a_buy_date': a_buy_date, 'a_m_cnt': a_m_cnt, 'a_pos': 0}
+        if len(dfa) > 0:
+            dfa = dfa.sort_values(by=['b_buy_date'], ascending=[False])
+            possible, dfc = check_match_possible(a_buy_date, ddf)
+            if dfc is not None:
+                if len(dfc) > 0:
+                    dfa = dfc
+            a_pos = possible
+            if a_pos > 0:
+                if 'a_pos' in dfa.columns:
+                    dfp = dfa[dfa['a_pos'] > 0]
+                    if len(dfp) == 0:
+                        a_pos = 0
+            rw['a_pos'] = a_pos
+            aa_pos = a_pos
+            a_date_cnt = DATE_CNT_MIN
+            while a_date_cnt <= DATE_CNT_MAX:
+                df0 = dfa
+                if len(df0) >= a_date_cnt:
+                    df0 = df0[:a_date_cnt]
+                a_pos = aa_pos
+                if a_pos > 0:
+                    if 'a_pos' in df0.columns:
+                        dfp = df0[df0['a_pos'] > 0]
+                        if len(dfp) == 0:
+                            a_pos = 0
+                df1 = df0[df0['a_m'] > 0]
+                a_m_cnt = len(df1)
+                a_cost, a_prize, a_return = calc_roi(a_buy_date, a_date_cnt, a_pos, df0, ddf)
+                rw[f'a_pos_{a_date_cnt}'] = a_pos
+                rw[f'a_m_cnt_{a_date_cnt}'] = a_m_cnt
+                rw[f'a_cost_{a_date_cnt}'] = a_cost
+                rw[f'a_prize_{a_date_cnt}'] = a_prize
+                rw[f'a_return_{a_date_cnt}'] = a_return
+                a_date_cnt += DATE_CNT_STEP
         rows.append(rw)
     cdf = pd.DataFrame(rows)
+    cdf.to_csv(f'match-count-{year}.csv', index=False)
     df1 = cdf[cdf['a_m_cnt'] > 0]
     a_m_1_cnt = len(df1)
     df0 = cdf[cdf['a_m_cnt'] == 0]
     a_m_0_cnt = len(df0)
-    rw = {'a_year': year, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt}
+    dfz = cdf[cdf[f'a_pos'] > 0]
+    a_pos_cnt = len(dfz)
+    rw = {'a_year': year, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt, 'a_pos_cnt': a_pos_cnt}
+    a_date_cnt = DATE_CNT_MIN
+    while a_date_cnt <= DATE_CNT_MAX:
+        df1 = cdf[cdf[f'a_m_cnt_{a_date_cnt}'] > 0]
+        rw[f'a_m_1_cnt_{a_date_cnt}'] = len(df1)
+        df0 = cdf[cdf[f'a_m_cnt_{a_date_cnt}'] == 0]
+        rw[f'a_m_0_cnt_{a_date_cnt}'] = len(df0)
+        a_cost = cdf[f'a_cost_{a_date_cnt}'].sum()
+        a_prize = cdf[f'a_prize_{a_date_cnt}'].sum()
+        a_return = cdf[f'a_return_{a_date_cnt}'].sum()
+        a_pos_cnt = cdf[f'a_pos_{a_date_cnt}'].sum()
+        rw[f'a_pos_cnt_{a_date_cnt}'] = a_pos_cnt
+        rw[f'a_cost_{a_date_cnt}'] = a_cost
+        rw[f'a_prize_{a_date_cnt}'] = a_prize
+        rw[f'a_return_{a_date_cnt}'] = a_return
+        a_date_cnt += DATE_CNT_STEP
     sdf = pd.DataFrame([rw])
+    sdf.to_csv(f'match-in-year-{year}.csv', index=False)
     return cdf, sdf
 
 =====>] Analyze pairing dataset in year range [<=====
 
-def analyze_year_range(year_min, year_max, ddf, m_1_cnt_min = 365, m_0_cnt_max = 0, possible_year_rate = 0.5):
-    if 'a_year' not in ddf.columns:
-        a_year_list = []
-        for ri in range(len(ddf)):
-            a_year = int(str(ddf['a_buy_date'].iloc[ri]).split('.')[0])
-            a_year_list.append(a_year)
-        ddf['a_year'] = a_year_list
-    year = year_min
+def analyze_year_range(ddf):
+    a_year_list = []
+    for ri in range(len(ddf)):
+        a_year = int(str(ddf['a_buy_date'].iloc[ri]).split('.')[0])
+        a_year_list.append(a_year)
+    ddf['a_year'] = a_year_list
+    year_start = YEAR_MAX
+    year_end = YEAR_MIN
+    year_step = -YEAR_STEP
+    year = year_start
     asdf = None
-    more = {}
-    while year <= year_max:
+    while year >= year_end:
         cdf, sdf = analyze_year(year, ddf)
-        if sdf is not None and cdf is not None:
-            more[f'cdf_{year}'] = cdf
+        if sdf is not None:
             if asdf is None:
                 asdf = sdf
             else:
                 asdf = pd.concat([asdf, sdf])
-        year += 1
-    possible = False
+        year += year_step
     if asdf is not None:
         asdf = asdf.sort_values(by=['a_year'], ascending=[False])
-        df = asdf[(asdf['a_m_1_cnt'] >= m_1_cnt_min)&(asdf['a_m_0_cnt'] <= m_0_cnt_max)]
-        if len(df) > len(asdf) * possible_year_rate:
-            possible = True
-    return possible, asdf, more
+        asdf.to_csv(f'match-in-year.csv', index=False)
+        rows = []
+        a_date_cnt = DATE_CNT_MIN
+        while a_date_cnt <= DATE_CNT_MAX:
+            a_cost = asdf[f'a_cost_{a_date_cnt}'].sum()
+            a_prize = asdf[f'a_prize_{a_date_cnt}'].sum()
+            a_return = asdf[f'a_return_{a_date_cnt}'].sum()
+            a_m_1_cnt = asdf[f'a_m_1_cnt_{a_date_cnt}'].sum()
+            a_m_0_cnt = asdf[f'a_m_0_cnt_{a_date_cnt}'].sum()
+            a_pos_cnt = asdf[f'a_pos_cnt_{a_date_cnt}'].sum()
+            df1 = asdf[asdf[f'a_return_{a_date_cnt}'] >= RETURN_IN_YEAR_MIN]
+            a_riy_1_cnt = len(df1)
+            df0 = asdf[asdf[f'a_return_{a_date_cnt}'] < RETURN_IN_YEAR_MIN]
+            a_riy_0_cnt = len(df0)
+            rw = {'a_date_cnt': a_date_cnt, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt, 'a_pos_cnt': a_pos_cnt, 'a_cost': a_cost, 'a_prize': a_prize, 'a_return': a_return, 'a_riy_1_cnt': a_riy_1_cnt, 'a_riy_0_cnt': a_riy_0_cnt}
+            rows.append(rw)
+            a_date_cnt += DATE_CNT_STEP
+        amdf = pd.DataFrame(rows)
+        amdf = amdf.sort_values(by=['a_riy_1_cnt', 'a_return', 'a_cost', 'a_date_cnt'], ascending=[False, False, True, True])
+        amdf.to_csv(f'matches.csv', index=False)
 
 
 ====================================
