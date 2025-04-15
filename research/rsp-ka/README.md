@@ -57,25 +57,47 @@ def gen_num():
 =====>] Reproduce random number from sim_seed & sim_cnt [<=====
 
 def reproduce_one(sim_seed, sim_cnt):
+    global cache_capture_seed, cache_reproduce_one, cache_capture
+
+    key = f'{sim_seed}_{sim_cnt}'
+    if key in cache_reproduce_one:
+        return cache_reproduce_one[key]
+
     random.seed(sim_seed)
     n = -1
     for si in range(sim_cnt):
-        n = gen_num()    
+        n = gen_num()  
+
+    cache_reproduce_one[key] = n
     return n
 
 =====>] Capture sim_seed from n [<=====
 
 def capture_seed(sim_cnt, n):
+    global cache_capture_seed, cache_reproduce_one, cache_capture
+    
+    key = f'{sim_cnt}_{n}'
+    if key in cache_capture_seed:
+        return cache_capture_seed[key]
+
     sim_seed = 0
     p = reproduce_one(sim_seed, sim_cnt)
     while p != n:
         sim_seed += 1
-        p = reproduce_one(sim_seed, sim_cnt)    
+        p = reproduce_one(sim_seed, sim_cnt)   
+
+    cache_capture_seed[key] = sim_seed
     return sim_seed
 
 =====>] Capture sim_seed, sim_cnt from w, n [<=====
 
 def capture(w, n):
+    global cache_capture_seed, cache_reproduce_one, cache_capture
+
+    key = f'{w}_{n}'
+    if key in cache_capture:
+        return cache_capture[key][0], cache_capture[key][1]
+
     sim_seed = capture_seed(1, n)
     random.seed(sim_seed)
     sim_cnt = 0
@@ -87,6 +109,7 @@ def capture(w, n):
     pn = reproduce_one(sim_seed, 1)
     pw = reproduce_one(sim_seed, sim_cnt)    
     if pn == n and pw == w:
+        cache_capture[key] = [sim_seed, sim_cnt]
         return sim_seed, sim_cnt
     else:
         return -1, -1
