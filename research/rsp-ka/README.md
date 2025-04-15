@@ -91,4 +91,19 @@ def capture(w, n):
     else:
         return -1, -1
 
+=====>] Predict next drawing number from past drawing date [<=====
+
+def predict(buy_date, past_buy_date, data_df):
+    adf = data_df[data_df['buy_date'] == buy_date]
+    bdf = data_df[data_df['buy_date'] == past_buy_date]
+    if len(adf) == 0 or len(bdf) == 0:
+        return -1
+    a_n = adf['n'].iloc[0]
+    b_w = bdf['w'].iloc[0]
+    b_n = bdf['n'].iloc[0]
+    a_sim_seed = capture_seed(1, a_n)
+    b_sim_seed, b_sim_cnt = capture(b_w, b_n)
+    p = reproduce_one(a_sim_seed, b_sim_cnt)
+    return p
+
 ```
