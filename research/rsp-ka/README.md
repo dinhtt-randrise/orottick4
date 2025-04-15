@@ -163,7 +163,7 @@ def pairing(data_df):
             a_m = 0
             if a_p == a_w:
                 a_m = 1
-            rw = {'a_buy_date': a_buy_date, 'a_w': a_w, 'a_n': a_n, 'a_p': a_p, 'a_m': a_m, 'b_buy_date': b_buy_date, 'b_w': b_w, 'b_n': b_n}
+            rw = {'a_buy_date': a_buy_date, 'a_year': a_year, 'a_w': a_w, 'a_n': a_n, 'a_p': a_p, 'a_m': a_m, 'b_buy_date': b_buy_date, 'b_w': b_w, 'b_n': b_n}
             rows.append(rw)
 
             dix += 1
