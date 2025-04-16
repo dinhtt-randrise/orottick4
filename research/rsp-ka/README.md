@@ -471,10 +471,16 @@ def analyze_year_range(ddf):
   o Profitable: No
 
 + 4 PM: 
+  o Possible: Yes
+  o Profitable: No
 
 + 7 PM: 
+  o Possible: Yes
+  o Profitable: No
 
 + 10 PM: 
+  o Possible: Yes
+  o Profitable: No
 
 
 ```
