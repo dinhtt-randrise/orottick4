@@ -430,6 +430,25 @@ def r4_analyze(r4df, ddf):
   -------------------------------
 
   -------------------------------
+   Generate random drawing data
+  -------------------------------
+
+=====>] Oregon Lottery - Pick 4 drawing [<=====
+
++ 1 PM:
+  o ra1 (SEED_ADD = 0): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra1-2025-01-01
+  o ra2 (SEED_ADD = 1): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra2-2025-01-01
+  o ra3 (SEED_ADD = 2): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra3-2025-01-01
+  o ra4 (SEED_ADD = 3): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra4-2025-01-01
+
++ 4 PM: 
+
++ 7 PM: 
+
++ 10 PM: 
+
+
+  -------------------------------
              Pairing
   -------------------------------
 
@@ -472,7 +491,7 @@ def r4_analyze(r4df, ddf):
 Analyze prediction by using R4 data
   -------------------------------
 
-=====>] Oregon Lottery - Pick 4 drawing [<=====
+=====>] Oregon Lottery - Pick 4 drawing (R4 Data: All kinds [1PM + 4PM + 7PM + 10PM]) [<=====
 
 + 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-analyze-rsp-ka-p4a-2025-01-01
 
@@ -488,7 +507,7 @@ Analyze prediction by using R4 data
   -------------------------------
 
   -------------------------------
-    Prediction by using R4 data
+Prediction by using R4 data (All kinds [1PM + 4PM + 7PM + 10PM])
   -------------------------------
 
 =====>] Oregon Lottery - Pick 4 drawing [<=====
