@@ -513,6 +513,10 @@ Analyze prediction by using R4 data
   o Possible: Yes
   o Profitable: Yes
 
+```
+![]https://github.com/dinhtt-randrise/orottick4/blob/7709ac5c240f04275dd07a3581de8e5c42eef80f/research/rsp-ka/r4-p4-p4c.png)
+
+```
 + 10 PM: 
   o Possible: Yes
   o Profitable: Yes
