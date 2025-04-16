@@ -406,4 +406,41 @@ def analyze_year_range(ddf):
 
 + 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-p4d-2-2025-01-01
 
+
+  -------------------------------
+   Analyze (Not check matchable)
+  -------------------------------
+
+=====>] Oregon Lottery - Pick 4 drawing [<=====
+
++ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-analyze-rsp-ka-p4a-nc-2025-01-01
+
++ 4 PM: 
+
++ 7 PM: 
+
++ 10 PM: 
+
+
+====================================
+             RESULTS
+  -------------------------------
+
+  -------------------------------
+       Not check matchable
+  -------------------------------
+
+=====>] Oregon Lottery - Pick 4 drawing [<=====
+
++ 1 PM:
+  o Possible: Yes
+  o Profitable: No
+
++ 4 PM: 
+
++ 7 PM: 
+
++ 10 PM: 
+
+
 ```
