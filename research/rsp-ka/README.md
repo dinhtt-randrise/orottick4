@@ -242,18 +242,25 @@ def calc_roi(a_buy_date, a_date_cnt, a_pos, dfb, ddf):
         tbdf = tddf[tddf['a_buy_date'] == b_buy_date]
         if len(tbdf) == 0:
             return 0, 0, 0
-        a_w = tadf['a_w'].iloc[0] * CV_ADJUST_RATE * CV_STOCK_CNT
         b_w = tbdf['a_w'].iloc[0] * CV_ADJUST_RATE * CV_STOCK_CNT
-        a_cost = b_w
-        a_prize = a_w - b_w
-        if a_prize > 0:
-            a_tax = calc_cv_tax_rate(a_prize) * a_prize
-            a_prize = 0
-            a_return = a_prize
-        else:
-            a_return = a_prize
-            a_prize = 0
-        return a_cost, a_prize, a_return            
+        aa_cost = 0
+        aa_prize = 0
+        aa_return = 0
+        for ria in range(len(dfb)):
+            a_w = dfb['a_p'].iloc[ria] * CV_ADJUST_RATE * CV_STOCK_CNT
+            a_cost = b_w
+            a_prize = a_w - b_w
+            if a_prize > 0:
+                a_tax = calc_cv_tax_rate(a_prize) * a_prize
+                a_prize = 0
+                a_return = a_prize
+            else:
+                a_return = a_prize
+                a_prize = 0
+            aa_cost += a_cost
+            aa_prize += a_prize
+            aa_return += a_return
+        return aa_cost, aa_prize, aa_return            
     else:
         return 0, 0, 0
         
