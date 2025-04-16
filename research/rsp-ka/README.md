@@ -498,7 +498,7 @@ Analyze prediction by using R4 data
   o Profitable: Yes
 
 ```
-![](https://github.com/dinhtt-randrise/orottick4/blob/412d3d8ffcb8fcaf5bec34bd6d4c05b9eeff3a51/research/rsp-ka/r4-p4-p4a.png
+![](https://github.com/dinhtt-randrise/orottick4/blob/412d3d8ffcb8fcaf5bec34bd6d4c05b9eeff3a51/research/rsp-ka/r4-p4-p4a.png)
 
 ```
 + 4 PM: 
