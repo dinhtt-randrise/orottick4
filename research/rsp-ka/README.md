@@ -417,6 +417,16 @@ def analyze_year_range(ddf):
 
 + 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-p4d-2-2025-01-01
 
+=====>] Nasdaq - Amazon.com stock price [<=====
+
++ Open price: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-s1o-1-2025-01-01
+
++ Close price: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-s1c-1-2025-01-01
+
++ High price: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-s1h-1-2025-01-01
+
++ Low price: https://www.kaggle.com/code/dinhttrandrise/orottick4-pairing-rsp-ka-s1l-1-2025-01-01
+
 
   -------------------------------
    Analyze (Not check matchable)
@@ -430,7 +440,7 @@ def analyze_year_range(ddf):
 
 + 7 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-analyze-rsp-ka-p4c-nc-2025-01-01
 
-+ 10 PM: 
++ 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-analyze-rsp-ka-p4d-nc-2025-01-01
 
 
 ====================================
