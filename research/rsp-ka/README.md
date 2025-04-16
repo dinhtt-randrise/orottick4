@@ -387,6 +387,17 @@ def analyze_year_range(ddf):
         amdf = amdf.sort_values(by=['a_riy_1_cnt', 'a_return', 'a_cost', 'a_date_cnt'], ascending=[False, False, True, True])
         amdf.to_csv(f'matches.csv', index=False)
 
+        possible = 'No'
+        df1 = amdf[amdf['a_m_1_cnt'] >= amdf['a_m_0_cnt'] * M_1_CNT_RATE]
+        if len(df1) > 0:
+            possible = 'Yes'
+        profitable = 'No'
+        df2 = amdf[amdf['a_return'] >= RETURN_ALL_MIN]
+        if len(df2) > 0:
+            profitable = 'Yes'
+        arsdf = pd.DataFrame({'key': ['Possible', 'Profitable'], 'value': [possible, profitable]})
+        arsdf.to_csv('results.csv', index=False)
+
 
 ====================================
              PROCESS
