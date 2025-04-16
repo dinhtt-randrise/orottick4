@@ -478,7 +478,7 @@ Analyze prediction by using R4 data
 
 + 4 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-analyze-rsp-ka-p4b-2025-01-01
 
-+ 7 PM: 
++ 7 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-analyze-rsp-ka-p4c-2025-01-01
 
 + 10 PM: 
 
