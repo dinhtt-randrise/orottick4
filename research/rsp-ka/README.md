@@ -305,7 +305,7 @@ def r4_merge(data_files):
         lu_w = list(r4df['w1'].unique())
         u_w = len(lu_w)
 
-        sdf = pd.DataFrame([{'u_w': u_w, 'u_n': u_n, 'u_max': 10000}])
+        sdf = pd.DataFrame([{'u_w': u_w, 'u_n': u_n, 'u_max': 10000, 'r4_sz': len(r4df)}])
         sdf.to_csv('r4-unique.csv', index=False)
 
 =====>] Analyze prediction by using R4 data [<=====
