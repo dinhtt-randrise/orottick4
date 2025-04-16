@@ -442,6 +442,7 @@ def r4_analyze(r4df, ddf):
   o ra4 (SEED_ADD = 3): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra4-2025-01-01
   o ra5 (SEED_ADD = 4): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra5-2025-01-01
   o ra6 (SEED_ADD = 5): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra6-2025-01-01
+  o ra7 (SEED_ADD = 6): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra7-2025-01-01
 
 + 4 PM: 
 
