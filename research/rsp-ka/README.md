@@ -521,26 +521,26 @@ def r4_analyze(r4df, ddf):
 =====>] Oregon Lottery - Pick 4 drawing [<=====
 
 + 1 PM:
-  o ra1 (SIM_CNT = 2): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra1-2025-01-01
-  o ra2 (SIM_CNT = 3): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra2-2025-01-01
-  o ra3 (SIM_CNT = 4): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra3-2025-01-01
-  o ra4 (SIM_CNT = 5): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra4-2025-01-01
-  o ra5 (SIM_CNT = 6): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra5-2025-01-01
-  o ra6 (SIM_CNT = 7): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra6-2025-01-01
-  o ra7 (SIM_CNT = 8): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra7-2025-01-01
-  o ra8 (SIM_CNT = 9): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra8-2025-01-01
-  o ra9 (SIM_CNT = 10): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra9-2025-01-01
-  o ra10 (SIM_CNT = 11): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra10-2025-01-01
-  o ra11 (SIM_CNT = 12): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra11-2025-01-01
-  o ra12 (SIM_CNT = 13): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra12-2025-01-01
-  o ra13 (SIM_CNT = 14): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra13-2025-01-01
-  o ra14 (SIM_CNT = 15): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra14-2025-01-01
-  o ra15 (SIM_CNT = 16): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra15-2025-01-01
-  o ra16 (SIM_CNT = 17): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra16-2025-01-01
-  o ra17 (SIM_CNT = 18): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra17-2025-01-01
-  o ra18 (SIM_CNT = 19): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra18-2025-01-01
-  o ra19 (SIM_CNT = 20): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra19-2025-01-01
-  o ra20 (SIM_CNT = 21): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra20-2025-01-01
+  o ra1 (SIM_CNT = 1): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra1-2025-01-01
+  o ra2 (SIM_CNT = 2): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra2-2025-01-01
+  o ra3 (SIM_CNT = 3): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra3-2025-01-01
+  o ra4 (SIM_CNT = 4): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra4-2025-01-01
+  o ra5 (SIM_CNT = 5): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra5-2025-01-01
+  o ra6 (SIM_CNT = 6): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra6-2025-01-01
+  o ra7 (SIM_CNT = 7): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra7-2025-01-01
+  o ra8 (SIM_CNT = 8): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra8-2025-01-01
+  o ra9 (SIM_CNT = 9): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra9-2025-01-01
+  o ra10 (SIM_CNT = 10): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra10-2025-01-01
+  o ra11 (SIM_CNT = 11): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra11-2025-01-01
+  o ra12 (SIM_CNT = 12): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra12-2025-01-01
+  o ra13 (SIM_CNT = 13): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra13-2025-01-01
+  o ra14 (SIM_CNT = 14): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra14-2025-01-01
+  o ra15 (SIM_CNT = 15): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra15-2025-01-01
+  o ra16 (SIM_CNT = 16): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra16-2025-01-01
+  o ra17 (SIM_CNT = 17): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra17-2025-01-01
+  o ra18 (SIM_CNT = 18): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra18-2025-01-01
+  o ra19 (SIM_CNT = 19): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra19-2025-01-01
+  o ra20 (SIM_CNT = 20): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra20-2025-01-01
 
 + 4 PM: 
 
