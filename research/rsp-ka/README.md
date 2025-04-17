@@ -526,6 +526,7 @@ def r4_analyze(r4df, ddf):
   o ra14 (SIM_CNT = 15): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra14-2025-01-01
   o ra15 (SIM_CNT = 16): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra15-2025-01-01
   o ra16 (SIM_CNT = 17): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra16-2025-01-01
+  o ra17 (SIM_CNT = 18): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra17-2025-01-01
 
 + 4 PM: 
 
