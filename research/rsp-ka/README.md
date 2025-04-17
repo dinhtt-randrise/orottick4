@@ -316,17 +316,26 @@ def r4_analyze(r4df, ddf):
     ddf['pcnt'] = 0
     ddf['pls'] = ' '
     ddf['m'] = 0
+    ddf['max_buy_date'] = ''
+    ddf['a_pcnt'] = 0
+    ddf['a_pls'] = ' '
+    ddf['a_m'] = 0
     ddf['a_max_buy_date'] = ''
     l_year = []
     l_pcnt = []
     l_pls = []
     l_m = []
+    l_max_buy_date = []
+    l_a_pcnt = []
+    l_a_pls = []
+    l_a_m = []
     l_a_max_buy_date = []
     for ri in range(len(ddf)):
         buy_date = ddf['buy_date'].iloc[ri]
         year = int(buy_date.split('.')[0])
         n = ddf['n'].iloc[ri]
         w = ddf['w'].iloc[ri]
+        max_buy_date = ddf['date'].iloc[ri]
         a_max_buy_date = ddf['date'].iloc[ri]
         pdf = r4df[(r4df['n1'] == n)&(r4df['max_buy_date'] < buy_date)]
         if CHK_MAX_YEAR:
@@ -353,28 +362,52 @@ def r4_analyze(r4df, ddf):
                 if w1 == w:
                     m = 1
                     a_max_buy_date = pdf['a_max_buy_date'].iloc[pi]
+
+        a_pdf = pdf
+        if len(a_pdf) > 0:
+            a_pdf = a_pdf[a_pdf['a_max_buy_date'] < buy_date]
+        a_pls = ' '
+        a_m = 0
+        a_pcnt = len(a_pdf)
+        if len(a_pdf) == 0:
+            a_m = -1
+        elif len(a_pdf) > 0:
+            ln = list(a_pdf['w1'].unique())
+            a_pls = ', '.join([str(x) for x in ln])
+            for pi in range(len(a_pdf)):
+                w1 = a_pdf['w1'].iloc[pi]
+                if w1 == w:
+                    a_m = 1
+                    a_max_buy_date = a_pdf['a_max_buy_date'].iloc[pi]
+            
         l_pls.append(pls)
         l_m.append(m)
         l_pcnt.append(pcnt)
         l_year.append(year)
+        l_max_buy_date.append(max_buy_date)
+
+        l_a_pls.append(a_pls)
+        l_a_m.append(a_m)
+        l_a_pcnt.append(a_pcnt)
         l_a_max_buy_date.append(a_max_buy_date)
+
     ddf['pls'] = l_pls
     ddf['m'] = l_m
     ddf['pcnt'] = l_pcnt
     ddf['year'] = l_year
+    ddf['max_buy_date'] = l_max_buy_date
+
+    ddf['a_pls'] = l_a_pls
+    ddf['a_m'] = l_a_m
+    ddf['a_pcnt'] = l_a_pcnt
     ddf['a_max_buy_date'] = l_a_max_buy_date
 
     ddf.to_csv('r4-data.csv', index=False)
 
     df1 = ddf[ddf['m'] == 1]
     m_1_cnt = len(df1)
-    m_1a_cnt = m_1_cnt
     if len(df1) > 0:
         df1.to_csv('r4-m-1.csv', index=False)
-        df1a = df1[df1['buy_date'] > df1['a_max_buy_date']]
-        m_1a_cnt = len(df1a)
-        if len(df1a) > 0:
-            df1a.to_csv('r4-m-1a.csv', index=False)
 
     df0 = ddf[ddf['m'] == 0]
     m_0_cnt = len(df0)
@@ -390,7 +423,24 @@ def r4_analyze(r4df, ddf):
     
     all_cnt = len(ddf)
 
-    sdf = pd.DataFrame([{'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_1a_cnt': m_1a_cnt, 'm_0_cnt': m_0_cnt, 'all_cnt': all_cnt}])
+    df1 = ddf[ddf['a_m'] == 1]
+    a_m_1_cnt = len(df1)
+    if len(df1) > 0:
+        df1.to_csv('r4-a-m-1.csv', index=False)
+
+    df0 = ddf[ddf['a_m'] == 0]
+    a_m_0_cnt = len(df0)
+    if len(df0) > 0:
+        df0.to_csv('r4-a-m-0.csv', index=False)
+
+    dfz = ddf[ddf['a_m'] == -1]
+    a_m_z_cnt = len(dfz)
+    if len(dfz) > 0:
+        dfz.to_csv('r4-a-m-z.csv', index=False)
+
+    a_pcnt_max = int(ddf['a_pcnt'].max())
+
+    sdf = pd.DataFrame([{'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'all_cnt': all_cnt, 'a_pcnt_max': a_pcnt_max, 'a_m_z_cnt': a_m_z_cnt, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt}])
     sdf.to_csv('r4-sum.csv', index=False)
 
     rows = []
@@ -400,13 +450,8 @@ def r4_analyze(r4df, ddf):
 
         df1 = dfk[dfk['m'] == 1]
         m_1_cnt = len(df1)
-        m_1a_cnt = m_1_cnt
         if len(df1) > 0:
             df1.to_csv(f'r4-m-1-{year}.csv', index=False) 
-            df1a = df1[df1['buy_date'] > df1['a_max_buy_date']]
-            m_1a_cnt = len(df1a)
-            if len(df1a) > 0:
-                df1a.to_csv(f'r4-m-1a-{year}.csv', index=False)
 
         df0 = dfk[dfk['m'] == 0]
         m_0_cnt = len(df0)
@@ -421,11 +466,31 @@ def r4_analyze(r4df, ddf):
         all_cnt = len(dfk)
 
         b_cnt = m_1_cnt + m_0_cnt
-        cost = MP_COST * b_cnt
+        cost = MP_COST * b_cnt * pcnt_max
         prize = MP_PRIZE * m_1_cnt
         profit = prize - cost
 
-        rw = {'year': year, 'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_1a_cnt': m_1a_cnt, 'm_0_cnt': m_0_cnt, 'all_cnt': all_cnt, 'buy_cnt': b_cnt, 'cost': cost, 'prize': prize, 'profit': profit} 
+        df1 = dfk[dfk['a_m'] == 1]
+        a_m_1_cnt = len(df1)
+        if len(df1) > 0:
+            df1.to_csv(f'r4-a-m-1-{year}.csv', index=False) 
+
+        df0 = dfk[dfk['a_m'] == 0]
+        a_m_0_cnt = len(df0)
+        if len(df0) > 0:
+            df0.to_csv(f'r4-a-m-0-{year}.csv', index=False) 
+
+        dfz = dfk[dfk['a_m'] == -1]
+        a_m_z_cnt = len(dfz)
+        if len(dfz) > 0:
+            dfz.to_csv(f'r4-a-m-z-{year}.csv', index=False) 
+
+        a_b_cnt = a_m_1_cnt + a_m_0_cnt
+        a_cost = MP_COST * a_b_cnt * a_pcnt_max
+        a_prize = MP_PRIZE * a_m_1_cnt
+        a_profit = a_prize - a_cost
+
+        rw = {'year': year, 'all_cnt': all_cnt, 'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'buy_cnt': b_cnt, 'cost': cost, 'prize': prize, 'profit': profit, 'a_pcnt_max': a_pcnt_max, 'a_m_z_cnt': a_m_z_cnt, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt, 'a_buy_cnt': a_b_cnt, 'a_cost': cost, 'a_prize': prize, 'a_profit': a_profit} 
         rows.append(rw)
         sdf = pd.DataFrame([rw])
         sdf.to_csv(f'r4-m-{year}.csv', index=False)
