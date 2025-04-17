@@ -139,12 +139,23 @@ Method of estimating if we can predict future
 =====>] Generate random drawing data from specified drawing data [<=====
 
 def gen_rand_ds(bddf):
+    bddf = bddf[(bddf['w'] >= 0)&(bddf['n'] >= 0)]
     bddf = bddf.sort_values(by=['buy_date'], ascending=[True])
     rows = []
+    dix = 0
+    dsz = len(bddf)
+    dcnt = 50
     for ri in range(len(bddf)):
+        if time.time() - START_TIME > RUNTIME:
+            break
+        dix += 1
+        if dix % dcnt == 0:
+            buy_date = bddf['buy_date'].iloc[ri]
+            print(f'== [GR] ==> {dix} / {dsz} -> {buy_date}')
+        w = int(bddf['w'].iloc[ri])
         n = int(bddf['n'].iloc[ri])
-        sim_seed = capture_seed(1, n)
-        n = reproduce_one(sim_seed, SIM_CNT)
+        sim_seed, sim_cnt = capture(w, n)
+        n = reproduce_one(sim_seed, sim_cnt + SIM_CNT)
         rw = {'date': bddf['date'].iloc[ri], 'w': -1, 'n': n}
         rows.append(rw)
     ddf = pd.DataFrame(rows)
