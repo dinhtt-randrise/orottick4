@@ -142,9 +142,9 @@ def gen_rand_ds(bddf):
     bddf = bddf.sort_values(by=['buy_date'], ascending=[True])
     rows = []
     for ri in range(len(bddf)):
-        b = int(SEED_ADD + int(bddf['n'].iloc[ri]))
-        random.seed(b)
-        n = random.randint(0, 9999)
+        n = int(bddf['n'].iloc[ri])
+        sim_seed = capture_seed(1, n)
+        n = reproduce_one(sim_seed, SIM_CNT)
         rw = {'date': bddf['date'].iloc[ri], 'w': -1, 'n': n}
         rows.append(rw)
     ddf = pd.DataFrame(rows)
