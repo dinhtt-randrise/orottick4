@@ -530,7 +530,7 @@ Prediction by using R4 data (All kinds [1PM + 4PM + 7PM + 10PM])
   o Profitable: Yes
 
 ```
-![](https://github.com/dinhtt-randrise/orottick4/blob/412d3d8ffcb8fcaf5bec34bd6d4c05b9eeff3a51/research/rsp-ka/r4-p4-p4a.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4a.png)
 
 ```
 + 4 PM: 
@@ -538,7 +538,7 @@ Prediction by using R4 data (All kinds [1PM + 4PM + 7PM + 10PM])
   o Profitable: Yes
 
 ```
-![](https://github.com/dinhtt-randrise/orottick4/blob/9c532ed503f892e73d78542e215cf542e77f8668/research/rsp-ka/r4-p4-p4b.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4b.png)
 
 ```
 + 7 PM: 
@@ -546,7 +546,7 @@ Prediction by using R4 data (All kinds [1PM + 4PM + 7PM + 10PM])
   o Profitable: Yes
 
 ```
-![](https://github.com/dinhtt-randrise/orottick4/blob/7709ac5c240f04275dd07a3581de8e5c42eef80f/research/rsp-ka/r4-p4-p4c.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4c.png)
 
 ```
 + 10 PM: 
@@ -554,7 +554,7 @@ Prediction by using R4 data (All kinds [1PM + 4PM + 7PM + 10PM])
   o Profitable: Yes
 
 ```
-![](https://github.com/dinhtt-randrise/orottick4/blob/92e6ec8b0174d92e3aa7fca00d44dac65a70f7c3/research/rsp-ka/r4-p4-p4d.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4d.png)
 
 ```
 
