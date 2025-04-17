@@ -490,7 +490,7 @@ def r4_analyze(r4df, ddf):
         a_prize = MP_PRIZE * a_m_1_cnt
         a_profit = a_prize - a_cost
 
-        rw = {'year': year, 'all_cnt': all_cnt, 'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'buy_cnt': b_cnt, 'cost': cost, 'prize': prize, 'profit': profit, 'a_pcnt_max': a_pcnt_max, 'a_m_z_cnt': a_m_z_cnt, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt, 'a_buy_cnt': a_b_cnt, 'a_cost': cost, 'a_prize': prize, 'a_profit': a_profit} 
+        rw = {'year': year, 'all_cnt': all_cnt, 'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'buy_cnt': b_cnt, 'cost': cost, 'prize': prize, 'profit': profit, 'a_pcnt_max': a_pcnt_max, 'a_m_z_cnt': a_m_z_cnt, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt, 'a_buy_cnt': a_b_cnt, 'a_cost': a_cost, 'a_prize': prize, 'a_profit': a_profit} 
         rows.append(rw)
         sdf = pd.DataFrame([rw])
         sdf.to_csv(f'r4-m-{year}.csv', index=False)
