@@ -445,14 +445,14 @@ def r4_analyze(r4df, ddf):
 =====>] Oregon Lottery - Pick 4 drawing [<=====
 
 + 1 PM:
-  o ra1 (SEED_ADD = 0): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra1-2025-01-01
-  o ra2 (SEED_ADD = 1): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra2-2025-01-01
-  o ra3 (SEED_ADD = 2): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra3-2025-01-01
-  o ra4 (SEED_ADD = 3): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra4-2025-01-01
-  o ra5 (SEED_ADD = 4): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra5-2025-01-01
-  o ra6 (SEED_ADD = 5): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra6-2025-01-01
-  o ra7 (SEED_ADD = 6): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra7-2025-01-01
-  o ra8 (SEED_ADD = 7): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra8-2025-01-01
+  o ra1 (SIM_CNT = 2): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra1-2025-01-01
+  o ra2 (SIM_CNT = 3): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra2-2025-01-01
+  o ra3 (SIM_CNT = 4): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra3-2025-01-01
+  o ra4 (SIM_CNT = 5): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra4-2025-01-01
+  o ra5 (SIM_CNT = 6): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra5-2025-01-01
+  o ra6 (SIM_CNT = 7): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra6-2025-01-01
+  o ra7 (SIM_CNT = 8): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra7-2025-01-01
+  o ra8 (SIM_CNT = 9): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra8-2025-01-01
 
 + 4 PM: 
 
