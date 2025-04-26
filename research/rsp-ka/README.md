@@ -136,54 +136,6 @@ def predict(buy_date, past_buy_date, data_df):
 Method of estimating if we can predict future
   -------------------------------
 
-=====>] Generate random drawing data from specified drawing data [<=====
-
-def gen_rand_ds(bddf):
-    bddf = bddf[(bddf['w'] >= 0)&(bddf['n'] >= 0)]
-    bddf = bddf.sort_values(by=['buy_date'], ascending=[True])
-    rows = []
-    dix = 0
-    dsz = len(bddf)
-    dcnt = 50
-    for ri in range(len(bddf)):
-        if time.time() - START_TIME > RUNTIME:
-            break
-        dix += 1
-        if dix % dcnt == 0:
-            buy_date = bddf['buy_date'].iloc[ri]
-            print(f'== [GR] ==> {dix} / {dsz} -> {buy_date}')
-        w = int(bddf['w'].iloc[ri])
-        n = int(bddf['n'].iloc[ri])
-        sim_seed, sim_cnt = capture(w, n)
-        n = reproduce_one(sim_seed, sim_cnt + SIM_CNT)
-        rw = {'date': bddf['date'].iloc[ri], 'w': -1, 'n': n}
-        rows.append(rw)
-    ddf = pd.DataFrame(rows)
-
-    rows = []
-    date_list = ddf['date'].unique()
-    for today in date_list:
-        d1 = datetime.strptime(today, "%Y.%m.%d")
-        d2 = d1 + timedelta(minutes=int(+(1) * (60 * 24)))
-        buy_date = d2.strftime('%Y.%m.%d')   
-        tdf = ddf[ddf['date'] == today]
-        bdf = ddf[ddf['date'] == buy_date]
-        next_date = buy_date
-        n = tdf['n'].iloc[0]
-        if len(bdf) == 0:
-            w = -1
-        else:
-            w = bdf['n'].iloc[0]
-        rw = {'date': today, 'buy_date': buy_date, 'next_date': next_date, 'w': w, 'n': n}
-        rows.append(rw)
-    df = pd.DataFrame(rows)
-    df = df.sort_values(by=['date'], ascending=[False])
-    df.to_csv(f'{LOTTE_KIND}-{BUY_DATE}.csv', index=False)
-
-    sz = len(df)
-    print(f'== [Success] ==> Random drawing data is generated. It contains {sz} rows.')
-
-
 =====>] Pairing [<=====
 
 def pairing(data_df):
@@ -225,328 +177,111 @@ def pairing(data_df):
     mdf = mdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
     return mdf
 
-=====>] Collect R4 data from pairing dataset [<=====
+=====>] Prepare past matches data [<=====
 
-def r4_collect(ddf):
-    ddf = ddf[ddf['a_m'] > 0]
-    rows = []
-    dsz = len(ddf)
-    dcnt = 1000
-    dix = 0
-    for ri in range(len(ddf)):
-        if time.time() - START_TIME > RUNTIME:
-            break
-
-        dix += 1
-        if dix % dcnt == 0:
-            print(f'== [R4] ==> {dix} / {dsz}')
-
-        if R4_DIX_START is not None:
-            if dix <= R4_DIX_START:
-                continue
-                
-        no = R4_NO_START + len(rows) + 1
-        w1 = ddf['a_w'].iloc[ri]
-        n1 = ddf['a_n'].iloc[ri]
-        w2 = ddf['b_w'].iloc[ri]
-        n2 = ddf['b_n'].iloc[ri] 
-        max_buy_date = ddf['b_buy_date'].iloc[ri]
-        max_year = int(max_buy_date.split('.')[0]) 
-        a_max_buy_date = ddf['a_buy_date'].iloc[ri]
-        fds = a_max_buy_date.split('.')
-        a_max_year = int(fds[0])
-        a_max_year_month = '_' + fds[0] + '.' + fds[1] + '_'
-        
-        key = str(w1) + '_' + str(n1) + '_' + str(w2) + '_' + str(n2)
-        rw = {'no': no, 'w1': w1, 'n1': n1, 'w2': w2, 'n2': n2, 'key': key, 'max_buy_date': max_buy_date, 'max_year': max_year, 'a_max_year': a_max_year, 'a_max_year_month': a_max_year_month, 'a_max_buy_date': a_max_buy_date}
-        rows.append(rw)
-
-    sdf = pd.DataFrame([{'dix': dix, 'dsz': dsz}])
-    sdf.to_csv('r4-sum.csv', index=False)
-    
-    if len(rows) > 0:
-        or4df = pd.DataFrame(rows)
-        r4df = None
-        key_list = list(or4df['key'].unique())
-        for key in key_list:
-            df = or4df[or4df['key'] == key]
-            df = df.sort_values(by=['a_max_year_month', 'max_buy_date'], ascending=[True, True])
-            df = df[:1]
-            if r4df is None:
-                r4df = df
-            else:
-                r4df = pd.concat([r4df, df])
-        r4df['no'] = [R4_NO_START+x+1 for x in range(len(r4df))]
-        r4df.to_csv('r4-data.csv', index=False)
-
-=====>] Merge multiple R4 data files [<=====
-
-def r4_merge(data_files):
-    ddf = None
-    for fn in data_files:
-        if os.path.exists(fn):
-            df = pd.read_csv(fn)
-            if ddf is None:
-                ddf = df
-            else:
-                ddf = pd.concat([ddf, df])
-    if ddf is not None:
-        ddf['no'] = [x+1 for x in range(len(ddf))]
-        or4df = ddf
-        r4df = None
-        key_list = list(or4df['key'].unique())
-        for key in key_list:
-            df = or4df[or4df['key'] == key] 
-            df = df.sort_values(by=['a_max_year_month', 'max_buy_date'], ascending=[True, True])
-            df = df[:1]
-            if r4df is None:
-                r4df = df
-            else:
-                r4df = pd.concat([r4df, df])
-        r4df = r4df.sort_values(by=['max_buy_date', 'a_max_buy_date'], ascending=[False, True])
-        r4df['no'] = [x+1 for x in range(len(r4df))]
-        r4df.to_csv('r4-data.csv', index=False)
-
-        r4df = r4df.sort_values(by=['a_max_buy_date', 'max_buy_date'], ascending=[False, False])
-        r4df.to_csv('r4-data-a.csv', index=False)
-
-        lu_n = list(r4df['n1'].unique())
-        u_n = len(lu_n)
-
-        lu_w = list(r4df['w1'].unique())
-        u_w = len(lu_w)
-
-        sdf = pd.DataFrame([{'u_w': u_w, 'u_n': u_n, 'u_max': 10000, 'r4_sz': len(r4df)}])
-        sdf.to_csv('r4-unique.csv', index=False)
-
-=====>] Analyze prediction by using R4 data [<=====
-
-def r4_analyze(r4df, ddf):
+def pm_prepare(ddf):
     ddf = ddf[(ddf['w'] >= 0)&(ddf['n'] >= 0)]
-    ddf['year'] = 0
-    ddf['pcnt'] = 0
-    ddf['pls'] = ' '
-    ddf['m'] = 0
-    ddf['max_buy_date'] = ''
-    ddf['a_pcnt'] = 0
-    ddf['a_pls'] = ' '
-    ddf['a_m'] = 0
-    ddf['a_max_buy_date'] = ''
+    if len(ddf) == 0:
+        return
+    ddf = ddf[ddf['buy_date'] < LAST_BUY_DATE]
+    if len(ddf) == 0:
+        return
+
+    ddf['year'] = -1
+    ddf['month'] = -1
+    ddf['day'] = -1
+    ddf['week_num'] = -1
+    ddf['weekday'] = -1
+    ddf['month_day'] = ''
+    ddf['sim_seed'] = -1
+    ddf['sim_cnt'] = -1
     l_year = []
-    l_pcnt = []
-    l_pls = []
-    l_m = []
-    l_max_buy_date = []
-    l_a_pcnt = []
-    l_a_pls = []
-    l_a_m = []
-    l_a_max_buy_date = []
+    l_month = []
+    l_day = []
+    l_week_num = []
+    l_weekday = []
+    l_month_day = []
+    l_sim_seed = []
+    l_sim_cnt = []
     for ri in range(len(ddf)):
         buy_date = ddf['buy_date'].iloc[ri]
-        year = int(buy_date.split('.')[0])
-        n = ddf['n'].iloc[ri]
-        w = ddf['w'].iloc[ri]
-        max_buy_date = ddf['date'].iloc[ri]
-        a_max_buy_date = ddf['date'].iloc[ri]
-        pdf = r4df[(r4df['n1'] == n)&(r4df['max_buy_date'] < buy_date)]
-        if CHK_MAX_YEAR:
-            if len(pdf) > 0:
-                pdf = pdf[pdf['max_year'] < year] 
-        if CHK_A_MAX_YEAR:
-            if len(pdf) > 0:
-                pdf = pdf[pdf['a_max_year'] <= year]
-        if CHK_A_MAX_YEAR_MONTH:
-            fds = buy_date.split('.')
-            year_month = '_' + fds[0] + '.' + fds[1] + '_'
-            if len(pdf) > 0:
-                pdf = pdf[pdf['a_max_year_month'] <= year_month]
-        pls = ' '
-        m = 0
-        pcnt = len(pdf)
-        if len(pdf) == 0:
-            m = -1
-        elif len(pdf) > 0:
-            ln = list(pdf['w1'].unique())
-            pls = ', '.join([str(x) for x in ln])
-            for pi in range(len(pdf)):
-                w1 = pdf['w1'].iloc[pi]
-                if w1 == w:
-                    m = 1
-                    a_max_buy_date = pdf['a_max_buy_date'].iloc[pi]
-
-        a_pdf = pdf
-        if len(a_pdf) > 0:
-            a_pdf = a_pdf[a_pdf['a_max_buy_date'] < buy_date]
-        a_pls = ' '
-        a_m = 0
-        a_pcnt = len(a_pdf)
-        if len(a_pdf) == 0:
-            a_m = -1
-        elif len(a_pdf) > 0:
-            ln = list(a_pdf['w1'].unique())
-            a_pls = ', '.join([str(x) for x in ln])
-            for pi in range(len(a_pdf)):
-                w1 = a_pdf['w1'].iloc[pi]
-                if w1 == w:
-                    a_m = 1
-                    a_max_buy_date = a_pdf['a_max_buy_date'].iloc[pi]
-            
-        l_pls.append(pls)
-        l_m.append(m)
-        l_pcnt.append(pcnt)
+        bdt = datetime.strptime(buy_date, "%Y.%m.%d")
+        week_num, weekday = bdt.isocalendar()[1], bdt.isocalendar()[2]
+        fds = buy_date.split('.')
+        year = int(fds[0])
+        month = int(fds[1])
+        day = int(fds[2])
+        month_day = '_' + str(month) + '_' + str(day) + '_' 
+        sim_seed, sim_cnt = capture(ddf['w'].iloc[ri], ddf['n'].iloc[ri])
         l_year.append(year)
-        l_max_buy_date.append(max_buy_date)
-
-        l_a_pls.append(a_pls)
-        l_a_m.append(a_m)
-        l_a_pcnt.append(a_pcnt)
-        l_a_max_buy_date.append(a_max_buy_date)
-
-    ddf['pls'] = l_pls
-    ddf['m'] = l_m
-    ddf['pcnt'] = l_pcnt
+        l_month.append(month)
+        l_day.append(day)
+        l_week_num.append(week_num)
+        l_weekday.append(weekday)
+        l_month_day.append(month_day)
+        l_sim_seed.append(sim_seed)
+        l_sim_cnt.append(sim_cnt)
+    ddf['sim_seed'] = l_sim_seed
+    ddf['sim_cnt'] = l_sim_cnt
     ddf['year'] = l_year
-    ddf['max_buy_date'] = l_max_buy_date
-
-    ddf['a_pls'] = l_a_pls
-    ddf['a_m'] = l_a_m
-    ddf['a_pcnt'] = l_a_pcnt
-    ddf['a_max_buy_date'] = l_a_max_buy_date
-
-    ddf.to_csv('r4-data.csv', index=False)
-
-    df1 = ddf[ddf['m'] == 1]
-    m_1_cnt = len(df1)
-    if len(df1) > 0:
-        df1.to_csv('r4-m-1.csv', index=False)
-
-    df0 = ddf[ddf['m'] == 0]
-    m_0_cnt = len(df0)
-    if len(df0) > 0:
-        df0.to_csv('r4-m-0.csv', index=False)
-
-    dfz = ddf[ddf['m'] == -1]
-    m_z_cnt = len(dfz)
-    if len(dfz) > 0:
-        dfz.to_csv('r4-m-z.csv', index=False)
-
-    pcnt_max = int(ddf['pcnt'].max())
+    ddf['month'] = l_month
+    ddf['day'] = l_day
+    ddf['month_day'] = l_month_day
+    ddf['week_num'] = l_week_num
+    ddf['weekday'] = l_weekday
     
-    all_cnt = len(ddf)
+    ddf = ddf[(ddf['sim_seed'] >= 0)&(ddf['sim_cnt'] >= 0)]
+    if len(ddf) == 0:
+        return
 
-    df1 = ddf[ddf['a_m'] == 1]
-    a_m_1_cnt = len(df1)
-    if len(df1) > 0:
-        df1.to_csv('r4-a-m-1.csv', index=False)
-
-    df0 = ddf[ddf['a_m'] == 0]
-    a_m_0_cnt = len(df0)
-    if len(df0) > 0:
-        df0.to_csv('r4-a-m-0.csv', index=False)
-
-    dfz = ddf[ddf['a_m'] == -1]
-    a_m_z_cnt = len(dfz)
-    if len(dfz) > 0:
-        dfz.to_csv('r4-a-m-z.csv', index=False)
-
-    a_pcnt_max = int(ddf['a_pcnt'].max())
-
-    sdf = pd.DataFrame([{'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'all_cnt': all_cnt, 'a_pcnt_max': a_pcnt_max, 'a_m_z_cnt': a_m_z_cnt, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt}])
-    sdf.to_csv('r4-sum.csv', index=False)
-
-    rows = []
-    year_list = list(ddf['year'].unique())
-    for year in year_list:
-        dfk = ddf[ddf['year'] == year]
-
-        df1 = dfk[dfk['m'] == 1]
-        m_1_cnt = len(df1)
-        if len(df1) > 0:
-            df1.to_csv(f'r4-m-1-{year}.csv', index=False) 
-
-        df0 = dfk[dfk['m'] == 0]
-        m_0_cnt = len(df0)
-        if len(df0) > 0:
-            df0.to_csv(f'r4-m-0-{year}.csv', index=False) 
-
-        dfz = dfk[dfk['m'] == -1]
-        m_z_cnt = len(dfz)
-        if len(dfz) > 0:
-            dfz.to_csv(f'r4-m-z-{year}.csv', index=False) 
-
-        all_cnt = len(dfk)
-
-        b_cnt = m_1_cnt + m_0_cnt
-        cost = MP_COST * b_cnt * pcnt_max
-        prize = MP_PRIZE * m_1_cnt
-        profit = prize - cost
-
-        df1 = dfk[dfk['a_m'] == 1]
-        a_m_1_cnt = len(df1)
-        if len(df1) > 0:
-            df1.to_csv(f'r4-a-m-1-{year}.csv', index=False) 
-
-        df0 = dfk[dfk['a_m'] == 0]
-        a_m_0_cnt = len(df0)
-        if len(df0) > 0:
-            df0.to_csv(f'r4-a-m-0-{year}.csv', index=False) 
-
-        dfz = dfk[dfk['a_m'] == -1]
-        a_m_z_cnt = len(dfz)
-        if len(dfz) > 0:
-            dfz.to_csv(f'r4-a-m-z-{year}.csv', index=False) 
-
-        a_b_cnt = a_m_1_cnt + a_m_0_cnt
-        a_cost = MP_COST * a_b_cnt * a_pcnt_max
-        a_prize = MP_PRIZE * a_m_1_cnt
-        a_profit = a_prize - a_cost
-
-        rw = {'year': year, 'all_cnt': all_cnt, 'pcnt_max': pcnt_max, 'm_z_cnt': m_z_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'buy_cnt': b_cnt, 'cost': cost, 'prize': prize, 'profit': profit, 'a_pcnt_max': a_pcnt_max, 'a_m_z_cnt': a_m_z_cnt, 'a_m_1_cnt': a_m_1_cnt, 'a_m_0_cnt': a_m_0_cnt, 'a_buy_cnt': a_b_cnt, 'a_cost': a_cost, 'a_prize': prize, 'a_profit': a_profit} 
-        rows.append(rw)
-        sdf = pd.DataFrame([rw])
-        sdf.to_csv(f'r4-m-{year}.csv', index=False)
+    pm_rows = []
+    sddf = ddf.sort_values(by=['buy_date'], ascending=[True])
+    for ri in range(len(sddf)):
+        if time.time() - START_TIME > RUNTIME:
+            break
             
-    sdf = pd.DataFrame(rows)
-    sdf.to_csv('r4-m.csv', index=False)
+        buy_date = sddf['buy_date'].iloc[ri]
+        bdt = datetime.strptime(buy_date, "%Y.%m.%d")
+        week_num, weekday = bdt.isocalendar()[1], bdt.isocalendar()[2]
+        week_info = '_' + str(week_num) + '_' + str(weekday) + '_'
+        fds = buy_date.split('.')
+        year = int(fds[0])
+        month = int(fds[1])
+        day = int(fds[2])
+        month_day = '_' + str(month) + '_' + str(day) + '_'
+        xdf = sddf[sddf['buy_date'] == buy_date]
+        x_sim_seed = xdf['sim_seed'].iloc[0]
+        x_w = xdf['w'].iloc[0]
+        
+        pdf = sddf[sddf['buy_date'] < buy_date]
+        pdf = pdf.sort_values(by=['buy_date'], ascending=[False])
+
+        for pi in range(len(pdf)):
+            p = reproduce_one(x_sim_seed, pdf['sim_cnt'].iloc[pi])
+            fds = pdf['buy_date'].iloc[pi].split('.')
+            b_year = int(fds[0])
+            b_month = int(fds[1])
+            b_day = int(fds[2])
+            a_month_day = '_' + str(month) + '_' + str(day) + '_'
+            b_month_day = '_' + str(b_month) + '_' + str(b_day) + '_'
+            bdt = datetime.strptime(pdf['buy_date'].iloc[pi], "%Y.%m.%d")
+            b_week_num, b_weekday = bdt.isocalendar()[1], bdt.isocalendar()[2]
+            b_week_info = '_' + str(b_week_num) + '_' + str(b_weekday) + '_'
+            if p == x_w:
+                pm_rw = {'no': len(pm_rows)+1, 'mb': 1, 'm_pos': pi + 1, 'a_buy_date': buy_date, 'a_year': year, 'a_month': month, 'a_day': day, 'a_month_day': a_month_day, 'a_week_num': week_num, 'a_weekday': weekday, 'a_week_info': week_info, 'b_buy_date': pdf['buy_date'].iloc[pi], 'b_year': b_year, 'b_month': b_month, 'b_day': b_day, 'b_month_day': b_month_day, 'b_week_num': b_week_num, 'b_weekday': b_weekday,'b_week_info': b_week_info}
+                pm_rows.append(pm_rw)
+            else:
+                pm_rw = {'no': len(pm_rows)+1, 'mb': 0, 'm_pos': -1, 'a_buy_date': buy_date, 'a_year': year, 'a_month': month, 'a_day': day, 'a_month_day': a_month_day, 'a_week_num': week_num, 'a_weekday': weekday, 'a_week_info': week_info, 'b_buy_date': pdf['buy_date'].iloc[pi], 'b_year': b_year, 'b_month': b_month, 'b_day': b_day, 'b_month_day': b_month_day, 'b_week_num': b_week_num, 'b_weekday': b_weekday,'b_week_info': b_week_info}
+                pm_rows.append(pm_rw)
+
+    mddf = pd.DataFrame(pm_rows)
+    mddf = mddf.sort_values(by=['mb', 'a_buy_date', 'b_buy_date'], ascending=[False, False, False])
+    mddf.to_csv(f'{LOTTE_KIND}-match-data-{LAST_BUY_DATE}.csv', index=False)
 
 
 ====================================
              PROCESS
   -------------------------------
-
-  -------------------------------
-   Generate random drawing data
-  -------------------------------
-
-=====>] Oregon Lottery - Pick 4 drawing [<=====
-
-+ 1 PM:
-  o ra1 (SIM_CNT = 1): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra1-2025-01-01
-  o ra2 (SIM_CNT = 2): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra2-2025-01-01
-  o ra3 (SIM_CNT = 3): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra3-2025-01-01
-  o ra4 (SIM_CNT = 4): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra4-2025-01-01
-  o ra5 (SIM_CNT = 5): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra5-2025-01-01
-  o ra6 (SIM_CNT = 6): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra6-2025-01-01
-  o ra7 (SIM_CNT = 7): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra7-2025-01-01
-  o ra8 (SIM_CNT = 8): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra8-2025-01-01
-  o ra9 (SIM_CNT = 9): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra9-2025-01-01
-  o ra10 (SIM_CNT = 10): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra10-2025-01-01
-  o ra11 (SIM_CNT = 11): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra11-2025-01-01
-  o ra12 (SIM_CNT = 12): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra12-2025-01-01
-  o ra13 (SIM_CNT = 13): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra13-2025-01-01
-  o ra14 (SIM_CNT = 14): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra14-2025-01-01
-  o ra15 (SIM_CNT = 15): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra15-2025-01-01
-  o ra16 (SIM_CNT = 16): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra16-2025-01-01
-  o ra17 (SIM_CNT = 17): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra17-2025-01-01
-  o ra18 (SIM_CNT = 18): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra18-2025-01-01
-  o ra19 (SIM_CNT = 19): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra19-2025-01-01
-  o ra20 (SIM_CNT = 20): https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-ra20-2025-01-01
-
-+ 4 PM: 
-
-+ 7 PM: 
-
-+ 10 PM: 
 
 
   -------------------------------
@@ -565,87 +300,17 @@ def r4_analyze(r4df, ddf):
 
 
   -------------------------------
-             R4 Data
+         Past Matches Data
   -------------------------------
 
 =====>] Oregon Lottery - Pick 4 drawing [<=====
 
-+ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-data-rsp-ka-p4a-2025-01-01
++ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmd-rsp-ka-p4a-2025-01-01
 
-+ 4 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-data-rsp-ka-p4b-2025-01-01
-
-+ 7 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-data-rsp-ka-p4c-2025-01-01
-
-+ 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-data-rsp-ka-p4d-2025-01-01
-
-
-  -------------------------------
-          Merged R4 Data
-  -------------------------------
-
-=====>] Oregon Lottery - Pick 4 drawing [<=====
-
-+ All kinds (1PM + 4PM + 7PM + 10PM): https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-data-rsp-ka-p4-2025-01-01
- 
-
-  -------------------------------
-Analyze prediction by using R4 data
-  -------------------------------
-
-=====>] Oregon Lottery - Pick 4 drawing (R4 Data: All kinds [1PM + 4PM + 7PM + 10PM]) [<=====
-
-+ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-analyze-rsp-ka-p4a-2025-01-01
-
-+ 4 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-analyze-rsp-ka-p4b-2025-01-01
-
-+ 7 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-analyze-rsp-ka-p4c-2025-01-01
-
-+ 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-r4-analyze-rsp-ka-p4d-2025-01-01
-
-
-====================================
-             RESULTS
-  -------------------------------
-
-  -------------------------------
-Prediction by using R4 data (All kinds [1PM + 4PM + 7PM + 10PM])
-  -------------------------------
-
-=====>] Oregon Lottery - Pick 4 drawing [<=====
-
-+ 1 PM:
-  o Possible: Yes
-  o Profitable: Yes
-
-```
-![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4a.png)
-
-```
 + 4 PM: 
-  o Possible: Yes
-  o Profitable: Yes
 
-```
-![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4b.png)
-
-```
 + 7 PM: 
-  o Possible: Yes
-  o Profitable: Yes
 
-```
-![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4c.png)
-
-```
 + 10 PM: 
-  o Possible: Yes
-  o Profitable: Yes
-
-```
-![](https://github.com/dinhtt-randrise/orottick4/blob/ed7ad9179a3f01146086c6183d2d603994212a94/research/rsp-ka/r4-p4-p4d.png)
-
-```
-
-
 
 ```
