@@ -387,4 +387,20 @@ def pm_prepare(ddf):
 
 + 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmd-rsp-ka-p4d-2025-01-01
 
+
+  -------------------------------
+        Past Matches B Train
+  -------------------------------
+
+=====>] Oregon Lottery - Pick 4 drawing [<=====
+
++ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmtb-rsp-ka-p4a-2025-01-01
+
++ 4 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmtb-rsp-ka-p4b-2025-01-01
+
++ 7 PM: 
+
++ 10 PM: 
+
+
 ```
