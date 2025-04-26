@@ -35,6 +35,8 @@ Study examples of future with single attribute:
   o 7 PM  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-p4c-2025-01-01 ]
   o 10 PM  [ https://www.kaggle.com/code/dinhttrandrise/orottick4-data-rsp-ka-p4d-2025-01-01 ]
 
++ Oregon Lottery - Power Ball drawing [ https://www.oregonlottery.org/jackpot/powerball/ ]
+  o Data Notebook: https://www.kaggle.com/code/dinhttrandrise/pwrall-data-rsp-ka-2025-01-01
 
   -------------------------------
               Data
