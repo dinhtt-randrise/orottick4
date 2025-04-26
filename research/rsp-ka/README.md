@@ -56,8 +56,80 @@ Study examples of future with single attribute:
 
 =====>] Generate random number [<=====
 
+baseset_pb = {0: 69*69*69*69, 1: 69*69*69, 2: 69*69, 3: 69, 4: 1}
+baseset_p4 = {0: 10*10*10, 1: 10*10, 2: 10, 3: 1}
+min_num_pb = 0
+max_num_pb = (69 * 69 * 69 * 69 * 69) - 1
+
+def a2n(a):
+    if LOTTE_KIND == 'pb':
+        if a is None:
+            return None
+        if len(a) < 5:
+            return None
+    
+        b = [x for x in a]
+        b.sort()
+        
+        n = 0
+        for ni in range(5):
+            n += (b[ni] - 1) * baseset_pb[ni]
+        return n
+    else:
+        if a is None:
+            return None
+        if len(a) < 4:
+            return None
+            
+        n = 0
+        for ni in range(4):
+            n += a[ni] * baseset_p4[ni]
+        return n        
+
+def n2a(n):
+    if LOTTE_KIND == 'pb':
+        try:
+            if n is None:
+                return None
+    
+            a = []
+            for ni in range(5):
+                b = baseset_pb[ni]
+                c = int((n - (n % b)) // b)
+                if c + 1 in a:
+                    return None
+                a.append(c + 1)
+                n = n - (c * b)
+            a.sort()
+            
+            return a
+        except Exception as e:
+            return None
+    else:
+        try:
+            if n is None:
+                return None
+    
+            a = []
+            for ni in range(4):
+                b = baseset_p4[ni]
+                c = int((n - (n % b)) // b)
+                a.append(c)
+                n = n - (c * b)
+            
+            return a
+        except Exception as e:
+            return None
+        
 def gen_num():
-    return random.randint(0, 9999)
+    if LOTTE_KIND == 'pb':
+        n = a2n(n2a(random.randint(min_num_pb, max_num_pb)))            
+        while n is None:
+            n = a2n(n2a(random.randint(min_num_pb, max_num_pb)))        
+        return n
+    else:
+        return random.randint(0, 9999)
+
 
 =====>] Reproduce random number from sim_seed & sim_cnt [<=====
 
