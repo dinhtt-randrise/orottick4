@@ -400,7 +400,7 @@ def pm_prepare(ddf):
 
 + 7 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmtb-rsp-ka-p4c-2025-01-01
 
-+ 10 PM: 
++ 10 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmtb-rsp-ka-p4d-2025-01-01
 
 
   -------------------------------
@@ -413,7 +413,7 @@ def pm_prepare(ddf):
 
 + 4 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmmb-rsp-ka-p4b-2025-01-01
 
-+ 7 PM: 
++ 7 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-pmmb-rsp-ka-p4c-2025-01-01
 
 + 10 PM: 
 
