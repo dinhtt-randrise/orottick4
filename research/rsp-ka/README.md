@@ -251,6 +251,167 @@ def pairing(data_df):
     mdf = mdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[False, False])
     return mdf
 
+=====>] Examine Pairing [<=====
+
+M_D_M_Z_RATE_MIN = 0.5
+
+def examine_pairing(kdf):
+    global cdf, ydf, mdf, ddf, mddf, wndf, wddf, widf, sdf
+
+    kdf = kdf.sort_values(by=['a_buy_date', 'b_buy_date'], ascending=[True, False])
+    list_date = list(kdf['a_buy_date'].unique())
+    dsz = len(list_date)
+    dix = 0
+    dcnt = 1000
+    rows = []
+    for a_buy_date in list_date:
+        dix += 1
+        if dix % dcnt == 0:
+            print(f'== [C] {dix} / {dsz} -> {a_buy_date}')
+            
+        fds = a_buy_date.split('.')
+        a_year = int(fds[0])
+        a_month = int(fds[1])
+        a_day = int(fds[2])
+        a_month_day = '_' + str(a_month) + '_' + str(a_day) + '_'
+        bdt = datetime.strptime(a_buy_date, "%Y.%m.%d")
+        a_week_num, a_weekday = bdt.isocalendar()[1], bdt.isocalendar()[2]
+        a_week_info = '_' + str(a_week_num) + '_' + str(a_weekday) + '_'
+        df = kdf[kdf['a_buy_date'] == a_buy_date]
+        df1 = df[df['a_m'] > 0]
+        m_d_cnt = 0
+        m_1_cnt = 0
+        m_z_cnt = len(df)
+        m_0_cnt = 0
+        if len(df1) > 0:
+            m_d_cnt = 1
+            m_1_cnt = len(df1)
+        m_0_cnt = m_z_cnt - m_1_cnt
+        rw = {'buy_date': a_buy_date, 'year': a_year, 'month': a_month, 'day': a_day, 'month_day': a_month_day, 'week_num': a_week_num, 'weekday': a_weekday, 'week_info': a_week_info, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    cdf = pd.DataFrame(rows)
+    cdf = cdf.sort_values(by=['buy_date'], ascending=[False])
+    cdf.to_csv(f'{LOTTE_KIND}-count-date-{LAST_BUY_DATE}.csv')
+    
+    rows = []
+    list_year = list(cdf['year'].unique())
+    for year in list_year:
+        df = cdf[cdf['year'] == year]
+        m_d_cnt = df['m_d_cnt'].sum()
+        m_1_cnt = df['m_1_cnt'].sum()
+        m_z_cnt = df['m_z_cnt'].sum()
+        m_0_cnt = df['m_0_cnt'].sum()
+        rw = {'year': year, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    ydf = pd.DataFrame(rows)
+    ydf = ydf.sort_values(by=['year'], ascending=[False])
+    ydf.to_csv(f'{LOTTE_KIND}-count-year-{LAST_BUY_DATE}.csv')
+    
+    rows = []
+    list_month = list(cdf['month'].unique())
+    for month in list_month:
+        df = cdf[cdf['month'] == month]
+        m_d_cnt = df['m_d_cnt'].sum()
+        m_1_cnt = df['m_1_cnt'].sum()
+        m_z_cnt = df['m_z_cnt'].sum()
+        m_0_cnt = df['m_0_cnt'].sum()
+        rw = {'month': month, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    mdf = pd.DataFrame(rows)
+    mdf = mdf.sort_values(by=['month'], ascending=[False])
+    mdf.to_csv(f'{LOTTE_KIND}-count-month-{LAST_BUY_DATE}.csv')
+    
+    rows = []
+    list_day = list(cdf['day'].unique())
+    for day in list_day:
+        df = cdf[cdf['day'] == day]
+        m_d_cnt = df['m_d_cnt'].sum()
+        m_1_cnt = df['m_1_cnt'].sum()
+        m_z_cnt = df['m_z_cnt'].sum()
+        m_0_cnt = df['m_0_cnt'].sum()
+        rw = {'day': day, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    ddf = pd.DataFrame(rows)
+    ddf = ddf.sort_values(by=['day'], ascending=[False])
+    ddf.to_csv(f'{LOTTE_KIND}-count-day-{LAST_BUY_DATE}.csv')
+    
+    rows = []
+    list_month_day = list(cdf['month_day'].unique())
+    for month_day in list_month_day:
+        df = cdf[cdf['month_day'] == month_day]
+        m_d_cnt = df['m_d_cnt'].sum()
+        m_1_cnt = df['m_1_cnt'].sum()
+        m_z_cnt = df['m_z_cnt'].sum()
+        m_0_cnt = df['m_0_cnt'].sum()
+        fds = month_day.split('_')
+        month = int(fds[1])
+        day = int(fds[2])
+        rw = {'month_day': month_day, 'month': month, 'day': day, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    mddf = pd.DataFrame(rows)
+    mddf = mddf.sort_values(by=['month', 'day'], ascending=[False, False])
+    mddf.to_csv(f'{LOTTE_KIND}-count-month_day-{LAST_BUY_DATE}.csv')
+    
+    rows = []
+    list_week_num = list(cdf['week_num'].unique())
+    for week_num in list_week_num:
+        df = cdf[cdf['week_num'] == week_num]
+        m_d_cnt = df['m_d_cnt'].sum()
+        m_1_cnt = df['m_1_cnt'].sum()
+        m_z_cnt = df['m_z_cnt'].sum()
+        m_0_cnt = df['m_0_cnt'].sum()
+        rw = {'week_num': week_num, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    wndf = pd.DataFrame(rows)
+    wndf = wndf.sort_values(by=['week_num'], ascending=[False])
+    wndf.to_csv(f'{LOTTE_KIND}-count-week_num-{LAST_BUY_DATE}.csv')
+    
+    rows = []
+    list_weekday = list(cdf['weekday'].unique())
+    for weekday in list_weekday:
+        df = cdf[cdf['weekday'] == weekday]
+        m_d_cnt = df['m_d_cnt'].sum()
+        m_1_cnt = df['m_1_cnt'].sum()
+        m_z_cnt = df['m_z_cnt'].sum()
+        m_0_cnt = df['m_0_cnt'].sum()
+        rw = {'weekday': weekday, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    wddf = pd.DataFrame(rows)
+    wddf = wddf.sort_values(by=['weekday'], ascending=[False])
+    wddf.to_csv(f'{LOTTE_KIND}-count-weekday-{LAST_BUY_DATE}.csv')
+    
+    rows = []
+    list_week_info = list(cdf['week_info'].unique())
+    for week_info in list_week_info:
+        df = cdf[cdf['week_info'] == week_info]
+        m_d_cnt = df['m_d_cnt'].sum()
+        m_1_cnt = df['m_1_cnt'].sum()
+        m_z_cnt = df['m_z_cnt'].sum()
+        m_0_cnt = df['m_0_cnt'].sum()
+        fds = week_info.split('_')
+        week_num = int(fds[1])
+        weekday = int(fds[2])
+        rw = {'week_info': week_info, 'week_num': week_num, 'weekday': weekday, 'm_d_cnt': m_d_cnt, 'm_1_cnt': m_1_cnt, 'm_0_cnt': m_0_cnt, 'm_z_cnt': m_z_cnt}
+        rows.append(rw)
+    widf = pd.DataFrame(rows)
+    widf = widf.sort_values(by=['week_num', 'weekday'], ascending=[False, False])
+    widf.to_csv(f'{LOTTE_KIND}-count-week_info-{LAST_BUY_DATE}.csv')
+
+    rows = []
+    m_d_cnt = cdf['m_d_cnt'].sum()
+    m_z_cnt = len(cdf)
+    m_d_m_z_rate = (m_d_cnt * 1.0) / (m_z_cnt * 1.0)
+    rows.append({'key': 'LAST_BUY_DATE', 'value': LAST_BUY_DATE})
+    rows.append({'key': 'LOTTE_KIND', 'value': LOTTE_KIND})
+    rows.append({'key': 'M_D_CNT', 'value': str(m_d_cnt)})
+    rows.append({'key': 'M_Z_CNT', 'value': str(m_z_cnt)})
+    rows.append({'key': 'M_D_M_Z_RATE', 'value': str(m_d_m_z_rate)})
+    rows.append({'key': 'M_D_M_Z_RATE_MIN', 'value': str(M_D_M_Z_RATE_MIN)})
+    rows.append({'key': 'PREDICTABLE', 'value': 'Yes' if m_d_m_z_rate > M_D_M_Z_RATE_MIN else 'No'})
+    sdf = pd.DataFrame(rows)
+    sdf.to_csv(f'{LOTTE_KIND}-summary-{LAST_BUY_DATE}.csv')
+
+
 =====>] Prepare past matches data [<=====
 
 def pm_prepare(ddf):
@@ -374,6 +535,21 @@ def pm_prepare(ddf):
 
 
   -------------------------------
+          Examine Pairing
+  -------------------------------
+
+=====>] Oregon Lottery - Pick 4 drawing [<=====
+
++ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-ep-rsp-ka-p4a-2025-01-01
+
++ 4 PM: 
+
++ 7 PM: 
+
++ 10 PM: 
+
+
+  -------------------------------
          Past Matches Data
   -------------------------------
 
@@ -432,5 +608,27 @@ def pm_prepare(ddf):
 
 + 10 PM: 
 
+
+====================================
+             RESULTS
+  -------------------------------
+
+  -------------------------------
+estimating if we can predict future
+  -------------------------------
+
+=====>] Oregon Lottery - Pick 4 drawing [<=====
+
++ 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-ep-rsp-ka-p4a-2025-01-01
+  o Predictable:
+
++ 4 PM: 
+  o Predictable:
+
++ 7 PM: 
+  o Predictable:
+
++ 10 PM: 
+  o Predictable:
 
 ```
