@@ -623,6 +623,7 @@ estimating if we can predict future
   o Predictable: Yes
 ```
 ![](https://github.com/dinhtt-randrise/orottick4/blob/d3f5c5acb191359394dc1db622c3bc38ba0f1a87/research/rsp-ka/ep-p4a.png)
+
 ![](https://github.com/dinhtt-randrise/orottick4/blob/19fb5e15c7f99f3f24b75012ce42f5c12b52f724/research/rsp-ka/ep-p4a-year.png)
 
 ```
