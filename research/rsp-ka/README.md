@@ -253,7 +253,7 @@ def pairing(data_df):
 
 =====>] Examine Pairing [<=====
 
-M_D_M_Z_RATE_MIN = 0.5
+M_D_M_Z_RATE_MIN = 0.1
 
 def examine_pairing(kdf):
     global cdf, ydf, mdf, ddf, mddf, wndf, wddf, widf, sdf
