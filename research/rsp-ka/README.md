@@ -620,8 +620,11 @@ estimating if we can predict future
 =====>] Oregon Lottery - Pick 4 drawing [<=====
 
 + 1 PM: https://www.kaggle.com/code/dinhttrandrise/orottick4-ep-rsp-ka-p4a-2025-01-01
-  o Predictable:
+  o Predictable: Yes
+```
+![](https://github.com/dinhtt-randrise/orottick4/blob/d3f5c5acb191359394dc1db622c3bc38ba0f1a87/research/rsp-ka/ep-p4a.png)
 
+```
 + 4 PM: 
   o Predictable:
 
