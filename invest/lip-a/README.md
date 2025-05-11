@@ -23,7 +23,7 @@
 
 Follow "Research project B - Plan A" [ https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-b ].
 
-+ Predict Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4pc-predict-p4a-2025-05-11
++ Predict Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4pc-predict-p4a-a-2025-05-11
 
   -------------------------------
 
