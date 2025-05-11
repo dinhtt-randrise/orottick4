@@ -31,7 +31,7 @@
              PROCESS A
   -------------------------------
 
-+ Analyzing Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4pc-analyze-p4a-1-2025-01-01
++ Analyzing Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4pc-analyze-p4a-a-1-2025-01-01
 
 
   -------------------------------
@@ -39,6 +39,6 @@
   -------------------------------
 ```
 
-![](https://github.com/dinhtt-randrise/orottick4/blob/cfa751c5b6ea65b68895161506e4136a61ce91cc/research/rsp-b/p4a-rsp-b-plan-a-analyze.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/af7182162e9fa1c16e8982ec16fd60cd69130bba/research/rsp-b/p4a-rsp-b-plan-a-analyze.png)
 
 
