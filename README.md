@@ -43,77 +43,61 @@ import os
 import warnings 
 warnings.filterwarnings('ignore')
 
-OROTTICK4_DIR = "/kaggle/buffers/orottick4"
+OROTTICK4P_DIR = "/kaggle/buffers/orottick4p"
 
-os.system(f'mkdir -p "{OROTTICK4_DIR}"')
-os.system(f'cd "{OROTTICK4_DIR}" && git clone https://github.com/dinhtt-randrise/orottick4.git')
+os.system(f'mkdir -p "{OROTTICK4P_DIR}"')
+os.system(f'cd "{OROTTICK4P_DIR}" && git clone https://github.com/dinhtt-randrise/orottick4.git')
 
 import sys 
-sys.path.append(os.path.abspath(OROTTICK4_DIR))
-import orottick4.orottick4 as vok4
+sys.path.append(os.path.abspath(OROTTICK4P_DIR))
+import orottick4.orottick4p as vok4p
 
 #----------#
 
-BUY_DATE = '2025.04.06'
-BUFFER_DIR = '/kaggle/buffers/orottick4'
+BUY_DATE = '2025.01.02'
+LAST_BUY_DATE = '2025.01.01'
+FIRST_BUY_DATE = '2015.01.01'
+BUFFER_DIR = '/kaggle/buffers/orottick4p'
 LOTTE_KIND = 'p4a'
 DATA_DF = None
-DATE_CNT = 56 * 5
-O_DATE_CNT = 7
-TCK_CNT = 56 * 5
-F_TCK_CNT = 56 * 5
-RUNTIME = 60 * 60 * 11.5
-PRD_SORT_ORDER = 'B'
 HAS_STEP_LOG = True
-RANGE_CNT = 52
-M4P_OBS = False 
-M4P_CNT = 10
-M4P_VRY = False
-M4P_ONE = False
 RESULT_DIR = '/kaggle/working'
-LOAD_CACHE_DIR = '/kaggle/input/orottick4-research-a-1-2025-04-06'
+LOAD_CACHE_DIR = '/kaggle/working'
 SAVE_CACHE_DIR = '/kaggle/working'
-CACHE_CNT = -1
+CACHE_RUN = True
+DEBUG_SEED_CNT = 2
+SEED_CNT = 10000
+SEED_CNT_2 = 2000
 USE_GITHUB = True
-M4P_COLLECT_DATA_DIRS = []
-M4P_COLLECT_SAVE_DIR = '/kaggle/working'
-M4P_PREPARE_DATA_DIR = '/kaggle/working'
-M4P_PREPARE_SAVE_DIR = '/kaggle/working'
-M4P_TRAIN_DATA_DIR = '/kaggle/working'
-M4P_TRAIN_SAVE_DIR = '/kaggle/working'
-M4P_MODEL_DIR = '/kaggle/input/orottick4-m4pm-rsp-a-k-2025-03-23'
-M4PC_MODEL_DIR = '/kaggle/input/orottick4-m4pcm-rsp-a-o-2025-04-06'
-M4P_RANKER_ONLY = True
-M4P_MAX = 5
-M4PL_MAX = 2.5
-M4PL_MIN = -2.5
-M4PL_STEP = 0.0225
-M4PC_TRAIN_DATA_DIR = '/kaggle/input/orottick4-research-b-1-2025-04-06'
-M4PC_TRAIN_SAVE_DIR = '/kaggle/working'
-TCK_PRIZE = 5000
-BRK_COST = 0.3
-PREDICT_NOTEBOOK = 'https://www.kaggle.com/code/dinhttrandrise/orottick4-predict-rsp-a-o-2025-04-06'
-PERIOD_NO = 1
-DAY_NO = 1
-REAL_BUY_TIMES = 1
+TRACK_DIR = None
+TRACK_BUY_DATE = LAST_BUY_DATE
+CACHE_DEBUG_ON = True
+RUNTIME = 60 * 60 * 11
+START_TIME = time.time()
 
-METHOD = 'simulate'
-#METHOD = 'observe'
-#METHOD = 'observe_range'
+MP_COST = 1.3
+MP_PRIZE = 5000 * (1 - 0.24 - 0.08)
+MP_RATE = 15
+MIN_TRY_NO = 1
+STEP_TRY_NO = 100000
+MAX_TRY_NO = MIN_TRY_NO + STEP_TRY_NO
+MB_0_RATE = 1.5
+CACHE_DIR = LOAD_CACHE_DIR
+
+MODEL_FILE = None
+SEED_LOOP_MAX = 10
+PICKED_BUY_DATE = None
+
 #METHOD = 'download'
-#METHOD = 'build_cache'
-#METHOD = 'm4p_collect'
-#METHOD = 'm4p_prepare'
-#METHOD = 'm4p_train'
-#METHOD = 'research_a'
-#METHOD = 'm4pc_prepare'
-#METHOD = 'm4pc_train'
+METHOD = 'cache'
+#METHOD = 'train'
+#METHOD = 'analyze'
+#METHOD = 'predict'
 
 #----------#
 
-options = {'BUY_DATE': BUY_DATE, 'BUFFER_DIR': BUFFER_DIR, 'LOTTE_KIND': LOTTE_KIND, 'DATA_DF': DATA_DF, 'DATE_CNT': DATE_CNT, 'O_DATE_CNT': O_DATE_CNT, 'TCK_CNT': TCK_CNT, 'F_TCK_CNT': F_TCK_CNT, 'RUNTIME': RUNTIME, 'PRD_SORT_ORDER': PRD_SORT_ORDER, 'HAS_STEP_LOG': HAS_STEP_LOG, 'RANGE_CNT': RANGE_CNT, 'M4P_OBS': M4P_OBS, 'M4P_CNT': M4P_CNT, 'M4P_VRY': M4P_VRY, 'M4P_ONE': M4P_ONE, 'RESULT_DIR': RESULT_DIR, 'LOAD_CACHE_DIR': LOAD_CACHE_DIR, 'SAVE_CACHE_DIR': SAVE_CACHE_DIR, 'CACHE_CNT': CACHE_CNT, 'USE_GITHUB': USE_GITHUB, 'METHOD': METHOD, 'M4P_COLLECT_DATA_DIRS': M4P_COLLECT_DATA_DIRS, 'M4P_COLLECT_SAVE_DIR': M4P_COLLECT_SAVE_DIR, 'M4P_PREPARE_DATA_DIR': M4P_PREPARE_DATA_DIR, 'M4P_PREPARE_SAVE_DIR': M4P_PREPARE_SAVE_DIR, 'M4P_TRAIN_DATA_DIR': M4P_TRAIN_DATA_DIR, 'M4P_TRAIN_SAVE_DIR': M4P_TRAIN_SAVE_DIR, 'M4PC_MODEL_DIR': M4PC_MODEL_DIR, 'M4P_MODEL_DIR': M4P_MODEL_DIR, 'M4P_RANKER_ONLY': M4P_RANKER_ONLY, 'M4P_MAX': M4P_MAX, 'M4PL_MAX': M4PL_MAX, 'M4PL_MIN': M4PL_MIN, 'M4PL_STEP': M4PL_STEP, 'M4PC_TRAIN_DATA_DIR': M4PC_TRAIN_DATA_DIR, 'M4PC_TRAIN_SAVE_DIR': M4PC_TRAIN_SAVE_DIR, 'TCK_PRIZE': TCK_PRIZE, 'BRK_COST': BRK_COST, 'PREDICT_NOTEBOOK': PREDICT_NOTEBOOK, 'PERIOD_NO': PERIOD_NO, 'DAY_NO': DAY_NO, 'REAL_BUY_TIMES': REAL_BUY_TIMES}
-
-vok4.Orottick4Simulator.run(options, vok4, None)
+options = {'BUY_DATE': BUY_DATE, 'BUFFER_DIR': BUFFER_DIR, 'LOTTE_KIND': LOTTE_KIND, 'DATA_DF': DATA_DF, 'HAS_STEP_LOG': HAS_STEP_LOG, 'RESULT_DIR': RESULT_DIR, 'LOAD_CACHE_DIR': LOAD_CACHE_DIR, 'SAVE_CACHE_DIR': SAVE_CACHE_DIR, 'CACHE_RUN': CACHE_RUN, 'DEBUG_SEED_CNT': DEBUG_SEED_CNT, 'SEED_CNT': SEED_CNT, 'SEED_CNT_2': SEED_CNT_2, 'USE_GITHUB': USE_GITHUB, 'METHOD': METHOD, 'LAST_BUY_DATE': LAST_BUY_DATE, 'FIRST_BUY_DATE': FIRST_BUY_DATE, 'TRACK_DIR': TRACK_DIR, 'TRACK_BUY_DATE': TRACK_BUY_DATE, 'CACHE_DEBUG_ON': CACHE_DEBUG_ON, 'RUNTIME': RUNTIME, 'START_TIME': START_TIME, 'MP_COST': MP_COST, 'MP_PRIZE': MP_PRIZE, 'MP_RATE': MP_RATE, 'MIN_TRY_NO': MIN_TRY_NO, 'STEP_TRY_NO': STEP_TRY_NO, 'MAX_TRY_NO': MAX_TRY_NO, 'MB_0_RATE': MB_0_RATE, 'CACHE_DIR': CACHE_DIR, 'MODEL_FILE': MODEL_FILE, 'SEED_LOOP_MAX': SEED_LOOP_MAX, 'PICKED_BUY_DATE': PICKED_BUY_DATE}
+vok4p.Orottick4PSimulator.run(options, vok4p, None)
 
 #----------#
 
@@ -124,92 +108,9 @@ vok4.Orottick4Simulator.run(options, vok4, None)
 
 
   -------------------------------
-         FORWARD CACHES
+         PICK 4 (1PM)
   -------------------------------
 
-[ 2025.03.30 ]
-
-+ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2025-03-30
-
-[ 2025.03.23 ]
-
-+ Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2025-03-23
-
-+ Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2-2025-03-23
-
-[ 2024.03.24 ]
-
-+ Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2024-03-24
-
-+ Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2-2024-03-24
-
-[ 2023.03.26 ]
-
-+ Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2023-03-26
-
-+ Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4-cache-p4a-f-2-2023-03-26
-
-
-====================================
-           M4P MODELS
-  -------------------------------
-
-[ RSP A, Plan G]
-
-+ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-m4pm-rsp-a-g-2025-03-23
-
-[ RSP A, Plan K]
-
-+ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-m4pm-rsp-a-k-2025-03-23
-
-
-====================================
-           M4PC MODELS
-  -------------------------------
-
-[ RSP A, Plan O]
-
-+ Notebook: https://www.kaggle.com/code/dinhttrandrise/orottick4-m4pcm-rsp-a-o-2025-04-06
-
-
-====================================
-           HOW TO INVEST
-  -------------------------------
-
-With Orottick4, we can invest in lottery (Pick 4) as following research:
-
-
-  -------------------------------
-    RESEARCH PROJECT A - PLAN O
-  -------------------------------
-
-+ Invest Period: 364 days
-
-+ Invest Cost: $6,188
-
-+ Invest Cost (w/o broker): $4,760
-
-+ Invest Return: $58,812
-
-+ Invest Return (w/o broker): $60,240
-
-+ Invest ROI: 950.4%
-
-+ Invest ROI (w/o broker, w/ cost): 973.5%
-
-+ Invest ROI (w/o broker, w/ no broker cost): 1065.5%
-
-+ Research project A: https://github.com/dinhtt-randrise/orottick4/tree/main/research/rsp-a
-
-+ Lottery Investment A Project: https://github.com/dinhtt-randrise/orottick4/tree/main/invest/lip-a
++ Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4pc-cache-p4a-1-2025-01-01
 
 ```
-
-```
-  ----------- Plan O ------------
-```
-
-![](https://github.com/dinhtt-randrise/orottick4/blob/fed4e897e4927ee3e30e79a616ddd2b1ab4b1b37/research/rsp-a/orottick4-rsp-a-analyze-o.png)
-
-
-
