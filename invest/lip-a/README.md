@@ -39,5 +39,5 @@ Follow "Research project B - Plan A" [ https://github.com/dinhtt-randrise/orotti
   ----------- Plan A ------------
 ```
 
-![](https://github.com/dinhtt-randrise/orottick4/blob/6103546a5e35ae1297333668ae163ee6f19e0c7b/research/rsp-b/p4a-rsp-b-plan-a-analyze.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/cfa751c5b6ea65b68895161506e4136a61ce91cc/research/rsp-b/p4a-rsp-b-plan-a-analyze.png)
 
