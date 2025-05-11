@@ -111,6 +111,19 @@ vok4p.Orottick4PSimulator.run(options, vok4p, None)
          PICK 4 (1PM)
   -------------------------------
 
-+ Notebook 1: https://www.kaggle.com/code/dinhttrandrise/orottick4pc-cache-p4a-1-2025-01-01
++ Notebook 5: https://www.kaggle.com/code/dinhttrandrise/orottick4p-cache-p4a-a-5-2025-01-01
+
+
+====================================
+             MODELS
+  -------------------------------
+
+
+  -------------------------------
+         PICK 4 (1PM)
+  -------------------------------
+
++ Notebook 2: https://www.kaggle.com/code/dinhttrandrise/orottick4p-model-p4a-a-5-2-2025-01-01
+
 
 ```
