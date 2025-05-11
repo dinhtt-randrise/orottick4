@@ -39,6 +39,6 @@
   -------------------------------
 ```
 
-![](p4a-rsp-b-plan-a-analyze.png)
+![](https://github.com/dinhtt-randrise/orottick4/blob/6103546a5e35ae1297333668ae163ee6f19e0c7b/research/rsp-b/p4a-rsp-b-plan-a-analyze.png)
 
 
